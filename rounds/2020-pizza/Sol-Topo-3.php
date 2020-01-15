@@ -1,5 +1,7 @@
 <?php
 
+ini_set('memory_limit', '-1');
+
 require __DIR__ . '/Reader.php';
 
 class Solution extends Reader
@@ -15,8 +17,8 @@ class Solution extends Reader
     public function solve()
     {
         // config
-        $nCodaSx = 16; // 20
-        $this->currentBestDelta = 68; // 68
+        $nCodaSx = 23;
+        $this->currentBestDelta = 5;
 
         // algo
         $this->oldPizzas = $this->pizzas;
