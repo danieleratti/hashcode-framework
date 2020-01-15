@@ -20,7 +20,7 @@ abstract class HashCode
         $this->inputContent = file_get_contents($dir . '/input/' . $inputName . '.in');
 
         $this->readInput();
-        $this->solve();
+        $this->solve($inputName);
     }
 
     public function output($content, $outputName = false, $history = false)
