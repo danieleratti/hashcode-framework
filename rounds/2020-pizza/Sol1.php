@@ -9,9 +9,14 @@ class Solution extends Reader
     public function solve()
     {
         // algo
-        $this->outputPizzas[] = 1;
-        $this->outputPizzas[] = 2;
-        $this->outputPizzas[] = 0;
+        $remaining = $this->maxSlices;
+        arsort($this->pizzas);
+        foreach ($this->pizzas as $id => $slices) {
+            if($slices <= $remaining) {
+                $this->outputPizzas[] = $id;
+                $remaining -= $slices;
+            }
+        }
 
         // output (don't touch below)
         $score = 0;
@@ -20,12 +25,12 @@ class Solution extends Reader
         }
         asort($this->outputPizzas);
         //$this->output(count($this->outputPizzas) . "\n" . implode(" ", array_values($this->outputPizzas))); //WARNING: in the order they are listed in the input
-        echo "Input: " . $this->inputName . " ***** Score: " . $score . " / " . $this->maxSlices . " (" . round($score/$this->maxSlices*100, 2) ."%)";
+        echo "Input: " . $this->inputName . " ***** Score: " . $score . " / " . $this->maxSlices . " (" . round($score / $this->maxSlices * 100, 2) . "%) ***** Delta = " . ($this->maxSlices - $score) . "\n\n";
     }
 }
 
 new Solution('a_example');
-//new Solution('b_small');
-//new Solution('c_medium');
-//new Solution('d_quite_big');
-//new Solution('e_also_big');
+new Solution('b_small');
+new Solution('c_medium');
+new Solution('d_quite_big');
+new Solution('e_also_big');
