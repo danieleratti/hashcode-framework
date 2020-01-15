@@ -19,8 +19,13 @@ abstract class HashCode
         $this->inputName = $inputName;
         $this->inputContent = file_get_contents($dir . '/input/' . $inputName . '.in');
 
-        $this->readInput();
-        $this->solve();
+        try {
+            $this->readInput();
+            $this->solve();
+        } catch (Exception $e) {
+            echo "### EXCEPTION " . $e->getMessage() . " ###\n";
+            echo $e->getTraceAsString();
+        }
     }
 
     public function output($content, $outputName = false, $history = false)

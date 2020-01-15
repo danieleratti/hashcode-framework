@@ -24,3 +24,30 @@ function array_keysort(&$data, $_key, $sort=SORT_DESC)
     // Add $data as the last parameter, to sort by the common key
     array_multisort($sorter, $sort, $data);
 }
+
+function getAllCombinations($arr)
+{
+    $firstId = key($arr);
+    if (count($arr) === 1) {
+        return [$firstId => $arr];
+    }
+    $first = $arr[$firstId];
+    unset($arr[$firstId]);
+    $combinations = getAllCombinations($arr);
+    $newCombinations = $combinations;
+    foreach ($newCombinations as &$item) {
+        $item[$firstId] = $first;
+    }
+    return array_merge([[$firstId => $first]], $combinations, $newCombinations);
+}
+
+function getSumForAllCombinations($arr)
+{
+    $combinations = getAllCombinations($arr);
+    $sums = [];
+    foreach ($combinations as $c) {
+        $sums[array_sum($c)] = $c;
+    }
+    ksort($sums);
+    return $sums;
+}
