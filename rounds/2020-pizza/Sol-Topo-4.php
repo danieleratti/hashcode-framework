@@ -17,7 +17,7 @@ class Solution extends Reader
     public function solve()
     {
         // config
-        $nCodaSx = 23;
+        $nCodaSx = min(23, count($this->pizzas)-1);
         $this->currentBestDelta = 5;
 
         // algo
@@ -75,8 +75,8 @@ class Solution extends Reader
     }
 }
 
-//new Solution('a_example');
-//new Solution('b_small');
-//new Solution('c_medium');
+new Solution('a_example');
+new Solution('b_small');
+new Solution('c_medium');
 new Solution('d_quite_big');
-//new Solution('e_also_big');
+new Solution('e_also_big');

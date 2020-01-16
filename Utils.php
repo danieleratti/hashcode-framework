@@ -51,3 +51,20 @@ function getSumForAllCombinations($arr)
     ksort($sums);
     return $sums;
 }
+
+function getSumForAllCombinationsV2($arr)
+{
+    $ret = [];
+    foreach($arr as $id => $val) {
+        foreach($ret as $sum => $null) {
+            if(!isset($ret[$val + $sum])) {
+                $list = [$id => $val];
+                foreach($ret[$sum] as $k2 => $v2)
+                    $list[$k2] = $v2;
+                $ret[$val + $sum] = $list;
+            }
+        }
+        $ret[$val] = [$id => $val];
+    }
+    return $ret;
+}
