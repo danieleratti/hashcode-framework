@@ -1,11 +1,6 @@
 <?php
 
-require_once __DIR__ . '/File.php';
-require_once __DIR__ . '/Utils.php';
-
-/*
- *
- * */
+namespace Src;
 
 abstract class HashCode
 {
@@ -33,9 +28,5 @@ abstract class HashCode
         File::write($this->workingDir . '/output/' . $fileName . '.txt', $content);
     }
 
-    /* to be implemented */
-    public function readInput()
-    {
-        /* read the $this->inputContent file */
-    }
+    public abstract function readInput();
 }

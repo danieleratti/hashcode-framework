@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/../../bootstrap.php';
+namespace Src;
 
 class Reader extends HashCode
 {
@@ -9,7 +9,7 @@ class Reader extends HashCode
     public function readInput()
     {
         $rows = explode("\n", $this->inputContent);
-        foreach($rows as $k => $v)
+        foreach ($rows as $k => $v)
             $this->foo .= $v;
     }
 }
