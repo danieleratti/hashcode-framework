@@ -1,5 +1,7 @@
 <?php
 
+ini_set('memory_limit', '32G');
+
 require_once __DIR__ . '/File.php';
 require_once __DIR__ . '/Utils.php';
 
