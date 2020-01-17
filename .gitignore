@@ -1,3 +1,5 @@
 vendor
 benchmarks
 .idea
+
+src/output/*
