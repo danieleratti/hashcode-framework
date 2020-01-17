@@ -4,8 +4,8 @@ namespace Src\Utils;
 
 class FileManager
 {
-    private $inputDir = __DIR__ . '/../input';
-    private $outputDir = __DIR__ . '/../output';
+    private static $inputDir = __DIR__ . '/../input';
+    private static $outputDir = __DIR__ . '/../output';
 
     private $inputName;
     private $fileContent;
@@ -13,7 +13,7 @@ class FileManager
     public function __construct($name)
     {
         $this->inputName = $this->getFileByStart($name);
-        $this->fileContent = file_get_contents($this->inputDir . '/' . $this->inputName);
+        $this->fileContent = file_get_contents(self::$inputDir . '/' . $this->inputName);
     }
 
     public function get()
@@ -23,17 +23,17 @@ class FileManager
 
     private function getFileByStart($query)
     {
-        foreach ($this->getInputFiles() as $fileName) {
+        foreach (self::listInputFiles() as $fileName) {
             if (substr($fileName, 0, strlen($query)) === $query)
                 return $fileName;
         }
     }
 
-    private function getInputFiles()
+    public static function listInputFiles()
     {
         $files = [];
 
-        if ($handle = opendir($this->inputDir)) {
+        if ($handle = opendir(self::$inputDir)) {
             while (false !== ($entry = readdir($handle))) {
                 if ($entry[0] != '.')
                     $files[] = $entry;
@@ -49,7 +49,7 @@ class FileManager
     {
         $baseInputName = basename($this->inputName, '.in');
         $scriptName = basename($_SERVER["SCRIPT_FILENAME"], '.php');
-        $this->write($this->outputDir . '/' . $scriptName . '_' . $baseInputName . '.txt', $content);
+        $this->write(self::$outputDir . '/' . $scriptName . '_' . $baseInputName . '.txt', $content);
     }
 
     private function write($fileName, $content)
