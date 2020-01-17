@@ -1,18 +1,12 @@
 <?php
 
+// inizializzo composer
 require_once "vendor/autoload.php";
-ini_set('memory_limit', '8G');
 
-use Src\Utils\Collection;
+// aumento limiti RAM disponibile
+ini_set('memory_limit', '16G');
 
 function collect($value = null)
 {
-    return new Collection($value);
-}
-
-function getExecutionTime(callable $function)
-{
-    $start = microtime(true);
-    $function();
-    return microtime(true) - $start;
+    return new Src\Utils\Collection($value);
 }
