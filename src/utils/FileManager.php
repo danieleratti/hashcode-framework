@@ -54,6 +54,11 @@ class FileManager
 
     private function write($fileName, $content)
     {
+        $dirname = dirname($fileName);
+        if (!is_dir($dirname)) {
+            mkdir($dirname, 0755, true);
+        }
+
         $fh = fopen($fileName, 'w');
         fwrite($fh, $content);
         fclose($fh);

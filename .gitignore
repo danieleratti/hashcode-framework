@@ -3,3 +3,4 @@ benchmarks
 .idea
 
 src/output/*
+src/images/*
