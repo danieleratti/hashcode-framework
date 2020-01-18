@@ -40,6 +40,7 @@ class PerfectFitter
 
         try {
             $itemsSum = array_sum($this->orderedItems);
+
             if ($itemsSum < $this->space) {
                 $this->bestSolutionFounded = $this->orderedKeys;
                 $this->bestSolutionSumFounded = $itemsSum;

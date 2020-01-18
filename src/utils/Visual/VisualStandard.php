@@ -16,10 +16,7 @@ Class VisualStandard extends Visual
 
         $this->colors = [];
         foreach ($reflectedColors->getConstants() as $name => $color) {
-            $r = hexdec(substr($color, 0, 2));
-            $g = hexdec(substr($color, 2, 2));
-            $b = hexdec(substr($color, 4, 2));
-            $this->colors[$color] = imagecolorallocate($this->image, $r, $g, $b);
+            $this->colors[$color] = $this->allocateByString($color);
         }
 
         $this->setBg('white');

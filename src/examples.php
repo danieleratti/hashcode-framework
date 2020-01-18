@@ -34,7 +34,7 @@ $visualGradient->save('gradiente');
 $visualStandard = new VisualStandard($ROWS, $COLUMNS);
 for ($row = 0; $row < $ROWS; $row++) {
     for ($col = 0; $col < $COLUMNS; $col++) {
-        $visualStandard->setPixel($row, $col, Colors::blue5);
+        $visualStandard->setPixel($row, $col, Colors::red5);
     }
 }
 $visualStandard->save('standard');

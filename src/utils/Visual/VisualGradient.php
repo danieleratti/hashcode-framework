@@ -6,13 +6,15 @@ class VisualGradient extends Visual
 {
     private $colors;
 
-    public function __construct($rows, $columns)
+    public function __construct($rows, $columns, $start = Colors::red5, $end = Colors::green5)
     {
         parent::__construct($rows, $columns);
 
-        $precision = 200;
-        $start = [255, 0, 0];
-        $end = [0, 0, 255];
+        $precision = 255;
+
+        $start = $this->stringToColorDec($start);
+        $end = $this->stringToColorDec($end);
+
         $delta = [];
         for ($c = 0; $c < 3; $c++)
             $delta[$c] = ($end[$c] - $start[$c]) / $precision;
