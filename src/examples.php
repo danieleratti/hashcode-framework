@@ -1,6 +1,7 @@
 <?php
 
 use Src\Utils\FileManager;
+use Src\Utils\Stopwatch;
 use Src\Utils\Visual\Colors;
 use Src\Utils\Visual\VisualGradient;
 use Src\Utils\Visual\VisualStandard;
@@ -38,3 +39,12 @@ for ($row = 0; $row < $ROWS; $row++) {
     }
 }
 $visualStandard->save('standard');
+
+
+// CONTROLLARE TEMPO DI ESECUZIONE
+$watcher = new Stopwatch('watcher1');
+for ($i = 0; $i < 10; $i++) {
+    $watcher->tik();
+    usleep(100000);
+    $watcher->tok(true);
+}
