@@ -3,7 +3,8 @@
     "ext-gd": "*",
     "amphp/parallel": "^1.1",
     "amphp/parallel-functions": "^0.1.3",
-    "tightenco/collect": "^6.11"
+    "tightenco/collect": "^6.11",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {
