@@ -1,7 +1,9 @@
 <?php
 
 use Src\Utils\FileManager;
-use Src\Utils\Visual;
+use Src\Utils\Visual\Colors;
+use Src\Utils\Visual\VisualGradient;
+use Src\Utils\Visual\VisualStandard;
 
 require_once '../bootstrap.php';
 
@@ -16,14 +18,23 @@ foreach (FileManager::listInputFiles() as $filename) {
 }
 
 // USARE CLASSE VISUAL
-$ROWS = 100;
-$COLUMNS = 100;
-$visual = new Visual($ROWS, $COLUMNS);
+$ROWS = 200;
+$COLUMNS = 200;
 
+
+$visualGradient = new VisualGradient($ROWS, $COLUMNS);
 for ($row = 0; $row < $ROWS; $row++) {
     for ($col = 0; $col < $COLUMNS; $col++) {
-        $visual->setGradient($row, $col, $row / $ROWS);
+        $visualGradient->setPixel($row, $col, $row / $ROWS);
     }
 }
+$visualGradient->save('gradiente');
 
-$visual->save('prova');
+
+$visualStandard = new VisualStandard($ROWS, $COLUMNS);
+for ($row = 0; $row < $ROWS; $row++) {
+    for ($col = 0; $col < $COLUMNS; $col++) {
+        $visualStandard->setPixel($row, $col, Colors::blue5);
+    }
+}
+$visualStandard->save('standard');
