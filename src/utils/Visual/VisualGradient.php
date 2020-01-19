@@ -6,26 +6,23 @@ class VisualGradient extends Visual
 {
     private $colors;
 
-    public function __construct($rows, $columns, $start = '00ff00', $end = 'ff0000')
+    public function __construct($rows, $columns)
     {
         parent::__construct($rows, $columns);
 
-        $precision = 255;
-
-        $start = $this->stringToColorDec($start);
-        $end = $this->stringToColorDec($end);
-
-        $delta = [];
-        for ($c = 0; $c < 3; $c++)
-            $delta[$c] = ($end[$c] - $start[$c]) / $precision;
-
         $this->colors = [];
-        $color = $start;
-        for ($k = 0; $k < $precision; $k++) {
-            $this->colors[] = imagecolorallocate($this->image, (int)$color[0], (int)$color[1], (int)$color[2]);
 
-            for ($c = 0; $c < 3; $c++)
-                $color[$c] = $color[$c] + $delta[$c];
+        $r = 0;
+        $g = 254;
+
+        for ($k = 0; $k < 256; $k++) {
+            echo "$k -> R: $r, G: $g \n";
+            $this->colors[] = imagecolorallocate($this->image, $r, $g, 0);
+
+            if ($k < 127)
+                $r += 2;
+            if ($k > 127)
+                $g -= 2;
 
         }
     }
