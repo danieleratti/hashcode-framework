@@ -2,6 +2,8 @@
 
 namespace Utils;
 
+use Src\Utils\DirUtils;
+
 Class Cache
 {
     protected $filename;
@@ -11,7 +13,7 @@ Class Cache
     public function __construct($filename)
     {
         $this->filename = $filename;
-        $this->dir = __DIR__ . '/../caches';
+        $this->dir = DirUtils::getScriptDir() . '/caches';
     }
 
     private function getFilename()

@@ -2,9 +2,11 @@
 
 namespace Src\Utils\Visual;
 
+use Src\Utils\DirUtils;
+
 abstract class Visual
 {
-    protected static $outputDir = __DIR__ . '/../../images';
+    protected static $outputDir = 'images';
 
     protected $image;
 
@@ -15,11 +17,9 @@ abstract class Visual
 
     public function save($name)
     {
-        $fileName = self::$outputDir . "/$name.png";
+        $fileName = DirUtils::getScriptDir() . '/' . self::$outputDir . "/$name.png";
         $dirname = dirname($fileName);
-        if (!is_dir($dirname)) {
-            mkdir($dirname, 0755, true);
-        }
+        DirUtils::makeDirOrCreate($dirname);
 
         imagepng($this->image, $fileName);
         //imagedestroy($this->image);

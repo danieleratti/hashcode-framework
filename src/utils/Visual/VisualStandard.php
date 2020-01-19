@@ -19,7 +19,7 @@ Class VisualStandard extends Visual
             $this->colors[$color] = $this->allocateByString($color);
         }
 
-        $this->setBg('white');
+        $this->setBg(Colors::white);
     }
 
     public function setPixel($row, $col, $color)

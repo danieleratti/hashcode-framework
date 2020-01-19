@@ -5,12 +5,16 @@ namespace Src\Utils;
 class Stopwatch
 {
     private $tik;
-    private $times;
     private $label;
+
+    private $last;
+    private $max;
+    private $min;
+    private $sum;
+    private $count;
 
     function __construct($label)
     {
-        $this->times = [];
         $this->label = $label;
     }
 
@@ -19,10 +23,13 @@ class Stopwatch
         $this->tik = microtime(true);
     }
 
-    public function tok($print = false)
+    public function tok($print = true)
     {
-        $this->times[] = microtime(true) - $this->tik;
-        $this->tik = null;
+        $this->last = microtime(true) - $this->tik;
+        $this->sum += $this->last;
+        $this->count++;
+        $this->min = min($this->min, $this->last);
+        $this->max = max($this->max, $this->last);
 
         if ($print)
             $this->printTime();
@@ -31,10 +38,11 @@ class Stopwatch
     public function printTime()
     {
         $r = 4;
-        $average = round(array_sum($this->times) / count($this->times), $r);
-        $last = round(end($this->times), $r);
-        $max = round(max($this->times), $r);
-        $min = round(min($this->times), $r);
+
+        $average = round($this->sum / $this->count, $r);
+        $last = round($this->last, $r);
+        $max = round($this->max, $r);
+        $min = round($this->min, $r);
 
         echo $this->label . ": {$last}s (μ: $average, max: $max, min: $min)\n";
     }

@@ -6,7 +6,7 @@ class VisualGradient extends Visual
 {
     private $colors;
 
-    public function __construct($rows, $columns, $start = Colors::red5, $end = Colors::green5)
+    public function __construct($rows, $columns, $start = '00ff00', $end = 'ff0000')
     {
         parent::__construct($rows, $columns);
 

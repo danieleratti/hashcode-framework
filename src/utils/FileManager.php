@@ -4,8 +4,8 @@ namespace Src\Utils;
 
 class FileManager
 {
-    private static $inputDir = __DIR__ . '/../input';
-    private static $outputDir = __DIR__ . '/../output';
+    private static $inputDir = 'input';
+    private static $outputDir = 'output';
 
     private $inputName;
     private $fileContent;
@@ -13,7 +13,7 @@ class FileManager
     public function __construct($name)
     {
         $this->inputName = $this->getFileByStart($name);
-        $this->fileContent = file_get_contents(self::$inputDir . '/' . $this->inputName);
+        $this->fileContent = file_get_contents(DirUtils::getScriptDir() . '/' . self::$inputDir . '/' . $this->inputName);
     }
 
     public function get()
@@ -48,16 +48,14 @@ class FileManager
     public function output($content)
     {
         $baseInputName = basename($this->inputName, '.in');
-        $scriptName = basename($_SERVER["SCRIPT_FILENAME"], '.php');
-        $this->write(self::$outputDir . '/' . $scriptName . '_' . $baseInputName . '.txt', $content);
+        $scriptName = DirUtils::getScriptName();
+        $this->write(DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . '.txt', $content);
     }
 
     private function write($fileName, $content)
     {
         $dirname = dirname($fileName);
-        if (!is_dir($dirname)) {
-            mkdir($dirname, 0755, true);
-        }
+        DirUtils::makeDirOrCreate($dirname);
 
         $fh = fopen($fileName, 'w');
         fwrite($fh, $content);

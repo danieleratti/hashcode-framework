@@ -4,6 +4,9 @@ namespace Src\Utils\Visual;
 
 class Colors
 {
+    const white = 'ffffff';
+    const black = '000000';
+
     const blue0 = 'e0eaf9';
     const blue1 = 'b3cbf0';
     const blue2 = '80a9e6';
