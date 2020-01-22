@@ -8,17 +8,17 @@ use Src\Utils\Visual\VisualStandard;
 
 require_once '../bootstrap.php';
 
-// LEGGERE GLI INPUT
+// Reading the inputs
 $fileManager = new FileManager('a');
 $fileManager->get();
 $fileManager->output('Output');
 
-// CICLARE SU TUTTI GLI INPUT
+// Iterating all the inputs
 foreach (FileManager::listInputFiles() as $filename) {
     $fileManager = new \Src\Utils\FileManager($filename);
 }
 
-// USARE CLASSE VISUAL
+// Using the visual classes
 $ROWS = 200;
 $COLUMNS = 200;
 
@@ -42,7 +42,7 @@ for ($row = 0; $row < $ROWS; $row++) {
 $visualStandard->save('standard');
 
 
-// CONTROLLARE TEMPO DI ESECUZIONE
+// Check the execution times
 $watcher = new Stopwatch('watcher1');
 for ($i = 0; $i < 10; $i++) {
     $watcher->tik();
