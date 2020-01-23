@@ -1,5 +1,7 @@
 <?php
 
+namespace Utils;
+
 class File
 {
     public static function write($fileName, $content)

@@ -1,11 +1,8 @@
 <?php
 
-require_once __DIR__ . '/File.php';
-require_once __DIR__ . '/Utils.php';
+namespace Src;
 
-/*
- *
- * */
+use Utils\File;
 
 abstract class HashCode
 {
@@ -19,8 +16,13 @@ abstract class HashCode
         $this->inputName = $inputName;
         $this->inputContent = file_get_contents($dir . '/input/' . $inputName . '.in');
 
-        $this->readInput();
-        $this->solve();
+        try {
+            $this->readInput();
+            $this->solve();
+        } catch (\Exception $e) {
+            echo "### EXCEPTION " . $e->getMessage() . " ###\n";
+            echo $e->getTraceAsString();
+        }
     }
 
     public function output($content, $outputName = false, $history = false)
@@ -33,9 +35,15 @@ abstract class HashCode
         File::write($this->workingDir . '/output/' . $fileName . '.txt', $content);
     }
 
-    /* to be implemented */
+    /* TO BE IMPLEMENTED inside the reader */
     public function readInput()
     {
         /* read the $this->inputContent file */
+    }
+
+    /* TO BE IMPLEMENTED inside the solution */
+    public function solve()
+    {
+        /* solve the problem */
     }
 }

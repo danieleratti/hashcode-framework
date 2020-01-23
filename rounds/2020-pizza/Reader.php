@@ -1,5 +1,7 @@
 <?php
 
+use HashCode;
+
 require __DIR__ . '/../../bootstrap.php';
 
 class Reader extends HashCode
