@@ -1,10 +1,10 @@
 <?php
 
-// inizializzo composer
+// initialize composer
 require_once "vendor/autoload.php";
 
-// aumento limiti RAM disponibile
-ini_set('memory_limit', '16G');
+// incrase the memory
+ini_set('memory_limit', '-1');
 
 function collect($value = null)
 {

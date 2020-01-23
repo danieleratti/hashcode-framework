@@ -4,3 +4,6 @@ benchmarks
 
 src/output/*
 src/images/*
+
+rounds/**/output/*.txt
+rounds/**/output/*.in
