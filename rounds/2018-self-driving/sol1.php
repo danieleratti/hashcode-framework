@@ -6,7 +6,7 @@ use Utils\Visual\Colors;
 use Utils\Visual\VisualStandard;
 
 $fileName = 'a';
-new Initializer($fileName);
+$inizialier = new Initializer($fileName);
 
 // $visual = new VisualStandard($R, $C);
 //
@@ -21,6 +21,8 @@ new Initializer($fileName);
 for ($currentTime = 0; $currentTime <= Initializer::$TIME; $currentTime++) {
     /** @var Car $car */
     foreach (Initializer::$CARS as $car) {
-        $car->takeRide(Initializer::$RIDES[0], $currentTime);
+        if($inizialier::$RIDES->count())
+            $car->takeRide($inizialier::$RIDES->first(), $currentTime);
+        else break;
     }
 }

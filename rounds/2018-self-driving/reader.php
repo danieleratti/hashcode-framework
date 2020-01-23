@@ -88,7 +88,7 @@ class Car
     public function takeRide(Ride $ride, $currentTime)
     {
         $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
-        $t = max($ride->minStart, $t);
+        $t = max($ride->earlyStart, $t);
 
         $freeAt = $t + $ride->distance;
         $r = $ride->rEnd;
@@ -141,9 +141,9 @@ class Initializer
         foreach ($rows as $i => $row) {
             $row = explode(' ', $row);
             $ride = new Ride($i, $row[0], $row[1], $row[2], $row[3], $row[4], $row[5]);
-            if (!$ride->isUseless()) {
+            //if (!$ride->isUseless()) {
                 self::$RIDES->add($ride);
-            }
+            //}
         }
         self::$RIDES = self::$RIDES->keyBy('id');
 
