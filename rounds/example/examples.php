@@ -1,12 +1,12 @@
 <?php
 
-use Src\Utils\FileManager;
-use Src\Utils\Stopwatch;
-use Src\Utils\Visual\Colors;
-use Src\Utils\Visual\VisualGradient;
-use Src\Utils\Visual\VisualStandard;
+use Utils\FileManager;
+use Utils\Stopwatch;
+use Utils\Visual\Colors;
+use Utils\Visual\VisualGradient;
+use Utils\Visual\VisualStandard;
 
-require_once '../bootstrap.php';
+require_once '../../bootstrap.php';
 
 // Reading the inputs
 $fileManager = new FileManager('a');
@@ -15,7 +15,7 @@ $fileManager->output('Output');
 
 // Iterating all the inputs
 foreach (FileManager::listInputFiles() as $filename) {
-    $fileManager = new \Src\Utils\FileManager($filename);
+    $fileManager = new \Utils\FileManager($filename);
 }
 
 // Using the visual classes

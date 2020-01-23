@@ -1,6 +1,6 @@
 <?php
 
-use Src\HashCode;
+use HashCode;
 
 require __DIR__ . '/../../bootstrap.php';
 

@@ -2,7 +2,7 @@
 
 namespace Utils;
 
-use Src\Utils\DirUtils;
+use Utils\DirUtils;
 
 Class Cache
 {

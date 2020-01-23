@@ -1,6 +1,6 @@
 <?php
 
-namespace Src\Utils\Visual;
+namespace Utils\Visual;
 
 class Colors
 {

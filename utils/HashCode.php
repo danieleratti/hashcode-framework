@@ -2,7 +2,7 @@
 
 namespace Src;
 
-use Src\Utils\File;
+use Utils\File;
 
 abstract class HashCode
 {

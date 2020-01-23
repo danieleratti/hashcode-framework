@@ -1,6 +1,6 @@
 <?php
 
-namespace Src\Utils;
+namespace Utils;
 
 class Collection extends \Tightenco\Collect\Support\Collection
 {

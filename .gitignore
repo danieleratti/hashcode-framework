@@ -2,8 +2,5 @@ vendor
 benchmarks
 .idea
 
-src/output/*
-src/images/*
-
-rounds/**/output/*.txt
-rounds/**/output/*.in
+rounds/**/output
+rounds/**/images

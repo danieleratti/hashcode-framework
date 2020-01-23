@@ -1,6 +1,6 @@
 <?php
 
-use \Src\Utils\ArrayUtils;
+use \Utils\ArrayUtils;
 
 require __DIR__ . '/Reader.php';
 

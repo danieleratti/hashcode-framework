@@ -1,8 +1,8 @@
 <?php
 
-namespace Src\Utils\Visual;
+namespace Utils\Visual;
 
-use Src\Utils\DirUtils;
+use Utils\DirUtils;
 
 abstract class Visual
 {
