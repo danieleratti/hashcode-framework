@@ -31,4 +31,10 @@ Class VisualStandard extends Visual
     {
         imagefill($this->image, 0, 0, $this->colors[$color]);
     }
+
+    public function setLine($r1, $c1, $r2, $c2, $color)
+    {
+        // x => c | y => r
+        imageline($this->image, $c1, $r1, $c2, $r2, $this->colors[$color]);
+    }
 }
