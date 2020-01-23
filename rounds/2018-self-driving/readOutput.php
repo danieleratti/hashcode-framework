@@ -8,9 +8,9 @@ include 'reader.php';
 $content = trim(file_get_contents(__DIR__ . '/output/' . $outputName));
 $rows = explode("\n", $content);
 
-if (count($rows) > $cars->count())
+if (count($rows) > $cars->count()) {
     die('troppi veicoli');
-
+}
 
 $points = 0;
 foreach ($rows as $row) {
@@ -19,8 +19,9 @@ foreach ($rows as $row) {
 
     $car = new Car(0);
     foreach ($outRides as $ride) {
-        if (!isset($rides[$ride]))
+        if (!isset($rides[$ride])) {
             die('ride usata due volte');
+        }
 
         $points += $car->takeRide($rides->get($ride));
     }
