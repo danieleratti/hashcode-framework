@@ -16,7 +16,6 @@ class VisualGradient extends Visual
         $g = 254;
 
         for ($k = 0; $k < 256; $k++) {
-            echo "$k -> R: $r, G: $g \n";
             $this->colors[] = imagecolorallocate($this->image, $r, $g, 0);
 
             if ($k < 127)
