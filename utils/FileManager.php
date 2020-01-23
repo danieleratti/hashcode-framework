@@ -7,7 +7,7 @@ class FileManager
     private static $inputDir = 'input';
     private static $outputDir = 'output';
 
-    private $inputName;
+    public $inputName;
     private $fileContent;
 
     public function __construct($name)
@@ -24,8 +24,9 @@ class FileManager
     private function getFileByStart($query)
     {
         foreach (self::listInputFiles() as $fileName) {
-            if (substr($fileName, 0, strlen($query)) === $query)
+            if (substr($fileName, 0, strlen($query)) === $query) {
                 return $fileName;
+            }
         }
     }
 
@@ -35,8 +36,9 @@ class FileManager
 
         if ($handle = opendir(self::$inputDir)) {
             while (false !== ($entry = readdir($handle))) {
-                if ($entry[0] != '.')
+                if ($entry[0] != '.') {
                     $files[] = $entry;
+                }
             }
 
             closedir($handle);

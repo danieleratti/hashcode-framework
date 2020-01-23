@@ -1,6 +1,7 @@
 <?php
 
 include 'reader.php';
+include 'readOutput.php';
 
 use Utils\FileManager;
 use Utils\Visual\Colors;
@@ -25,8 +26,12 @@ new Initializer($fileManager);
 for ($currentTime = 0; $currentTime <= Initializer::$TIME; $currentTime++) {
     /** @var Car $car */
     foreach (Initializer::$CARS as $car) {
-        if (Initializer::$RIDES->count()) {
-            $car->takeRide(Initializer::$RIDES->first(), $currentTime);
+        $freeRides = Initializer::$RIDES->filter(function ($item) {
+            return !$item->alreadyTaken();
+        });
+
+        if ($freeRides->count()) {
+            $car->takeRide($freeRides->first(), $currentTime);
         } else {
             break;
         }
@@ -44,3 +49,6 @@ foreach (Initializer::$CARS as $car) {
 }
 
 $fileManager->output($content);
+
+$readerOutput = new ReaderOutput($fileManager);
+$readerOutput->getResult();
