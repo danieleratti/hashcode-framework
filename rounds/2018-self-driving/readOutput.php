@@ -1,7 +1,7 @@
 <?php
 
-$fileName = 'a';
-$outputName = 'a.txt';
+$fileName = 'b';
+$outputName = 'sol1_b_should_be_easy.txt';
 
 include 'reader.php';
 
@@ -10,7 +10,6 @@ $rows = explode("\n", $content);
 
 if (count($rows) > $cars->count())
     die('troppi veicoli');
-
 
 $points = 0;
 foreach ($rows as $row) {

@@ -39,10 +39,27 @@ class Car
     public $r = 0;
     public $c = 0;
     public $freeAt = 0;
+    public $rides;
 
     public function __construct($id)
     {
         $this->id = $id;
+    }
+
+
+    public function getRidePoints(Ride $ride)
+    {
+        global $B;
+
+        $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
+        $t = max($ride->tStart, $t);
+
+        if ($t + $ride->distance > $ride->tEnd)
+            $points = 0;
+        else
+            $points = $ride->distance + ($t == $ride->tStart ? $B : 0);
+
+        return $points;
     }
 
     public function takeRide(Ride $ride)
@@ -60,12 +77,18 @@ class Car
             die('tempo fine ride > T');
 
         $rides->forget($ride->id);
+        $this->rides[] = $ride->id;
         if ($this->freeAt > $ride->tEnd) {
             echo "ATTENZIONE! 0 punti per questa ride";
             return 0;
         }
 
         return $ride->distance + ($t == $ride->tStart ? $B : 0);
+    }
+
+    public function toString()
+    {
+        return count($this->rides) . ' ' . implode(' ', $this->rides);
     }
 }
 
