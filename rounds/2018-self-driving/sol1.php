@@ -2,11 +2,15 @@
 
 include 'reader.php';
 
+use Utils\FileManager;
 use Utils\Visual\Colors;
 use Utils\Visual\VisualStandard;
 
 $fileName = 'a';
-new Initializer($fileName);
+
+// Reading the inputs
+$fileManager = new FileManager($fileName);
+new Initializer($fileManager);
 
 // $visual = new VisualStandard($R, $C);
 //
@@ -28,3 +32,15 @@ for ($currentTime = 0; $currentTime <= Initializer::$TIME; $currentTime++) {
         }
     }
 }
+
+$content = '';
+foreach (Initializer::$CARS as $car) {
+    $row = count($car->rides);
+    foreach ($car->rides as $ride) {
+        $row .= ' ' . $ride->id;
+    }
+
+    $content .= $row . "\n";
+}
+
+$fileManager->output($content);

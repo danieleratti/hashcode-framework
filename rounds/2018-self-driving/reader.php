@@ -127,10 +127,8 @@ class Initializer
     public static $RIDES;
     public static $CARS;
 
-    public function __construct($fileName)
+    public function __construct(FileManager $fileManager)
     {
-        // Reading the inputs
-        $fileManager = new FileManager($fileName);
         $fileContent = $fileManager->get();
 
         $rows = explode("\n", $fileContent);
