@@ -46,7 +46,7 @@ class Ride
 
     public function isUseless()
     {
-        return $this->distance - ($this->latestFinish - $this->earlyStart) < 0;
+        return $this->distance - ($this->latestFinish - $this->earlyStart) > 0;
     }
 
     public function take($currentTime)
@@ -88,7 +88,7 @@ class Car
     public function takeRide(Ride $ride, $currentTime)
     {
         $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
-        $t = max($ride->minStart, $t);
+        $t = max($ride->earlyStart, $t);
 
         $freeAt = $t + $ride->distance;
         $r = $ride->rEnd;

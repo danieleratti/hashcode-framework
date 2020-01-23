@@ -21,6 +21,10 @@ new Initializer($fileName);
 for ($currentTime = 0; $currentTime <= Initializer::$TIME; $currentTime++) {
     /** @var Car $car */
     foreach (Initializer::$CARS as $car) {
-        $car->takeRide(Initializer::$RIDES[0], $currentTime);
+        if (Initializer::$RIDES->count()) {
+            $car->takeRide(Initializer::$RIDES->first(), $currentTime);
+        } else {
+            break;
+        }
     }
 }
