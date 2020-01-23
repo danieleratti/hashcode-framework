@@ -26,7 +26,7 @@ class Ride
 
     public $distance;
 
-    private $takeAt;
+    private $takeAt = null;
     public $points;
 
     public function __construct($id, $rStart, $cStart, $rEnd, $cEnd, $earlyStart, $latestFinish)
@@ -46,13 +46,18 @@ class Ride
 
     public function isUseless()
     {
-        return $this->distance - ($this->latestFinish - $this->earlyStart) < 0;
+        return $this->distance - ($this->latestFinish - $this->earlyStart) > 0;
     }
 
     public function take($currentTime)
     {
         $this->takeAt = $currentTime;
         $this->points = $this->calculatePoints($currentTime + $this->distance);
+    }
+
+    public function alreadyTaken()
+    {
+        return $this->takeAt !== null;
     }
 
     private function calculatePoints($currentTime)
@@ -80,13 +85,17 @@ class Car
 
     public function canTakeRide(Ride $ride)
     {
-        if ($ride->takeAt) {
+        if ($ride->alreadyTaken()) {
             return false;
         }
     }
 
-    public function takeRide(Ride $ride, $currentTime)
+    public function takeRide(Ride $ride, $currentTime, $debug = true)
     {
+        if ($debug) {
+            echo "[car: $this->id, ride: $ride->id, T: $currentTime]\n";
+        }
+
         $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
         $t = max($ride->earlyStart, $t);
 
@@ -95,13 +104,16 @@ class Car
         $c = $ride->cEnd;
 
         if ($freeAt > Initializer::$TIME) {
-            echo "ATTENZIONE! Fuori tempo massimo\n";
+            if ($debug) {
+                echo "    Fuori tempo massimo, skip\n";
+            }
             return 0;
         }
 
-        Initializer::$RIDES->forget($ride->id);
         if ($this->freeAt > $ride->latestFinish) {
-            echo "ATTENZIONE! 0 punti per questa ride\n";
+            if ($debug) {
+                echo "    0 punti per questa ride\n";
+            }
             return 0;
         }
 
@@ -127,10 +139,8 @@ class Initializer
     public static $RIDES;
     public static $CARS;
 
-    public function __construct($fileName)
+    public function __construct(FileManager $fileManager)
     {
-        // Reading the inputs
-        $fileManager = new FileManager($fileName);
         $fileContent = $fileManager->get();
 
         $rows = explode("\n", $fileContent);

@@ -1,30 +1,44 @@
 <?php
 
-$fileName = 'a';
-$outputName = 'a.txt';
+use Utils\DirUtils;
+use Utils\FileManager;
 
-include 'reader.php';
+class ReaderOutput
+{
+    private $fileManager;
 
-$content = trim(file_get_contents(__DIR__ . '/output/' . $outputName));
-$rows = explode("\n", $content);
+    public function __construct(FileManager $fileManager)
+    {
+        $this->fileManager = $fileManager;
+    }
 
-if (count($rows) > $cars->count()) {
-    die('troppi veicoli');
-}
+    public function getResult()
+    {
+        $baseInputName = basename($this->fileManager->inputName, '.in');
+        $scriptName = DirUtils::getScriptName();
 
-$points = 0;
-foreach ($rows as $row) {
-    $outRides = explode(' ', $row);
-    array_shift($outRides);
+        $content = trim(file_get_contents(__DIR__ . '/output/' . $scriptName . '_' . $baseInputName . '.txt'));
+        $rows = explode("\n", $content);
 
-    $car = new Car(0);
-    foreach ($outRides as $ride) {
-        if (!isset($rides[$ride])) {
-            die('ride usata due volte');
+        if (count($rows) > Initializer::$CARS->count()) {
+            die('troppi veicoli');
         }
 
-        $points += $car->takeRide($rides->get($ride));
+        $points = 0;
+        foreach ($rows as $row) {
+            $outRides = explode(' ', $row);
+            array_shift($outRides);
+
+            $car = new Car(0);
+            foreach ($outRides as $ride) {
+                //if (Initializer::$RIDES->get($ride)) {
+                //    die('ride usata due volte');
+                //}
+
+                $points += $car->takeRide(Initializer::$RIDES->get($ride), $car->freeAt, false);
+            }
+        }
+
+        echo "\nBRAVO! punteggio $points\n";
     }
 }
-
-echo "BRAVO! punteggio $points";
