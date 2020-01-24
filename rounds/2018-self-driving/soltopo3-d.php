@@ -1,5 +1,10 @@
 <?php
 
+/* Distanza tra punto medio partenze e fine ride è un malus
+Versione base (con 300) : SCORE = 572744 (est. 11454880) 20esima macchina
+
+*/
+
 $fileName = 'd';
 
 include 'reader.php';
@@ -62,12 +67,14 @@ $rides = $rides->filter(function (Ride $ride) use ($RRound, $CRound, $RadiusRoun
 */
 
 /* Soluzione per C -> NON contano i tempi!!!! cerchiamo di concatenare la più vicina */
-foreach ($cars as $car) {
-    echo "Car " . $car->id . "\n";
+foreach ($cars as $ncar => $car) {
     while (true) {
         /** @var Car $car */
         $bestPerformance = 0;
         $bestRide = null;
+
+        $avgRidesDistances = $rides->avg('distance');
+
         foreach ($rides as $ride) {
             /** @var Ride $ride */
             if ($car->getRidePoints($ride) <= 0)
@@ -77,8 +84,16 @@ foreach ($cars as $car) {
             // virtual performance
             $safeTime = $car->getSafeTime($ride); // should be small! [da 0 a migliaia]
             //$performance /= ($safeTime + 1) * 0.25;
-            if($safeTime > 300)
+            //if($safeTime > 0)
+            //    $performance /= $safeTime/$avgRidesDistances;
+            if ($safeTime > 1000)
                 $performance /= 2;
+
+            /*
+            $distanceFromBaricentro = getDistance($ride->rEnd, $ride->cEnd, 2802, 1056);
+            $x = min($distanceFromBaricentro, $T - $car->freeAt - $ride->distance - getDistance($car->r, $car->c, $ride->rStart, $ride->cStart));
+            $performance /= $x;
+            */
 
             if ($performance > $bestPerformance) {
                 $bestPerformance = $performance;
@@ -94,7 +109,8 @@ foreach ($cars as $car) {
         } else break;
     }
     $foo = 1;
-    echo "SCORE = " . $SCORE . "\n";
+    echo "Done Car " . $car->id . " (" . $car->score . ")\n";
+    echo "SCORE = " . $SCORE . " (est. " . round($SCORE / $ncar * $F) . ")\n";
 }
 
 echo "Finito... SCORE = " . $SCORE;

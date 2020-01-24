@@ -1,6 +1,11 @@
 <?php
 
-$fileName = 'd';
+/* Distanza tra punto medio partenze e fine ride è un malus
+Versione base (con 300) : SCORE = 572744 (est. 11454880) 20esima macchina
+
+*/
+
+$fileName = 'd'; //b,c,d
 
 include 'reader.php';
 
@@ -13,37 +18,6 @@ function printOutput()
         $output[] = $car->toString();
     }
     $fileManager->output(implode("\n", $output));
-}
-
-class MultiRide
-{
-    public $rStart = 0;
-    public $rEnd = 0;
-    public $cStart = 0;
-    public $cEnd = 0;
-    public $tStart = 0; // initial: max(tStart[0], distance((0,0), position))
-    public $tFinish = 0; // FINISH != end
-    public $score = 0; // sum of all scores [NO bonus]
-    public $rides = [];
-
-    public function __construct()
-    {
-    }
-
-    public function addRide(Ride $ride)
-    {
-        //checks
-        if (count($this->rides) == 0) {
-            $this->rStart = $ride->rStart;
-            $this->cStart = $ride->cStart;
-            $this->tStart = max(getDistance(0, 0, $this->rStart, $this->cStart), $ride->tStart);
-            $this->tFinish = $this->tStart;
-        }
-        $this->tFinish = max($this->tFinish + $ride->distance, $ride->tStart);
-        $this->rEnd = $ride->rEnd;
-        $this->cEnd = $ride->cEnd;
-        $this->score += $ride->distance;
-    }
 }
 
 $SCORE = 0;
@@ -62,30 +36,41 @@ $rides = $rides->filter(function (Ride $ride) use ($RRound, $CRound, $RadiusRoun
 */
 
 /* Soluzione per C -> NON contano i tempi!!!! cerchiamo di concatenare la più vicina */
-foreach ($cars as $car) {
-    echo "Car " . $car->id . "\n";
+foreach ($cars as $ncar => $car) {
     while (true) {
         /** @var Car $car */
         $bestPerformance = 0;
         $bestRide = null;
+
         foreach ($rides as $ride) {
             /** @var Ride $ride */
-            if ($car->getRidePoints($ride) <= 0)
+            $points = $car->getRidePoints($ride);
+            if ($points <= 0)
                 continue;
-            $performance = $car->getRidePerformance($ride); // [tra 0 e 1]
 
-            // virtual performance
-            $safeTime = $car->getSafeTime($ride); // should be small! [da 0 a migliaia]
-            //$performance /= ($safeTime + 1) * 0.25;
-            if($safeTime > 300)
-                $performance /= 2;
+            $k1 = 1; // :(((
+            $k2 = 1; // :((
+            $k3 = 0; // :(
+
+            $distXride = getDistance($car->r, $car->c, $ride->rStart, $ride->cStart);
+            $waitingTime = max(0, $ride->tStart - ($car->freeAt + $distXride));
+            $hurryTime = $ride->tLastStart - ($car->freeAt + $distXride + $waitingTime);
+
+            //$performance = $points / (1 + $k1 * $waitingTime + $k2 * $distXride + $k3 * $hurryTime);
+            $performance = 1 / (1 + $k1 * $waitingTime + $k2 * $distXride + $k3 * $hurryTime);
+
+            //if ($hurryTime > 300)
+            //    $performance /= 1.1;
+
+            if ($T - $car->freeAt < 25000 && $ride->distance > 2500)
+                $performance /= 1.1;
 
             if ($performance > $bestPerformance) {
                 $bestPerformance = $performance;
                 $bestRide = $ride;
             }
         }
-        if ($bestRide) { //TODO: threshold
+        if ($bestRide) { //TODO: threshold accettazione
             //echo "Best performance = " . $bestPerformance . "\n";
             if ($car->getRidePoints($bestRide) > 0)
                 $SCORE += $car->takeRide($bestRide);
@@ -94,7 +79,9 @@ foreach ($cars as $car) {
         } else break;
     }
     $foo = 1;
-    echo "SCORE = " . $SCORE . "\n";
+    echo "Done Car " . $car->id . " (" . $car->score . ")\n";
+    echo "SCORE = " . $SCORE . " (est. " . round($SCORE / $ncar * $F) . ")\n";
+    //die();
 }
 
 echo "Finito... SCORE = " . $SCORE;

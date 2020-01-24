@@ -19,6 +19,7 @@ class Ride
     public $tStart;
     public $tEnd;
     public $distance;
+    public $tLastStart;
 
     public function __construct($id, $rStart, $cStart, $rEnd, $cEnd, $tStart, $tEnd)
     {
@@ -30,6 +31,7 @@ class Ride
         $this->tStart = $tStart;
         $this->tEnd = $tEnd;
         $this->distance = getDistance($rStart, $cStart, $rEnd, $cEnd);
+        $this->tLastStart = $tEnd - $this->distance;
     }
 }
 
@@ -45,11 +47,12 @@ class Car
     public $unusefulTime = 0;
     public $timePerformance = 0;
 
+    public $score = 0;
+
     public function __construct($id)
     {
         $this->id = $id;
     }
-
 
     public function getRidePoints(Ride $ride)
     {
@@ -67,6 +70,23 @@ class Car
             $points = $ride->distance + ($t == $ride->tStart ? $B : 0);
 
         return $points;
+    }
+
+    public function getRidePerformance(Ride $ride)
+    {
+        $useful = $ride->distance;
+        $unuseful = getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
+        $t = $this->freeAt + $unuseful;
+        if($t < $ride->tStart)
+            $unuseful += $ride->tStart - $t;
+        return $useful / ($useful + $unuseful);
+    }
+
+    public function getSafeTime(Ride $ride)
+    {
+        $unuseful = getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
+        $t = $this->freeAt + $unuseful;
+        return $ride->tEnd - $t - $ride->distance;
     }
 
     public function takeRide(Ride $ride)
@@ -94,7 +114,9 @@ class Car
             return 0;
         }
 
-        return $ride->distance + ($t == $ride->tStart ? $B : 0);
+        $score = $ride->distance + ($t == $ride->tStart ? $B : 0);
+        $this->score += $score;
+        return $score;
     }
 
     public function getTimePerformance()
