@@ -41,6 +41,10 @@ class Car
     public $freeAt = 0;
     public $rides;
 
+    public $usefulTime = 0;
+    public $unusefulTime = 0;
+    public $timePerformance = 0;
+
     public function __construct($id)
     {
         $this->id = $id;
@@ -49,10 +53,13 @@ class Car
 
     public function getRidePoints(Ride $ride)
     {
-        global $B;
+        global $B, $T;
 
         $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
         $t = max($ride->tStart, $t);
+
+        if ($this->freeAt > $T)
+            return 0;
 
         if ($t + $ride->distance > $ride->tEnd)
             $points = 0;
@@ -69,6 +76,10 @@ class Car
         $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
         $t = max($ride->tStart, $t);
 
+        $this->unusefulTime += $t - $this->freeAt;
+        $this->usefulTime += $ride->distance;
+        $this->timePerformance = $this->getTimePerformance();
+
         $this->freeAt = $t + $ride->distance;
         $this->r = $ride->rEnd;
         $this->c = $ride->cEnd;
@@ -84,6 +95,11 @@ class Car
         }
 
         return $ride->distance + ($t == $ride->tStart ? $B : 0);
+    }
+
+    public function getTimePerformance()
+    {
+        return round($this->usefulTime / ($this->usefulTime + $this->unusefulTime), 2);
     }
 
     public function toString()

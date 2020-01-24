@@ -30,10 +30,11 @@ foreach ($rides as $ride) {
         $combinationMaxScore = $score;
 }
 
+$padding = -500000;
 $corner = [[ //C,R
-    0, 1580
+    0+$padding, 1580+$padding
 ], [
-    3960, 2280
+    3960-$padding, 2280-$padding
 ]];
 
 $rides = $rides->filter(function (Ride $ride) use ($corner) {
@@ -56,6 +57,8 @@ foreach ($rides as $ride) {
 }
 
 $visual->save('line_' . $fileName);
+
+die();
 
 echo "Heated\n";
 
