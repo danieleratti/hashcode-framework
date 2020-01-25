@@ -4,3 +4,5 @@ benchmarks
 
 rounds/**/output
 rounds/**/images
+rounds/**/cache
+rounds/**/charts
