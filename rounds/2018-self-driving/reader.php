@@ -41,7 +41,7 @@ class Ride
         $this->distance = getDistance($rStart, $cStart, $rEnd, $cEnd);
 
         $this->maxStart = $this->latestFinish - $this->distance;
-        $this->minStart = $this->maxStart - $this->earlyStart;
+        $this->minStart = $this->earlyStart;
     }
 
     public function isUseless()
@@ -65,7 +65,7 @@ class Ride
         if ($currentTime > $this->latestFinish) {
             return 0;
         } else {
-            return $this->distance + ($this->takeAt == $this->earlyStart ? Initializer::$BONUS : 0);
+            return $this->distance + ($this->takeAt == $this->minStart ? Initializer::$BONUS : 0);
         }
     }
 }
@@ -83,6 +83,12 @@ class Car
         $this->id = $id;
     }
 
+    public function getWastedTime(Ride $ride)
+    {
+        $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
+        return max($ride->minStart, $t);
+    }
+
     public function canTakeRide(Ride $ride)
     {
         if ($ride->alreadyTaken()) {
@@ -96,8 +102,7 @@ class Car
             echo "[car: $this->id, ride: $ride->id, T: $currentTime]\n";
         }
 
-        $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
-        $t = max($ride->earlyStart, $t);
+        $t = $this->getWastedTime($ride);
 
         $freeAt = $t + $ride->distance;
         $r = $ride->rEnd;
@@ -110,6 +115,7 @@ class Car
             return 0;
         }
 
+        Initializer::$RIDES->forget($ride->id);
         if ($this->freeAt > $ride->latestFinish) {
             if ($debug) {
                 echo "    0 punti per questa ride\n";
@@ -121,7 +127,7 @@ class Car
         $this->r = $r;
         $this->c = $c;
 
-        $ride->take($currentTime);
+        $ride->take($t);
         $this->rides[] = $ride;
 
         return $ride->points;
@@ -151,9 +157,9 @@ class Initializer
         foreach ($rows as $i => $row) {
             $row = explode(' ', $row);
             $ride = new Ride($i, $row[0], $row[1], $row[2], $row[3], $row[4], $row[5]);
-            //if (!$ride->isUseless()) {
+            if (!$ride->isUseless()) {
                 self::$RIDES->add($ride);
-            //}
+            }
         }
         self::$RIDES = self::$RIDES->keyBy('id');
 

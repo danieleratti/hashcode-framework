@@ -7,13 +7,13 @@ use Utils\FileManager;
 use Utils\Visual\Colors;
 use Utils\Visual\VisualStandard;
 
-$fileName = 'a';
+$fileName = 'c';
 
 // Reading the inputs
 $fileManager = new FileManager($fileName);
 new Initializer($fileManager);
 
-// $visual = new VisualStandard($R, $C);
+// $visual = new VisualStandard($R, $C);2348 = {Ride} [12]
 //
 // /** @var Ride $ride */
 // foreach ($rides as $ride) {
@@ -23,32 +23,58 @@ new Initializer($fileManager);
 //
 // $visual->save($fileName);
 
+Initializer::$RIDES->sortBy('earlyStart');
+
 for ($currentTime = 0; $currentTime <= Initializer::$TIME; $currentTime++) {
     /** @var Car $car */
-    foreach (Initializer::$CARS as $car) {
-        $freeRides = Initializer::$RIDES->filter(function ($item) {
-            return !$item->alreadyTaken();
-        });
-
-        if ($freeRides->count()) {
-            $car->takeRide($freeRides->first(), $currentTime);
-        } else {
-            break;
-        }
+    foreach (Initializer::$RIDES as $ride) {
+        $car = getBestCar($ride, $currentTime);
+        if(!$car) continue;
+        $car->takeRide($ride, $currentTime);
     }
 }
 
+
+function getBestCar(Ride $ride, $currentTime)
+{
+    $bestCar = null;
+    /** @var Car $car */
+    foreach(Initializer::$CARS as $car) {
+        if($car->freeAt > $currentTime) continue;
+
+        if(!$bestCar) {
+            $bestCar = $car;
+            continue;
+        }
+
+        $currentCar = $car->getWastedTime($ride);
+        if($bestCar->getWastedTime($ride) > $currentCar) {
+            $bestCar = $car;
+        }
+    }
+
+    return $bestCar;
+}
+
 $content = '';
+$total = 0;
 foreach (Initializer::$CARS as $car) {
     $row = count($car->rides);
     foreach ($car->rides as $ride) {
         $row .= ' ' . $ride->id;
+        /** @var Ride $ride */
+        $total += $ride->points;
     }
 
     $content .= $row . "\n";
 }
 
+echo $total . PHP_EOL;
+
 $fileManager->output($content);
 
-$readerOutput = new ReaderOutput($fileManager);
-$readerOutput->getResult();
+
+// a => 10
+// b => 121412
+// c => ???
+// d => ???
