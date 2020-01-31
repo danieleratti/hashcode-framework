@@ -332,6 +332,10 @@ $content = str_replace("\r", "", $fileManager->get());
 $content = explode("\n", $content);
 
 list($colCount, $rowCount, $clientsCount, $maxOfficesCount) = explode(' ', $content[0]);
+$colCount = (int)$colCount;
+$rowCount = (int)$rowCount;
+$clientsCount = (int)$clientsCount;
+$maxOfficesCount = (int)$maxOfficesCount;
 
 $clientsFileList = array_slice($content, 1, $clientsCount);
 $mapRowsFile = array_slice($content, 1 + $clientsCount, $rowCount);
@@ -342,8 +346,9 @@ foreach ($clientsFileList as $id => $clientRow) {
     $clients[$id] = new Client($id, $row, $col, $revenue);
 }
 
+/** @var Map $map */
 $map = new Map($mapRowsFile, $clients);
-
+/** @var PathMap[] $caches */
 $caches = [];
 foreach ($clients as $key => $client) {
     $n = $key + 1;

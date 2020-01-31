@@ -2,7 +2,7 @@
 
 error_reporting(0);
 
-$fileName = '5';
+$fileName = '1';
 
 include 'reader.php';
 
@@ -13,12 +13,43 @@ for ($c = 0; $c < $colCount; $c++) {
         foreach ($caches as $cache) {
             /** @var PathMap $cache */
             if (isset($cache->cells[$r]) && isset($cache->cells[$r][$c]) && $cache->cells[$r][$c]->pathCost > 0) {
+                if(!isset($scores["$r,$c"])) {
+                    $scores["$r,$c"] = [
+                        'score' => 0,
+                        'reached' => [],
+                    ];
+                }
                 $scores["$r,$c"] += $cache->client->revenue - $cache->cells[$r][$c]->pathCost;
+                $scores['reached'][] = $cache->client->id;
             }
         }
     }
 }
 arsort($scores);
+
+$covered = [];
+for ($i = 0; $i < $clientsCount; $i++) {
+    $covered = [];
+}
+foreach ($caches as $clientCache) {
+    /** @var PathMap $clientCache */
+    foreach ($scores as $rc => $s) {
+        list($r, $c) = explode(',', $rc);
+        if (isset($clientCache->cells[$r]) && isset($clientCache->cells[$r][$c])) {
+            $taken["$r,$c"] = $clientCache->client->revenue - $clientCache->cells[$r][$c]->pathCost;
+            break;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
 
 $final = array_slice($scores, 0, $maxOfficesCount);
 print_r($final);
@@ -27,7 +58,7 @@ $taken = [];
 
 foreach ($caches as $clientCache) {
     /** @var PathMap $clientCache */
-    foreach ($final as $rc => $s) {
+    foreach ($scores as $rc => $s) {
         list($r, $c) = explode(',', $rc);
         if (isset($clientCache->cells[$r]) && isset($clientCache->cells[$r][$c])) {
             $taken[] = [
