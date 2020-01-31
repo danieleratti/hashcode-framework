@@ -310,7 +310,7 @@ class PathMap
     }
 }
 
-$fileManager = new FileManager('0');
+$fileManager = new FileManager($fileName);
 
 $content = str_replace("\r", "", $fileManager->get());
 $content = explode("\n", $content);
