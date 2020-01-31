@@ -314,7 +314,7 @@ class PathMap
     {
         if (!isset($this->cells[$row][$col]))
             return null;
-        else $this->cells[$row][$col];
+        return $this->cells[$row][$col];
     }
 }
 
