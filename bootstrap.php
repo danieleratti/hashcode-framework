@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ERROR | E_PARSE);
+
 // initialize composer
 require_once "vendor/autoload.php";
 

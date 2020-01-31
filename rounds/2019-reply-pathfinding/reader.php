@@ -129,9 +129,14 @@ class PathCell extends Cell
         $this->pathCost = $pathCost;
     }
 
-    public function __toString()
+    public function toString()
     {
         return $this->col . ' ' . $this->row . ' ' . $this->fixPath($this->path);
+    }
+
+    public function __toString()
+    {
+        return $this->toString();
     }
 
     function fixPath($path)
@@ -172,7 +177,7 @@ class PathMap
 
     public $fileName;
 
-    public function __construct(Map $map, Client $client, $fileName)
+    public function __construct(Map $map, Client $client, $fileName, $all = false)
     {
         $this->map = $map;
         $this->client = $client;
@@ -183,7 +188,7 @@ class PathMap
         /** @var Cell $clientCell */
         $clientCell = $map->cells[$row][$col];
 
-        $dir = $this->getDir();
+        $dir = $this->getDir($all);
         $fhName = "$dir/" . $this->client->id . ".txt";
 
         if (file_exists($fhName)) {
@@ -193,7 +198,7 @@ class PathMap
             $this->cells[$row][$col] = $firstCell;
             $this->borderCells[] = $firstCell;
             $this->calculatePaths();
-            $this->toFile();
+            $this->toFile($all);
         }
     }
 
@@ -270,18 +275,19 @@ class PathMap
         }
     }
 
-    public function toFile()
+    public function toFile($all)
     {
-        $dir = $this->getDir();
+        $dir = $this->getDir($all);
         DirUtils::makeDirOrCreate($dir);
         $fh = fopen("$dir/" . $this->client->id . ".txt", "w");
 
         foreach ($this->cells as $row) {
             /** @var PathCell $cell */
             foreach ($row as $cell) {
+                /*
                 if ($cell->pathCost >= $this->client->revenue)
                     continue;
-
+                */
                 $row = $cell->row;
                 $col = $cell->col;
                 $char = $cell->char;
@@ -304,9 +310,11 @@ class PathMap
         }
     }
 
-    public function getDir()
+    public function getDir($all)
     {
-        return "cache/" . $this->fileName;
+        if ($all)
+            return "cache/heavy/" . $this->fileName;
+        return "cache/light/" . $this->fileName;
     }
 
     /** @return PathCell */
@@ -335,8 +343,8 @@ foreach ($clientsFileList as $id => $clientRow) {
 }
 
 $map = new Map($mapRowsFile, $clients);
-$caches = [];
 
+$caches = [];
 foreach ($clients as $key => $client) {
     $n = $key + 1;
     echo "Cache $n/$clientsCount caricata\n";
