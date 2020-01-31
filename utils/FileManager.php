@@ -7,8 +7,8 @@ class FileManager
     private static $inputDir = 'input';
     private static $outputDir = 'output';
 
-    private $inputName;
-    private $fileContent;
+    public $inputName;
+    public $fileContent;
 
     public function __construct($name)
     {

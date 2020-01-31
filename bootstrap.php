@@ -10,3 +10,13 @@ function collect($value = null)
 {
     return new Utils\Collection($value);
 }
+
+function issetOrVal(&$value, $orVal)
+{
+    return isset($value) ? $value : $orVal;
+}
+
+function issetOrNull(&$value)
+{
+    return issetOrVal($value, null);
+}
