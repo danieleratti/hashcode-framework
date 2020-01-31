@@ -308,6 +308,14 @@ class PathMap
     {
         return "cache/" . $this->fileName;
     }
+
+    /** @return PathCell */
+    public function getCell($row, $col)
+    {
+        if (!isset($this->cells[$row][$col]))
+            return null;
+        else $this->cells[$row][$col];
+    }
 }
 
 $fileManager = new FileManager($fileName);
