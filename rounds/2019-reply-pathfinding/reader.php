@@ -128,10 +128,35 @@ class PathCell extends Cell
         $this->path = $path;
         $this->pathCost = $pathCost;
     }
+
+    public function __toString()
+    {
+        return $this->col . ' ' . $this->row . ' ' . $this->fixPath($this->path);
+    }
+
+    function fixPath($path)
+    {
+        $result = '';
+        for ($i = 0; $i < strlen($path); $i++) {
+            switch ($path[$i]) {
+                case 'D':
+                    $result .= 'U';
+                    break;
+                case 'U':
+                    $result .= 'D';
+                    break;
+                case 'L':
+                    $result .= 'R';
+                    break;
+                case 'R':
+                    $result .= 'L';
+                    break;
+            }
+        }
+
+        return $result;
+    }
 }
-
-
-const PAD_LENGTH = 6;
 
 class PathMap
 {
@@ -161,7 +186,7 @@ class PathMap
         $dir = $this->getDir();
         $fhName = "$dir/" . $this->client->id . ".txt";
 
-        if(file_exists($fhName)) {
+        if (file_exists($fhName)) {
             $this->fromFile(file_get_contents($fhName));
         } else {
             $firstCell = new PathCell($row, $col, $clientCell->char, '', 0);
@@ -239,7 +264,7 @@ class PathMap
                 $value = 'X';
                 if ($this->cells[$r][$c])
                     $value = $this->cells[$r][$c]->pathCost;
-                echo str_pad($value, PAD_LENGTH, ' ');
+                echo str_pad($value, 6, ' ');
             }
             echo "\n";
         }
@@ -285,9 +310,10 @@ class PathMap
     }
 }
 
-$fileManager = new FileManager('2');
+$fileManager = new FileManager('0');
 
-$content = explode("\r\n", $fileManager->get());
+$content = str_replace("\r", "", $fileManager->get());
+$content = explode("\n", $content);
 
 list($colCount, $rowCount, $clientsCount, $maxOfficesCount) = explode(' ', $content[0]);
 
