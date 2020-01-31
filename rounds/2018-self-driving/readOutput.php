@@ -1,11 +1,11 @@
 <?php
 
-$fileName = 'e';
-$outputName = 'sol4_e_high_bonus.txt';
+$fileName = 'd';
+//$outputName = 'e-20200126161501.out';
 
 include 'reader.php';
 
-$content = trim(file_get_contents(__DIR__ . '/output/' . $outputName));
+$content = trim(file_get_contents('/Users/matteomilesi/Dev/hashcode-framework/rounds/2018-self-driving-mm/output/e-20200127010118.out'));
 $rows = explode("\n", $content);
 
 if (count($rows) > $cars->count())
