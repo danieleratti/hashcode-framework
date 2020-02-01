@@ -349,10 +349,12 @@ foreach ($clientsFileList as $id => $clientRow) {
 /** @var Map $map */
 $map = new Map($mapRowsFile, $clients);
 /** @var PathMap[] $caches */
-$caches = [];
-foreach ($clients as $key => $client) {
-    $n = $key + 1;
-    echo "Cache $n/$clientsCount caricata\n";
-    $cache = new PathMap($map, $client, $fileManager->inputName, true);
-    $caches[$client->id] = $cache;
+if(!$skipRead) {
+    $caches = [];
+    foreach ($clients as $key => $client) {
+        $n = $key + 1;
+        echo "Cache $n/$clientsCount caricata\n";
+        $cache = new PathMap($map, $client, $fileManager->inputName, true);
+        $caches[$client->id] = $cache;
+    }
 }

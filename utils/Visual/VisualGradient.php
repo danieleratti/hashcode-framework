@@ -31,4 +31,9 @@ class VisualGradient extends Visual
         $colorId = (int)count($this->colors) * $gradient;
         imagesetpixel($this->image, $col, $row, $this->colors[$colorId]);
     }
+
+    public function setCustomPixel($row, $col, $r, $g, $b)
+    {
+        imagesetpixel($this->image, $col, $row, imagecolorallocate($this->image, $r, $g, $b));
+    }
 }

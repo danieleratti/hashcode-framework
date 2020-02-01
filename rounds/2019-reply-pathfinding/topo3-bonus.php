@@ -7,7 +7,7 @@
  * 4 OK best
  */
 
-$fileName = '5';
+$fileName = '3';
 $sampleSize = 1;
 
 include 'reader.php';

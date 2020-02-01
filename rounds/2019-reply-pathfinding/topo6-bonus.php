@@ -79,7 +79,40 @@ $paddingOffices = 1;
 
 echo "Found clients = " . array_sum($foundClients) . "\n";
 
-foreach ($possibilities->sortByDesc('totalProfit')->take($maxOfficesCount - $paddingOffices) as $key => $p) {
+
+
+
+//$clientsToExclude = [];
+$p = $possibilities->sortBy('worstProfit')->sortBy('remainingClientsCount')->pop();
+$donerc[$p['r']][$p['c']] = true;
+foreach ($p['possibleClients'] as $c) {
+    //$clientsToExclude[] = $c->id;
+    $reverseClients[$c->id] = 0;
+}
+foreach ($p['possibleCells'] as $c) {
+    $content .= $c . "\n";
+}
+$takenOffices++;
+$outputScore += $p['worstProfit'];
+
+//print_r($p);
+
+foreach ($possibilities as $key => $possibility) {
+    $remainingClientsCount = 0;
+    foreach ($possibility['possibleClients'] as $c) {
+        $remainingClientsCount += $reverseClients[$c->id];
+    }
+    if($possibility['remainingClientsCount'] != $remainingClientsCount) {
+        $possibility['remainingClientsCount'] = $remainingClientsCount;
+        $possibilities[$key] = $possibility;
+    }
+}
+echo "Remaining = " . array_sum($reverseClients) . "\n";
+
+
+
+
+foreach ($possibilities->sortByDesc('totalProfit')->take($maxOfficesCount - $paddingOffices - 1) as $key => $p) {
     foreach ($p['cells'] as $c) {
         $content .= $c . "\n";
     }
