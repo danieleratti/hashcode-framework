@@ -353,6 +353,6 @@ $caches = [];
 foreach ($clients as $key => $client) {
     $n = $key + 1;
     echo "Cache $n/$clientsCount caricata\n";
-    $cache = new PathMap($map, $client, $fileManager->inputName);
+    $cache = new PathMap($map, $client, $fileManager->inputName, true);
     $caches[$client->id] = $cache;
 }

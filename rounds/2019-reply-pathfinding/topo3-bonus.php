@@ -6,11 +6,12 @@
  */
 
 $fileName = '2';
-$sampleSize = 10;
+$sampleSize = 1;
 
 include 'reader.php';
 
 $reverseClients = [];
+$foundClients = [];
 
 $bonus = 0;
 /** @var PathMap $pathMap */
@@ -21,53 +22,94 @@ foreach ($caches as $pathMap) {
 
 $possibilities = collect();
 for ($r = 0; $r < $map->rowCount; $r += $sampleSize) {
+    echo "R=$r\n";
     for ($c = 0; $c < $map->colCount; $c += $sampleSize) {
         /** @var PathMap $pathMap */
         $clientCells = [];
-        echo "R=$r C=$c\n";
         $totalProfit = 0;
+        $worstProfit = 0;
         $clients = [];
+        $cells = [];
+        $possibleClients = [];
+        $possibleCells = [];
         $revClients = [];
         foreach ($caches as $pathMap) {
             $cell = $pathMap->getCell($r, $c);
             if ($cell && $cell->pathCost > 0) {
                 $profit = $pathMap->client->revenue - $cell->pathCost;
-                if ($profit > -10000) { // tuning
+                if ($profit > 0) { // tuning
                     $totalProfit += $profit;
                     $clients[] = $pathMap->client;
+                    $cells[] = $cell;
                     //$revClients[$pathMap->client->id] = 1;
                 }
+                $worstProfit += $profit;
+                $possibleClients[] = $pathMap->client;
+                $possibleCells[] = $cell;
+                $foundClients[$pathMap->client->id] = 1;
             }
         }
-        if ($totalProfit > -10000) { // tuning
-            $possibilities->add([
-                'r' => $r,
-                'c' => $c,
-                'totalProfit' => $totalProfit,
-                'clients' => $clients,
-                //'revClients' => $revClients,
-                'remainingClientsCount' => count($clients),
-            ]);
-        }
+        $possibilities->add([
+            'r' => $r,
+            'c' => $c,
+            'worstProfit' => $worstProfit,
+            'totalProfit' => $totalProfit,
+            'clients' => $clients,
+            'cells' => $cells,
+            'possibleClients' => $possibleClients,
+            'possibleCells' => $possibleCells,
+            //'revClients' => $revClients,
+            'remainingClientsCount' => count($possibleClients),
+        ]);
     }
 }
 
-while(array_sum($reverseClients) > 0) {
+
+$content = "";
+$outputScore = 0;
+$takenOffices = 0;
+
+echo "Found clients = " . array_sum($foundClients) . "\n";
+echo "Remaining = " . array_sum($reverseClients) . "\n";
+while (array_sum($reverseClients) > 0) {
     //$clientsToExclude = [];
-    $p = $possibilities->sortBy('remainingClientsCount')->pop(); //take the last. Add something like ->sortByAsc('totalProfit') (???????)
-    foreach($p['clients'] as $c) {
+    $p = $possibilities->sortBy('worstProfit')->sortBy('remainingClientsCount')->pop();
+    foreach ($p['possibleClients'] as $c) {
         //$clientsToExclude[] = $c->id;
         $reverseClients[$c->id] = 0;
     }
+    foreach ($p['possibleCells'] as $c) {
+        $content .= $c . "\n";
+    }
+    $takenOffices++;
+    $outputScore += $p['worstProfit'];
 
-    foreach($possibilities as &$possibility) {
+    //print_r($p);
+
+    foreach ($possibilities as &$possibility) {
         $remainingClientsCount = 0;
-        foreach($possibility['clients'] as $c) {
+        foreach ($possibility['possibleClients'] as $c) {
             $remainingClientsCount += $reverseClients[$c->id];
         }
         $possibility['remainingClientsCount'] = $remainingClientsCount;
     }
+    echo "Remaining = " . array_sum($reverseClients) . "\n";
 }
+
+foreach ($possibilities->sortByDesc('totalProfit')->take($maxOfficesCount - $takenOffices) as $p) {
+    foreach ($p['cells'] as $c) {
+        $content .= $c . "\n";
+    }
+    $outputScore += $p['totalProfit'];
+}
+
+$fileManager->output(trim($content));
+
+echo "TOTAL Output Score no bonus = " . $outputScore . "\n";
+echo "TOTAL Output Score with bonus = " . ($outputScore + $bonus) . "\n";
+
+
+//foreach($possibilities->sortBy('totalProfit'))
 
 
 /*
