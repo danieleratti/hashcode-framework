@@ -6,6 +6,7 @@ class FileManager
 {
     private static $inputDir = 'input';
     private static $outputDir = 'output';
+    private static $cacheDir = 'cache';
 
     public $inputName;
     public $fileContent;
@@ -29,30 +30,19 @@ class FileManager
         }
     }
 
-    public static function listInputFiles()
-    {
-        $files = [];
-
-        if ($handle = opendir(self::$inputDir)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry[0] != '.')
-                    $files[] = $entry;
-            }
-
-            closedir($handle);
-        }
-
-        return $files;
-    }
-
     public function output($content)
     {
-        $baseInputName = basename($this->inputName, '.in');
+        $baseInputName = $this->getInputName();
         $scriptName = DirUtils::getScriptName();
         $this->write(DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . '.txt', $content);
     }
 
-    private function write($fileName, $content)
+    public function getInputName()
+    {
+        return basename($this->inputName, '.in');
+    }
+
+    public function write($fileName, $content)
     {
         $dirname = dirname($fileName);
         DirUtils::makeDirOrCreate($dirname);
@@ -67,5 +57,21 @@ class FileManager
         $fh = fopen($fileName, 'w');
         fwrite($fh, $content);
         fclose($fh);
+    }
+
+    public static function listInputFiles()
+    {
+        $files = [];
+
+        if ($handle = opendir(self::$inputDir)) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry[0] != '.')
+                    $files[] = $entry;
+            }
+
+            closedir($handle);
+        }
+
+        return $files;
     }
 }
