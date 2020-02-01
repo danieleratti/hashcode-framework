@@ -2,12 +2,10 @@
 
 /*
  * Sampled algorithm
- * 2 OK
- * 3 OK ma non best
- * 4 OK best
+ *
  */
 
-$fileName = '5';
+$fileName = '2';
 $sampleSize = 1;
 
 include 'reader.php';
@@ -70,14 +68,36 @@ for ($r = 0; $r < $map->rowCount; $r += $sampleSize) {
 $content = "";
 $outputScore = 0;
 $takenOffices = 0;
-$donerc = [];
 
 echo "Found clients = " . array_sum($foundClients) . "\n";
+
+foreach ($possibilities->sortByDesc('totalProfit')->take($maxOfficesCount - 1) as $p) {
+    foreach ($p['cells'] as $c) {
+        $content .= $c . "\n";
+    }
+    foreach ($p['clients'] as $c) {
+        $reverseClients[$c->id] = 0;
+    }
+    $outputScore += $p['totalProfit'];
+}
+
+print_r($reverseClients);
+
+foreach ($possibilities as $k => $possibility) {
+    $remainingClientsCount = 0;
+    foreach ($possibility['possibleClients'] as $c) {
+        $remainingClientsCount += $reverseClients[$c->id];
+    }
+    $possibilities[$k]['remainingClientsCount'] = $remainingClientsCount;
+}
+
 echo "Remaining = " . array_sum($reverseClients) . "\n";
 while (array_sum($reverseClients) > 0) {
     //$clientsToExclude = [];
     $p = $possibilities->sortBy('worstProfit')->sortBy('remainingClientsCount')->pop();
-    $donerc[$p['r']][$p['c']] = true;
+
+    echo "Current output points = $outputScore // Found remainingClientsCount=" . $p['remainingClientsCount'] . "\n";
+
     foreach ($p['possibleClients'] as $c) {
         //$clientsToExclude[] = $c->id;
         $reverseClients[$c->id] = 0;
@@ -90,30 +110,14 @@ while (array_sum($reverseClients) > 0) {
 
     //print_r($p);
 
-    foreach ($possibilities as $key => $possibility) {
+    foreach ($possibilities as &$possibility) {
         $remainingClientsCount = 0;
         foreach ($possibility['possibleClients'] as $c) {
             $remainingClientsCount += $reverseClients[$c->id];
         }
-        if($possibility['remainingClientsCount'] != $remainingClientsCount) {
-            $possibility['remainingClientsCount'] = $remainingClientsCount;
-            $possibilities[$key] = $possibility;
-        }
+        $possibility['remainingClientsCount'] = $remainingClientsCount;
     }
     echo "Remaining = " . array_sum($reverseClients) . "\n";
-}
-
-foreach ($possibilities->sortByDesc('totalProfit')->take($maxOfficesCount) as $p) {
-    $takenOffices++;
-    if(!isset($donerc[$p['r']][$p['c']])) {
-        $donerc[$p['r']][$p['c']] = true;
-        foreach ($p['cells'] as $c) {
-            $content .= $c . "\n";
-        }
-        $outputScore += $p['totalProfit'];
-    }
-    if($takenOffices == $maxOfficesCount)
-        break;
 }
 
 $fileManager->output(trim($content));
