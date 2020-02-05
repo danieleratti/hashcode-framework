@@ -86,16 +86,25 @@ class Grid
             $this->backbones[$bRow][$bCol] = true;
         }
 
-        for ($r = max(0, $row - $this->routerRange); $r <= min($this->gridRows, $row + $this->routerRange); $r++) {
-            for ($c = max(0, $col - $this->routerRange); $c <= min($this->gridCols, $col + $this->routerRange); $c++) {
-                if ($this->covered[$r][$c])
-                    continue;
-                $this->covered[$r][$c] = !isThereAWall($this->grid, $r, $c, $row, $col);
-            }
-        }
+        $covered = $this->getCoveredCells($row, $col);
+        foreach ($covered as $coveredCell)
+            $this->covered[$coveredCell[0]][$coveredCell[1]] = true;
 
         $this->remainingBudget -= $this->getBackboneCost($row, $col);
         $this->remainingBudget -= $this->routerCosts;
+    }
+
+    public function getCoveredCells($row, $col)
+    {
+        $result = [];
+        for ($r = max(0, $row - $this->routerRange); $r <= min($this->gridRows, $row + $this->routerRange); $r++) {
+            for ($c = max(0, $col - $this->routerRange); $c <= min($this->gridCols, $col + $this->routerRange); $c++) {
+                if (isThereAWall($this->grid, $r, $c, $row, $col))
+                    continue;
+                $result[] = [$r, $c];
+            }
+        }
+        return $result;
     }
 
     public function getBackboneCost($row, $col)
