@@ -18,6 +18,14 @@ class Cell
     public $isWall;
     /** @var bool $isVoid */
     public $isVoid;
+    /** @var bool $isCovered */
+    public $isCovered = false;
+    /** @var bool $hasRouter */
+    public $hasRouter = false;
+    /** @var bool $hasBackbone */
+    public $hasBackbone = false;
+    /** @var array $coverableCells */
+    public $coverableCells = [];
 
     public function __construct($r, $c, $type)
     {
@@ -41,8 +49,16 @@ function plot($name = '')
 
             $color = Colors::black;
 
-            if ($cell->isTarget)
-                $color = Colors::green0;
+            if ($cell->isTarget) {
+                if($cell->hasRouter)
+                    $color = Colors::purple9;
+                elseif($cell->hasBackbone)
+                    $color = Colors::blue9;
+                elseif($cell->isCovered)
+                    $color = Colors::green9;
+                else
+                    $color = Colors::green0;
+            }
             elseif ($cell->isWall)
                 $color = Colors::red9;
 
