@@ -29,8 +29,8 @@ foreach (array_slice($contentRows, 3, count($contentRows)) as $stringRow) {
 
 function isThereAWall($gridArray, $r1, $c1, $r2, $c2)
 {
-    for ($i = min($r1, $r2); $i < max($r1, $r2); $i++) {
-        for ($j = min($c1, $c2); $j < max($c1, $c2); $j++) {
+    for ($i = min($r1, $r2); $i <= max($r1, $r2); $i++) {
+        for ($j = min($c1, $c2); $j <= max($c1, $c2); $j++) {
             if ($gridArray[$i][$j] == '#') {
                 return true;
             }
@@ -41,10 +41,27 @@ function isThereAWall($gridArray, $r1, $c1, $r2, $c2)
 
 function addWifi($boolGrid, $gridArray, $r, $c, $wifiRange)
 {
-    for ($i = max(0, $r - $wifiRange); $i < min(count($gridArray), $r + $wifiRange); $i++) {
-        for ($j = max(0, $c - $wifiRange); $j < min(count($gridArray[$i]), $c + $wifiRange); $j++) {
-            $boolGrid[$i][$j] = !isThereAWall($gridArray, $i, $j, $r, $c);
+    for ($i = max(0, $r - $wifiRange); $i <= min(count($gridArray), $r + $wifiRange); $i++) {
+        for ($j = max(0, $c - $wifiRange); $j <= min(count($gridArray[$i]), $c + $wifiRange); $j++) {
+            if ($i == $r && $j == $c) {
+                $boolGrid[$i][$j] = true;
+            } else
+                $boolGrid[$i][$j] = $boolGrid[$i][$j] || !isThereAWall($gridArray, $i, $j, $r, $c);
         }
     }
     return $boolGrid;
+}
+
+function printBoolGrid($boolGrid)
+{
+    for ($i = 0; $i < count($boolGrid); $i++) {
+        for ($j = 0; $j < count($boolGrid[$i]); $j++) {
+            if ($boolGrid[$i][$j]) {
+                echo "X";
+            } else {
+                echo "_";
+            }
+        }
+        echo PHP_EOL;
+    }
 }

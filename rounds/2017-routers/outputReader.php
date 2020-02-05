@@ -29,16 +29,16 @@ if (!$content) {
 $rows = explode("\n", $content);
 
 // Controlli
-$backboneLength = $row[0];
+$backboneLength = $rows[0];
 array_shift($rows);
 
-$backbone = [];
+$backbones = [];
 for ($i = 0; $i < $backboneLength; $i++) {
-  $backbone[] = explode(' ', $rows[0]);
+  $backbones[] = explode(' ', $rows[0]);
   array_shift($rows);
 }
 
-$routersNumber = $row[0];
+$routersNumber = $rows[0];
 array_shift($rows);
 
 $routers = [];
@@ -72,7 +72,7 @@ for ($i = 0; $i < $routersNumber; $i++) {
     }
   }
 
-  if ($found) {
+  if (!$found) {
     die("Il router non è connesso alla backbone");
   }
 
@@ -106,8 +106,9 @@ for ($i = 0; $i < $routersNumber; $i++) {
 $t = 0;
 for ($i = 0; $i < $gridRows; $i++) {
   for ($j = 0; $j < $gridCols; $j++) {
-    if ($boolGrid[$i][$j])
+    if ($boolGrid[$i][$j]) {
       $t++;
+    }
   }
 }
 
