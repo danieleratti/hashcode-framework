@@ -18,7 +18,7 @@ include_once('reader.php');
 $output = file_get_contents(__DIR__ . '/output/' . $outputName);
 $outputRows = explode("\n", $output);
 
-// N
+// N  (NUMBER OF )
 $n = (int)($outputRows[0]);
 if ($n < 0 || $n >= $rowsCount * $columnsCount) {
     die("N ($n) non valido.");
@@ -65,26 +65,37 @@ if ($n * $backbonePrice + $m * $routerPrice > $maxBudget) {
 }
 
 // Calcolo lo score
+$score = 0;
 
 foreach ($routers as $coords) {
     $cell = $map[$coords[0]][$coords[1]];
-    $cell->coverableCells;
+    foreach($cell->coverableCells as $cell) {
+        if(!$cell->isCovered) {
+            $score += 1000;
+            $cell->isCovered = true;
+        }
+    }
 }
 
-// Functions
+$score += $maxBudget - ($n * $backbonePrice + $m * $routerPrice);
 
+echo $score;
+
+// Functions
 function coverBackbone($fromR, $fromC, &$backbonesCoverage)
 {
     global $rowsCount, $columnsCount;
     $directions = [
-        [-1, -1],
-        [-1, 0],
-        [-1, 1],
-        [0, 1],
-        [0, -1],
-        [1, 0],
+        [-1, -1], // 1 6
+        [-1, 0], // 1 7
+        [-1, 1], // 1 8
+        [0, 1], // 2 8
+        [0, -1], // 2 6
+        [1, 0], // 3 7
+        [1, -1], // 3 6
         [1, 1],
     ];
+
     foreach ($directions as $d) {
         $r = $fromR + $d[0];
         $c = $fromC + $d[1];
@@ -135,4 +146,42 @@ function getBestRouterPosition($r, $c)
         }
     }
     return $maxCoverage > 0 ? $maxCoverageRouterPosition : false;
+}
+
+function recalcRouterCoverableCells($r, $c)
+{
+    global $map, $routerRadius;
+    if ($map[$r][$c]->isVoid || $map[$r][$c]->isTarget) {
+        $map[$r][$c]->coverableCells = [];
+
+        for ($rt = $r - $routerRadius; $rt <= $r + $routerRadius; $rt++) {
+            for ($ct = $c - $routerRadius; $ct <= $c + $routerRadius; $ct++) {
+                if ($map[$rt][$ct]->isTarget && existsRectBetweenPoints($r, $c, $rt, $ct))
+                    $map[$r][$c]->coverableCells[] = [$rt, $ct];
+            }
+        }
+    }
+}
+
+// Pre-heating (serialized)
+function existsRectBetweenPoints($r1, $c1, $r2, $c2)
+{
+    global $map;
+
+    if ($r2 < $r1) {
+        $rt = $r1;
+        $r1 = $r2;
+        $r2 = $rt;
+    }
+    if ($c2 < $c1) {
+        $ct = $c1;
+        $c1 = $c2;
+        $c2 = $ct;
+    }
+
+    for ($r = $r1; $r <= $r2; $r++)
+        for ($c = $c1; $c <= $c2; $c++)
+            if ($map[$r][$c]->isWall)
+                return false;
+    return true;
 }
