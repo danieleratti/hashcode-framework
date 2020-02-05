@@ -6,30 +6,24 @@ require_once '../../bootstrap.php';
 
 class Cell
 {
+    /** @var int $r */
     public $r;
+    /** @var int $c */
     public $c;
-    public $type;
+    /** @var bool $isTarget */
+    public $isTarget;
+    /** @var bool $isWall */
+    public $isWall;
+    /** @var bool $isVoid */
+    public $isVoid;
 
     public function __construct($r, $c, $type)
     {
         $this->r = $r;
         $this->c = $c;
-        $this->type = $type;
-    }
-
-    public function isTarget()
-    {
-        return $this->type === '.';
-    }
-
-    public function isWall()
-    {
-        return $this->type === '#';
-    }
-
-    public function isVoid()
-    {
-        return $this->type === '-';
+        $this->isTarget = $type === '.';
+        $this->isWall = $type === '#';
+        $this->isVoid = $type === '-';
     }
 }
 
