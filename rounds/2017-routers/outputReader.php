@@ -12,8 +12,8 @@
  * @var integer[][] $gridArray
  */
 
-$fileName = '1';
-$outputName = 'classes_b_charleston_road.txt';
+$fileName = 'a';
+$outputName = 'a_example.txt';
 
 include 'reader.php';
 
@@ -49,11 +49,18 @@ for ($i = 0; $i < $routersNumber; $i++) {
 for ($i = 0; $i < $backboneLength; $i++) {
   $r = $backbones[$i][0];
   $c = $backbones[$i][1];
-  if ($i >= 1) {
-    $r2 = $backbones[$i - 1][0];
-    $c2 = $backbones[$i - 1][1];
+  if (isAdiacent($r, $c, $backboneRow, $backboneCol))
+    continue;
+  $foundAdiacent = false;
+  for ($j = 0; $j < $i; $j++) {
+    $r2 = $backbones[$j][0];
+    $c2 = $backbones[$j][1];
+    if (isAdiacent($r, $c, $r2, $c2)) {
+      $foundAdiacent = true;
+      break;
+    }
   }
-  if (!isAdiacent($r, $c, $backboneRow, $backboneCol) && !($i >= 1 && isAdiacent($r, $c, $r2, $c2))) {
+  if (!$foundAdiacent) {
     die("Backbone non valida");
   }
 }
