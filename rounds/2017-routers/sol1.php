@@ -15,6 +15,9 @@ include_once('heating.php');
 /** @var Cell[][] $map */
 
 $routersPlaced = [];
+$backbonesPlaced = [];
+$targetsCovered = [];
+$budget = $maxBudget;
 
 function getBestRouterPosition($r, $c)
 {
@@ -36,17 +39,27 @@ function getBestRouterPosition($r, $c)
 
 function applyRouter($r, $c)
 {
-    global $routersPlaced, $map, $routerRadius;
+    global $routersPlaced, $map, $routerRadius, $budget, $routerPrice, $targetsCovered;
     $routersPlaced[] = [$r, $c];
+    $budget -= $routerPrice;
+
     $map[$r][$c]->hasRouter = true;
     foreach ($map[$r][$c]->coverableCells as $cell) {
         $map[$cell[0]][$cell[1]]->isCovered = true;
+        $targetsCovered[] = [$cell[0], $cell[1]];
     }
     for ($rt = $r - $routerRadius; $rt <= $r + $routerRadius; $rt++) {
         for ($ct = $c - $routerRadius; $ct <= $c + $routerRadius; $ct++) {
             recalcRouterCoverableCells($rt, $ct);
         }
     }
+}
+
+function applyBackbone($r, $c)
+{
+    global $backbonesPlaced, $budget, $backbonePrice;
+    $backbonesPlaced[] = [$r, $c];
+    $budget -= $backbonePrice;
 }
 
 for ($r = 0; $r <= $rowsCount; $r++) {
@@ -63,3 +76,5 @@ for ($r = 0; $r <= $rowsCount; $r++) {
 }
 
 
+$score = count($targetsCovered)*1000 + $budget;
+echo "Punteggio = $score";

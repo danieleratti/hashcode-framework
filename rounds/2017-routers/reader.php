@@ -51,16 +51,16 @@ function plot($name = '')
 
             if ($cell->isTarget) {
                 if($cell->hasRouter)
-                    $color = Colors::purple9;
+                    $color = Colors::pink4;
                 elseif($cell->hasBackbone)
-                    $color = Colors::blue9;
+                    $color = Colors::orange7;
                 elseif($cell->isCovered)
                     $color = Colors::green9;
                 else
                     $color = Colors::green0;
             }
             elseif ($cell->isWall)
-                $color = Colors::red9;
+                $color = Colors::brown5;
 
             $visualStandard->setPixel($row, $col, $color);
         }
@@ -99,5 +99,7 @@ for ($i = 0; $i < $rowsCount; $i++) {
         $map[$i][$k] = new Cell($i, $k, $data[$i][$k]);
     }
 }
+
+$map[$backboneStartRow][$backboneStartColumn]->hasBackbone = true;
 
 unset($data);
