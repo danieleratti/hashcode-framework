@@ -37,21 +37,21 @@ class Grid
 
     private $fileManager;
     private $visualizer;
-    private $remainingBudget;
+    public $remainingBudget;
 
     public function __construct()
     {
         global
-        $gridRows,
-        $gridCols,
-        $routerRange,
-        $backboneCosts,
-        $routerCosts,
-        $budget,
-        $backboneRow,
-        $backboneCol,
-        $gridArray,
-        $fileManager;
+            $gridRows,
+            $gridCols,
+            $routerRange,
+            $backboneCosts,
+            $routerCosts,
+            $budget,
+            $backboneRow,
+            $backboneCol,
+            $gridArray,
+            $fileManager;
 
         $this->gridRows = $gridRows;
         $this->gridCols = $gridCols;
@@ -70,10 +70,19 @@ class Grid
 
     public function placeRouter($row, $col)
     {
-        if ($this->grid[$row][$col] != '.')
-            die("Hai piazzato un router in un posto di merda ($row, $col)");
-        if (isset($this->routers[$row][$col]))
-            die("Hai piazzato un router sopra un altro ($row, $col)");
+        if ($this->grid[$row][$col] != '.') {
+            echo "Hai piazzato un router in un posto di merda ($row, $col)\n";
+            return false;
+        }
+        if (isset($this->routers[$row][$col])) {
+            echo "Hai piazzato un router sopra un altro ($row, $col)\n";
+            return false;
+        }
+
+        if ($this->remainingBudget - $this->getBackboneCost($row, $col) - $this->routerCosts < 0) {
+            echo "Budget insufficiente, non piazzo il router ($row, $col)\n";
+            return false;
+        }
 
         $this->routers[$row][$col] = true;
 
@@ -95,6 +104,19 @@ class Grid
     }
 
     public function getCoveredCells($row, $col)
+    {
+        $result = [];
+        for ($r = max(0, $row - $this->routerRange); $r <= min($this->gridRows, $row + $this->routerRange); $r++) {
+            for ($c = max(0, $col - $this->routerRange); $c <= min($this->gridCols, $col + $this->routerRange); $c++) {
+                if (isThereAWall($this->grid, $r, $c, $row, $col))
+                    continue;
+                $result[] = [$r, $c];
+            }
+        }
+        return $result;
+    }
+
+    public function getCoveredCells2($row, $col)
     {
         $result = [];
         for ($r = max(0, $row - $this->routerRange); $r <= min($this->gridRows, $row + $this->routerRange); $r++) {
@@ -165,4 +187,3 @@ class Grid
         $this->fileManager->output($output);
     }
 }
-

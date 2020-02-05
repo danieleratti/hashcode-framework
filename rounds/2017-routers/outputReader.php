@@ -12,7 +12,7 @@
  * @var integer[][] $gridArray
  */
 
-$fileName = 'b';
+$fileName = 'a';
 $outputName = 'sol1_b_charleston_road.txt';
 
 include 'reader.php';
