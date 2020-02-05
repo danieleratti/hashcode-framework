@@ -33,6 +33,7 @@ class Grid
 
     private $routers;
     private $backbones;
+    private $backbonesPath;
     private $covered;
 
     private $fileManager;
@@ -64,6 +65,7 @@ class Grid
         $this->grid = $gridArray;
         $this->fileManager = $fileManager;
 
+        $this->backbonesPath = [];
         $this->remainingBudget = $budget;
         $this->visualizer = new VisualStandard($gridRows, $gridCols);
     }
@@ -84,23 +86,28 @@ class Grid
             return false;
         }
 
+
         $this->routers[$row][$col] = true;
 
         $bRow = $this->backboneRow;
         $bCol = $this->backboneCol;
 
+        $initialBackbones = count($this->backbonesPath);
         while ($bRow != $row || $bCol != $col) {
             $bRow += min(max($row - $bRow, -1), 1);
             $bCol += min(max($col - $bCol, -1), 1);
             $this->backbones[$bRow][$bCol] = true;
+            $this->backbonesPath[] = [$bRow, $bCol];
         }
 
         $covered = $this->getCoveredCells($row, $col);
         foreach ($covered as $coveredCell)
             $this->covered[$coveredCell[0]][$coveredCell[1]] = true;
 
-        $this->remainingBudget -= $this->getBackboneCost($row, $col);
-        $this->remainingBudget -= $this->routerCosts;
+        $cost = $this->routerCosts + (count($this->backbonesPath) - $initialBackbones) * $this->backboneCosts;
+        $this->remainingBudget -= $cost;
+
+        return true;
     }
 
     public function getCoveredCells($row, $col)
@@ -116,11 +123,13 @@ class Grid
         return $result;
     }
 
-    public function getCoveredCells2($row, $col)
+    public function getValidCoveredCells($row, $col)
     {
         $result = [];
         for ($r = max(0, $row - $this->routerRange); $r <= min($this->gridRows, $row + $this->routerRange); $r++) {
             for ($c = max(0, $col - $this->routerRange); $c <= min($this->gridCols, $col + $this->routerRange); $c++) {
+                if ($this->covered[$r][$c])
+                    continue;
                 if (isThereAWall($this->grid, $r, $c, $row, $col))
                     continue;
                 $result[] = [$r, $c];
@@ -155,13 +164,10 @@ class Grid
 
     public function outputSolution()
     {
-        $backbones = [];
         $routers = [];
         $coveredCount = 0;
         for ($r = 0; $r < $this->gridRows; $r++) {
             for ($c = 0; $c < $this->gridCols; $c++) {
-                if (isset($this->backbones[$r][$c]))
-                    $backbones[] = "$r $c";
                 if (isset($this->routers[$r][$c]))
                     $routers[] = "$r $c";
                 if ($this->covered[$r][$c])
@@ -169,8 +175,15 @@ class Grid
             }
         }
 
+        $serialized = array_map('serialize', $this->backbonesPath);
+        $unique = array_unique($serialized);
+        $backbones = array_intersect_key($this->backbonesPath, $unique);
+
         $output = count($backbones) . "\n";
-        $output .= implode("\n", $backbones);
+        foreach ($backbones as $backbone) {
+            $output .= "$backbone[0] $backbone[1]\n";
+        }
+        $output  = substr($output, 0, -1);
         $output .= "\n" . count($routers) . "\n";
         $output .= implode("\n", $routers);
 
