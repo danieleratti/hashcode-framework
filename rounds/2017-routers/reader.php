@@ -1,6 +1,8 @@
 <?php
 
 use Utils\FileManager;
+use Utils\Visual\Colors;
+use Utils\Visual\VisualStandard;
 
 require_once '../../bootstrap.php';
 
@@ -25,6 +27,29 @@ class Cell
         $this->isWall = $type === '#';
         $this->isVoid = $type === '-';
     }
+}
+
+// Functions
+function plot($name = '')
+{
+    global $fileName, $rowsCount, $columnsCount, $map;
+    $visualStandard = new VisualStandard($rowsCount, $columnsCount);
+    for ($row = 0; $row < $rowsCount; $row++) {
+        for ($col = 0; $col < $columnsCount; $col++) {
+            /** @var Cell $cell */
+            $cell = $map[$row][$col];
+
+            $color = Colors::black;
+
+            if ($cell->isTarget)
+                $color = Colors::green0;
+            elseif ($cell->isWall)
+                $color = Colors::red9;
+
+            $visualStandard->setPixel($row, $col, $color);
+        }
+    }
+    $visualStandard->save($fileName . ($name != '' ? ('_' . $name) : ''));
 }
 
 // Reading the inputs
