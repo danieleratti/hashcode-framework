@@ -23,23 +23,29 @@ function isAdiacent($r1, $c1, $r2, $c2)
 }
 
 $content = trim(file_get_contents(__DIR__ . '/output/' . $outputName));
+if (!$content) {
+  die("No output file");
+}
 $rows = explode("\n", $content);
 
 // Controlli
-
 $backboneLength = $row[0];
 array_shift($rows);
+
 $backbone = [];
 for ($i = 0; $i < $backboneLength; $i++) {
   $backbone[] = explode(' ', $rows[0]);
   array_shift($rows);
 }
+
 $routersNumber = $row[0];
 array_shift($rows);
+
 $routers = [];
 for ($i = 0; $i < $routersNumber; $i++) {
   $routers[] = explode(' ', $rows[$i]);
 }
+
 for ($i = 0; $i < $backboneLength; $i++) {
   $r = $backbones[$i][0];
   $c = $backbones[$i][1];
@@ -51,9 +57,11 @@ for ($i = 0; $i < $backboneLength; $i++) {
     die("Backbone non valida");
   }
 }
+
 for ($i = 0; $i < $routersNumber; $i++) {
   $r = $routers[$i][0];
   $c = $routers[$i][1];
+
   $found = false;
   for ($j = 0; $j < $backboneLength; $j++) {
     $r2 = $backbones[$j][0];
@@ -63,16 +71,20 @@ for ($i = 0; $i < $routersNumber; $i++) {
       break;
     }
   }
+
   if ($found) {
     die("Il router non è connesso alla backbone");
   }
+
   if ($gridArray[$r][$c] == '#') {
     die("Il router è sul muro");
   }
 }
+
 $totalBackboneCost = $backboneLength * $backboneCosts;
 $totalRoutersCost = $routersNumber * $routerCosts;
 $totalCost = $totalBackboneCost + $totalRoutersCost;
+
 if ($totalCost > $budget) {
   die("Il budget non è stato rispettato");
 }
@@ -84,11 +96,13 @@ for ($i = 0; $i < $gridRows; $i++) {
     $boolGrid[$i][$j] = false;
   }
 }
+
 for ($i = 0; $i < $routersNumber; $i++) {
   $r = $routers[$i][0];
   $c = $routers[$i][1];
   $boolGrid = addWifi($boolGrid, $gridArray, $r, $c, $routerRange);
 }
+
 $t = 0;
 for ($i = 0; $i < $gridRows; $i++) {
   for ($j = 0; $j < $gridCols; $j++) {
@@ -96,5 +110,6 @@ for ($i = 0; $i < $gridRows; $i++) {
       $t++;
   }
 }
+
 $score = 1000 * $t + ($budget - $totalCost);
 echo "Lo score è " . $score;
