@@ -143,13 +143,14 @@ class Grid
         $output .= "\n" . count($routers) . "\n";
         $output .= implode("\n", $routers);
 
-        $costs = count($backbones) * $this->backboneCosts + count($routers) * $this->routerCosts;
+        $costs = (count($backbones) * $this->backboneCosts) + (count($routers) * $this->routerCosts);
         $budget = $this->budget;
         $revenue = $coveredCount * 1000;
         $score = $revenue + $budget - $costs;
 
         echo "BUDGET: $budget\n";
         echo "COSTO: $costs\n";
+        echo "COVERED: $coveredCount\n";
         echo "SCORE: $score";
 
         $this->fileManager->output($output);
