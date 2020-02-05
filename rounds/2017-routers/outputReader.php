@@ -72,9 +72,29 @@ for ($i = 0; $i < $routersNumber; $i++) {
 }
 $totalBackboneCost = $backboneLength * $backboneCosts;
 $totalRoutersCost = $routersNumber * $routerCosts;
-$total = $totalBackboneCost + $totalRoutersCost;
-if ($total > $budget) {
+$totalCost = $totalBackboneCost + $totalRoutersCost;
+if ($totalCost > $budget) {
   die("Il budget non è stato rispettato");
 }
 
 // Calcolo punteggio
+$boolGrid = [];
+for ($i = 0; $i < $gridRows; $i++) {
+  for ($j = 0; $j < $gridCols; $j++) {
+    $boolGrid[$i][$j] = false;
+  }
+}
+for ($i = 0; $i < $routersNumber; $i++) {
+  $r = $routers[$i][0];
+  $c = $routers[$i][1];
+  $boolGrid = addWifi($boolGrid, $gridArray, $r, $c, $routerRange);
+}
+$t = 0;
+for ($i = 0; $i < $gridRows; $i++) {
+  for ($j = 0; $j < $gridCols; $j++) {
+    if ($boolGrid[$i][$j])
+      $t++;
+  }
+}
+$score = 1000 * $t + ($budget - $totalCost);
+echo "Lo score è " . $score;
