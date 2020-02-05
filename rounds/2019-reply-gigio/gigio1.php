@@ -1,26 +1,30 @@
 <?php
 
-$fileName = '0';
+$fileName = '2';
 
 require_once 'reader.php';
 
-$revenues = [];
+$results = [];
 
 /** @var GMap $map */
 foreach ($map->cells as $row) {
     foreach ($row as $cell) {
-        $res = $cell->getPositiveRevenuesSum();
-        $revenues[] = [
+        $res = $cell->getRevenuesSum();
+
+        if (!count($res['positiveClients']))
+            continue;
+
+        $results[] = [
             'row' => $cell->row,
             'col' => $cell->col,
-            'clients' => $res['clients'],
-            'total' => $res['total'],
+            'clients' => $res['positiveClients'],
+            'score' => $res['positiveRevenues'],
         ];
     }
 }
 
-$sol = collect($revenues)
-    ->sortByDesc('total')
+$sol = collect($results)
+    ->sortByDesc('score')
     ->take($maxOfficesCount);
 
 $map->outputSolution($sol);

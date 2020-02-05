@@ -39,9 +39,9 @@ class GCell
     public $col;
     public $char;
     public $cost;
-    public $clientsPathsCosts;
-    public $clientsPaths;
     public $buildable = true;
+    public $clientsPaths;
+    public $clientsPathsCosts;
 
     public function __construct($row, $col, $char)
     {
@@ -56,22 +56,14 @@ class GCell
             $this->buildable = false;
     }
 
-    public function forgetPaths()
-    {
-        unset($this->clientsPaths);
-    }
-
-    public function getClientsTotalCost()
-    {
-        return array_sum($this->clientsPathsCosts);
-    }
-
-    public function getPositiveRevenuesSum()
+    public function getRevenuesSum()
     {
         global $clients;
 
-        $tot = 0;
-        $ids = [];
+        $allRevenues = 0;
+        $positiveRevenues = 0;
+        $allClients = [];
+        $positiveClients = [];
 
         if ($this->buildable) {
             foreach ($clients as $id => $client) {
@@ -79,16 +71,22 @@ class GCell
                     continue;
 
                 $revenue = $client->revenue - $this->clientsPathsCosts[$id];
+
                 if ($revenue > 0) {
-                    $tot += $revenue;
-                    $ids[] = $id;
+                    $positiveRevenues += $revenue;
+                    $positiveClients[] = $id;
                 }
+
+                $allRevenues += $revenue;
+                $allClients[] = $id;
             }
         }
 
         return [
-            'total' => $tot,
-            'clients' => $ids
+            'allRevenues' => $allRevenues,
+            'allClients' => $allClients,
+            'positiveRevenues' => $positiveRevenues,
+            'positiveClients' => $positiveClients,
         ];
     }
 }
@@ -112,11 +110,13 @@ class GMap
         $this->clients = $clients;
         $this->rowCount = count($mapRows);
         $this->colCount = strlen($mapRows[0]);
+
         foreach ($mapRows as $rowId => $mapRow) {
             foreach (str_split($mapRow, 1) as $colId => $charCell) {
                 $this->cells[$rowId][$colId] = new GCell($rowId, $colId, $charCell);
             }
         }
+
         foreach ($clients as $client) {
             $this->cells[$client->row][$client->col]->buildable = false;
         }
@@ -273,13 +273,12 @@ class GMap
 
         $output = '';
         $score = 0;
-        $bonusGained = false;
         $bonus = collect($this->clients)->sum('revenue');
+        $totalClients = count($this->clients);
+        $missingClients = $totalClients - count($solutionByClient);
 
-        if (count($solutionByClient) == count($this->clients)) {
-            $bonusGained = true;
+        if (!$missingClients)
             $score += $bonus;
-        }
 
         foreach ($solutionByClient as $clientId => $offices) {
             $pathsFile = $this->dir . "/${clientId}_paths.txt";
@@ -295,13 +294,23 @@ class GMap
         }
 
         echo "\n\n";
-        if ($bonusGained)
-            echo "Hai guadagnato il bonus! ($bonus)";
-        else
-            echo "Senza il bonus ($bonus)";
-        echo "\nSCORE: $score";
+        if ($missingClients) {
+            echo "Senza il bonus ($bonus)\n";
+            echo "clienti mancanti $missingClients su $totalClients\n";
+        } else {
+            echo "Hai guadagnato il bonus! ($bonus)\n";
+        }
+        echo "SCORE: $score";
 
         $this->fileManager->output($output);
+    }
+
+    public function getPathCost($row, $col, $clientId)
+    {
+        $costs = $this->cells[$row][$col]->clientsPathsCosts;
+        if(!isset($costs[$clientId]))
+            return null;
+        return $costs[$clientId];
     }
 }
 
@@ -322,7 +331,6 @@ foreach ($clientsFileList as $id => $clientRow) {
 }
 
 $map = new GMap($fileManager, $mapRowsFile, $clients);
-$bonus = collect($clients)->sum('revenue');
 
 /*
 Formato suluzioni accettato da mappa:
@@ -330,7 +338,7 @@ Formato suluzioni accettato da mappa:
     [
         'row' => x,
         'col' => x,
-        'clientsIds' => [x,x,x]
+        'clients' => [x,x,x]
     ]
 ]
  */
