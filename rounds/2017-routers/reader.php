@@ -4,15 +4,15 @@ use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
-$fileManager = new FileManager('a');
+$fileManager = new FileManager($fileName);
 $contentRows = explode("\n", $fileManager->get());
 list($gridRows, $gridCols, $routerRange) = explode(' ', $contentRows[0]);
 list($backboneCosts, $routerCosts, $budget) = explode(' ', $contentRows[1]);
 list($backboneRow, $backboneCol) = explode(' ', $contentRows[2]);
 
-$grid = [];
+$gridArray = [];
 foreach (array_slice($contentRows, 3, count($contentRows)) as $stringRow) {
-    $grid[] = str_split($stringRow);
+    $gridArray[] = str_split($stringRow);
 }
 
 /**
@@ -24,5 +24,5 @@ foreach (array_slice($contentRows, 3, count($contentRows)) as $stringRow) {
  * @var integer $budget
  * @var integer $backboneRow
  * @var integer $backboneCol
- * @var integer[][] $grid
+ * @var integer[][] $gridArray
  */
