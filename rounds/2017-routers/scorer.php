@@ -56,6 +56,7 @@ for ($i = 0; $i < $m; $i++) {
     if ($map[$r][$c]->isWall) {
         die("Il router in ($r,$c) è stato murato (è già stato arrestato).");
     }
+    $routers[] = [$r, $c];
 }
 array_splice($outputRows, 0, $m);
 
@@ -65,7 +66,10 @@ if ($n * $backbonePrice + $m * $routerPrice > $maxBudget) {
 
 // Calcolo lo score
 
-
+foreach ($routers as $coords) {
+    $cell = $map[$coords[0]][$coords[1]];
+    $cell->coverableCells;
+}
 
 // Functions
 
@@ -113,4 +117,22 @@ function isRouterConnected($r, $c, &$backbonesCoverage)
         }
     }
     return false;
+}
+
+function getBestRouterPosition($r, $c)
+{
+    global $map, $routerRadius;
+
+    $maxCoverage = 0;
+    $maxCoverageRouterPosition = [null, null];
+
+    for ($rt = $r - $routerRadius; $rt <= $r + $routerRadius; $rt++) {
+        for ($ct = $c - $routerRadius; $ct <= $c + $routerRadius; $ct++) {
+            if (!$map[$rt][$ct]->isCovered && count($map[$rt][$ct]->coverableCells) > $maxCoverage) {
+                $maxCoverage = count($map[$rt][$ct]->coverableCells);
+                $maxCoverageRouterPosition = [$rt, $ct];
+            }
+        }
+    }
+    return $maxCoverage > 0 ? $maxCoverageRouterPosition : false;
 }
