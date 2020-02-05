@@ -49,17 +49,16 @@ function plot($name = '')
 
             $color = Colors::black;
 
-            if ($cell->isTarget) {
-                if($cell->hasRouter)
-                    $color = Colors::pink4;
-                elseif($cell->hasBackbone)
-                    $color = Colors::orange7;
-                elseif($cell->isCovered)
+            if ($cell->hasRouter)
+                $color = Colors::pink4;
+            elseif ($cell->hasBackbone)
+                $color = Colors::orange7;
+            elseif ($cell->isTarget) {
+                if ($cell->isCovered)
                     $color = Colors::green9;
                 else
                     $color = Colors::green0;
-            }
-            elseif ($cell->isWall)
+            } elseif ($cell->isWall)
                 $color = Colors::brown5;
 
             $visualStandard->setPixel($row, $col, $color);
