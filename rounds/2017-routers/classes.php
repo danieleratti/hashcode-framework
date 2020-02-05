@@ -3,8 +3,6 @@
 use Utils\Visual\Colors;
 use Utils\Visual\VisualStandard;
 
-$fileName = 'b';
-
 require_once './reader.php';
 
 function getGridCellColor($cell)
@@ -12,7 +10,6 @@ function getGridCellColor($cell)
     switch ($cell) {
         case '-':
             return Colors::white;
-
         case '.':
             return Colors::red0;
         case '#':
@@ -71,16 +68,6 @@ class Grid
         $this->visualizer = new VisualStandard($gridRows, $gridCols);
     }
 
-    public function visualizeEmptyGrid()
-    {
-        foreach ($this->grid as $row => $cellsRow) {
-            foreach ($cellsRow as $col => $cell) {
-                $this->visualizer->setPixel($row, $col, getGridCellColor($cell));
-            }
-        }
-        $this->visualizer->save($this->fileManager->getInputName());
-    }
-
     public function placeRouter($row, $col)
     {
         if ($this->grid[$row][$col] != '.')
@@ -99,6 +86,14 @@ class Grid
             $this->backbones[$bRow][$bCol] = true;
         }
 
+        for ($r = max(0, $row - $this->routerRange); $r <= min($this->gridRows, $row + $this->routerRange); $r++) {
+            for ($c = max(0, $col - $this->routerRange); $c <= min($this->gridCols, $col + $this->routerRange); $c++) {
+                if ($this->covered[$r][$c])
+                    continue;
+                $this->covered[$r][$c] = !isThereAWall($this->grid, $r, $c, $row, $col);
+            }
+        }
+
         $this->remainingBudget -= $this->getBackboneCost($row, $col);
         $this->remainingBudget -= $this->routerCosts;
     }
@@ -114,8 +109,8 @@ class Grid
             foreach ($cellsRow as $col => $cell) {
                 $this->visualizer->setPixel($row, $col, getGridCellColor($cell));
 
-                if (isset($this->covered[$row][$col]))
-                    $this->visualizer->setPixel($row, $col, Colors::green5);
+                if ($this->covered[$row][$col])
+                    $this->visualizer->setPixel($row, $col, Colors::green2);
                 if (isset($this->backbones[$row][$col]))
                     $this->visualizer->setPixel($row, $col, Colors::purple1);
                 if (isset($this->routers[$row][$col]))
@@ -124,19 +119,22 @@ class Grid
         }
         $this->visualizer->setPixel($this->backboneRow, $this->backboneCol, Colors::purple5);
 
-        $this->visualizer->save('solution_' . $this->fileManager->getInputName());
+        $this->visualizer->save($this->fileManager->getInputName());
     }
 
     public function outputSolution()
     {
         $backbones = [];
         $routers = [];
+        $coveredCount = 0;
         for ($r = 0; $r < $this->gridRows; $r++) {
             for ($c = 0; $c < $this->gridCols; $c++) {
                 if (isset($this->backbones[$r][$c]))
                     $backbones[] = "$r $c";
                 if (isset($this->routers[$r][$c]))
                     $routers[] = "$r $c";
+                if ($this->covered[$r][$c])
+                    $coveredCount++;
             }
         }
 
@@ -145,11 +143,16 @@ class Grid
         $output .= "\n" . count($routers) . "\n";
         $output .= implode("\n", $routers);
 
+        $costs = count($backbones) * $this->backboneCosts + count($routers) * $this->routerCosts;
+        $budget = $this->budget;
+        $revenue = $coveredCount * 1000;
+        $score = $revenue + $budget - $costs;
+
+        echo "BUDGET: $budget\n";
+        echo "COSTO: $costs\n";
+        echo "SCORE: $score";
+
         $this->fileManager->output($output);
     }
 }
 
-$grid = new Grid();
-$grid->placeRouter(36, 62);
-$grid->printSolution();
-$grid->outputSolution();

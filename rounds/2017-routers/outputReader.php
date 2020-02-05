@@ -12,8 +12,8 @@
  * @var integer[][] $gridArray
  */
 
-$fileName = 'a';
-$outputName = 'a_example.txt';
+$fileName = '1';
+$outputName = 'classes_b_charleston_road.txt';
 
 include 'reader.php';
 
