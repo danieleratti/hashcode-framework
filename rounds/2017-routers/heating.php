@@ -95,7 +95,7 @@ function calculateCoverableCells($r, $c)
                 if ($map[$cr][$cc]->isWall || $cr < 0 || $cr >= $rowsCount || $cc < 0 || $cc >= $columnsCount) {
                     break;
                 }
-                if (!$map[$cr][$cc]->isCovered)
+                if ($map[$cr][$cc]->isTarget && !$map[$cr][$cc]->isCovered)
                     $cells[] = [$cr, $cc];
             }
         }

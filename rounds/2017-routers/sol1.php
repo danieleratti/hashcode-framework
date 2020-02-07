@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'e';
+$fileName = 'b';
 
 include_once('heating.php');
 
@@ -71,6 +71,9 @@ for ($r = 0; $r <= $rowsCount; $r++) {
             $bestRouterPosition = getBestRouterPosition($r, $c);
             if ($bestRouterPosition !== false) {
                 echo "Placed router @ $r/$rowsCount $c\n";
+                if ($budget < $routerPrice) {
+                    break 2;
+                }
                 applyRouter($bestRouterPosition[0], $bestRouterPosition[1]);
                 //plot('test1');
             }
@@ -126,5 +129,19 @@ plot('test1');
 
 
 $score = count($targetsCovered) * 1000 + $budget;
-echo "Punteggio = $score\n";
+echo "\nPunteggio = $score\n";
 echo "Budget rim = $budget\n";
+
+/*
+$output = "";
+$output .= count($backbonesPlaced) . "\n";
+foreach ($backbonesPlaced as $b) {
+    $output .= "{$b[0]} {$b[1]}\n";
+}
+$output .= count($routersPlaced) . "\n";
+foreach ($routersPlaced as $r) {
+    $output .= "{$r[0]} {$r[1]}\n";
+}
+echo "\n\n\n";
+echo $output;
+*/
