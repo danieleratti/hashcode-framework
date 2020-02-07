@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'a';
+$fileName = 'e';
 
 include_once('heating.php');
 
@@ -72,7 +72,7 @@ for ($r = 0; $r <= $rowsCount; $r++) {
             if ($bestRouterPosition !== false) {
                 echo "Placed router @ $r/$rowsCount $c\n";
                 applyRouter($bestRouterPosition[0], $bestRouterPosition[1]);
-                plot('test1');
+                //plot('test1');
             }
         }
     }
@@ -93,7 +93,6 @@ for ($radius = 1; $radius <= max($rowsCount, $columnsCount); $radius++) {
         for ($i = -$radius; $i < $radius; $i++) {
             $r = $backboneStartRow + $radius * $m[0] + $i * ($m[0] === 0 ? 1 : 0);
             $c = $backboneStartColumn + $radius * $m[1] + $i * ($m[1] === 0 ? 1 : 0);
-            echo "$r,$c\n";
             if (isset($map[$r]) && isset($map[$r][$c]) && $map[$r][$c]->hasRouter) {
                 // Per questa cella cerco la backbone più vicina
                 $minDist = PHP_INT_MAX;

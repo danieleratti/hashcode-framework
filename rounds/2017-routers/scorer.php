@@ -148,21 +148,6 @@ function getBestRouterPosition($r, $c)
     return $maxCoverage > 0 ? $maxCoverageRouterPosition : false;
 }
 
-function recalcRouterCoverableCells($r, $c)
-{
-    global $map, $routerRadius;
-    if ($map[$r][$c]->isVoid || $map[$r][$c]->isTarget) {
-        $map[$r][$c]->coverableCells = [];
-
-        for ($rt = $r - $routerRadius; $rt <= $r + $routerRadius; $rt++) {
-            for ($ct = $c - $routerRadius; $ct <= $c + $routerRadius; $ct++) {
-                if ($map[$rt][$ct]->isTarget && existsRectBetweenPoints($r, $c, $rt, $ct))
-                    $map[$r][$c]->coverableCells[] = [$rt, $ct];
-            }
-        }
-    }
-}
-
 // Pre-heating (serialized)
 function existsRectBetweenPoints($r1, $c1, $r2, $c2)
 {
