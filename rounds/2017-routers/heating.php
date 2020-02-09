@@ -13,29 +13,7 @@ include_once('reader.php');
 /** @var Cell[][] $map */
 
 
-// Pre-heating (serialized)
-function existsRectBetweenPoints($r1, $c1, $r2, $c2)
-{
-    global $map;
-
-    if ($r2 < $r1) {
-        $rt = $r1;
-        $r1 = $r2;
-        $r2 = $rt;
-    }
-    if ($c2 < $c1) {
-        $ct = $c1;
-        $c1 = $c2;
-        $c2 = $ct;
-    }
-
-    for ($r = $r1; $r <= $r2; $r++)
-        for ($c = $c1; $c <= $c2; $c++)
-            if ($map[$r][$c]->isWall)
-                return false;
-    return true;
-}
-
+// Delta matrix population
 $_deltaMatrix = [];
 for ($i = 1; $i <= $routerRadius; $i++) {
     for ($k = 0; $k <= $routerRadius; $k++) {
@@ -69,7 +47,7 @@ for ($i = 0; $i <= $routerRadius; $i++) {
         ];
     }
 }
-
+/*
 echo "\n";
 foreach ($_deltaMatrix as $deltaQuadrant) {
     foreach ($deltaQuadrant as $deltaRow) {
@@ -80,6 +58,7 @@ foreach ($_deltaMatrix as $deltaQuadrant) {
     }
     echo "\n\n";
 }
+*/
 
 function calculateCoverableCells($r, $c)
 {
@@ -106,7 +85,7 @@ function calculateCoverableCells($r, $c)
 function recalcRouterCoverableCells($r, $c)
 {
     global $map;
-    if ($map[$r][$c]->isTarget) {
+    if ($map[$r][$c]->isTarget /*&& !$map[$r][$c]->isCovered*/) {
         $map[$r][$c]->coverableCells = [];
         calculateCoverableCells($r, $c);
     }
@@ -120,4 +99,4 @@ for ($r = 0; $r <= $rowsCount; $r++) {
     }
 }
 $t2 = microtime(true);
-echo "Tempo: " . ($t2 - $t1) . "\n";
+echo "Tempo heating: " . ($t2 - $t1) . "\n";

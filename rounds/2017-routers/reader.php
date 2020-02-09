@@ -26,6 +26,10 @@ class Cell
     public $hasBackbone = false;
     /** @var array $coverableCells */
     public $coverableCells = [];
+    /** @var int $coveredCellsCount */
+    public $coveredCellsCount;
+    /** @var array $coveredCells */
+    public $coveredCells = [];
 
     public function __construct($r, $c, $type)
     {

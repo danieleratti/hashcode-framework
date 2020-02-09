@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'b';
+$fileName = 'e';
 
 include_once('heating.php');
 
@@ -47,9 +47,14 @@ function applyRouter($r, $c)
 
     $map[$r][$c]->hasRouter = true;
     foreach ($map[$r][$c]->coverableCells as $cell) {
-        $map[$cell[0]][$cell[1]]->isCovered = true;
-        $targetsCovered[] = [$cell[0], $cell[1]];
+        [$rt, $ct] = $cell;
+        if (!$map[$rt][$ct]->isCovered) {
+            $map[$rt][$ct]->isCovered = true;
+            $map[$r][$c]->coveredCells[] = [$rt, $ct];
+            //$targetsCovered[] = [$rt, $ct];
+        }
     }
+    $map[$r][$c]->coveredCellsCount = count($map[$r][$c]->coveredCells);
     for ($rt = $r - $routerRadius; $rt <= $r + $routerRadius; $rt++) {
         for ($ct = $c - $routerRadius; $ct <= $c + $routerRadius; $ct++) {
             recalcRouterCoverableCells($rt, $ct);
@@ -65,21 +70,44 @@ function applyBackbone($r, $c)
     $budget -= $backbonePrice;
 }
 
+function removeLessConvenientRouters()
+{
+    global $budget, $routerPrice, $routersPlaced, $map;
+    while ($budget < 0) {
+        $routerCell = array_pop($routersPlaced);
+        $budget += $routerPrice;
+        $map[$routerCell[0]][$routerCell[1]]->hasRouter = false;
+        foreach ($map[$routerCell[0]][$routerCell[1]]->coveredCells as $cell) {
+            $map[$cell[0]][$cell[1]]->isCovered = false;
+        }
+        // Dovrei togliere anche la backbone inutile poi
+    }
+}
+
+$t1 = microtime(true);
+
 for ($r = 0; $r <= $rowsCount; $r++) {
     for ($c = 0; $c <= $columnsCount; $c++) {
         if ($map[$r][$c]->isTarget && !$map[$r][$c]->isCovered) {
             $bestRouterPosition = getBestRouterPosition($r, $c);
             if ($bestRouterPosition !== false) {
                 echo "Placed router @ $r/$rowsCount $c\n";
-                if ($budget < $routerPrice) {
-                    break 2;
-                }
                 applyRouter($bestRouterPosition[0], $bestRouterPosition[1]);
                 //plot('test1');
             }
         }
     }
 }
+
+$t2 = microtime(true);
+echo "Tempo piazzamento router: " . ($t2 - $t1) . "\n";
+
+// Ordine i router per celle coperte
+usort($routersPlaced, function ($routerA, $routerB) {
+    global $map;
+    return $map[$routerA[0]][$routerA[1]]->coveredCellsCount < $map[$routerB[0]][$routerB[1]]->coveredCellsCount;
+});
+removeLessConvenientRouters();
 
 // Piazzo le backbone
 $placedBackbones = [
@@ -114,7 +142,7 @@ for ($radius = 1; $radius <= max($rowsCount, $columnsCount); $radius++) {
                 while ($r != $bestCell[0] || $c != $bestCell[1]) {
                     $placedBackbones[] = [$r, $c];
                     applyBackbone($r, $c);
-                    echo "Backbone in $r,$c\n";
+                    //echo "Backbone in $r,$c\n";
                     if ($r > $bestCell[0]) $r--;
                     elseif ($r < $bestCell[0]) $r++;
                     if ($c > $bestCell[1]) $c--;
@@ -127,8 +155,12 @@ for ($radius = 1; $radius <= max($rowsCount, $columnsCount); $radius++) {
 
 plot('test1');
 
+$targetsCoveredCount = 0;
+foreach ($routersPlaced as $routerCell) {
+    $targetsCoveredCount += $map[$routerCell[0]][$routerCell[1]]->coveredCellsCount;
+}
 
-$score = count($targetsCovered) * 1000 + $budget;
+$score = $targetsCoveredCount * 1000 + $budget;
 echo "\nPunteggio = $score\n";
 echo "Budget rim = $budget\n";
 
