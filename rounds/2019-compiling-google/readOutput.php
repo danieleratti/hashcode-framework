@@ -1,31 +1,19 @@
 <?php
 
 $fileName = 'a';
-$outputName = 'a.txt';
+$outputName = 'd_soluzione.txt';
 
 include 'reader.php';
 
 $content = trim(file_get_contents(__DIR__ . '/output/' . $outputName));
 $rows = explode("\n", $content);
+//$rows = explode(" ", $rows);
 
-/*
-$points = 0;
-foreach ($rows as $row) {
-    $outRides = explode(' ', $row);
-    array_shift($outRides);
-
-    $car = new Car(0);
-    foreach ($outRides as $ride) {
-        if (!isset($rides[$ride]))
-            die('ride usata due volte');
-
-        $points += $car->takeRide($rides->get($ride));
-    }
-}
-*/
 $score = 0;
 array_shift($rows);
-foreach ($arr as $a){
+
+foreach ($rows as $el){
+    $a = explode(" ", $el);
     $file = $files[$a[0]];
     //$server = $a[1];
     if(in_array($file->filename, array_keys($targetFiles))){
