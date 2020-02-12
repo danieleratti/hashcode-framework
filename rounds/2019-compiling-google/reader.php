@@ -11,14 +11,23 @@ class File
     public $replicationTime;
     public $dependenciesIds;
 
-    public $isTarget = false;
-    public $deadline;
-    public $goalPoints;
-
     public function __construct($fileRow1, $fileRow2)
     {
         list($this->id, $this->compilingTime, $this->replicationTime) = explode(' ', $fileRow1);
         $this->dependenciesIds = array_slice(explode(' ', $fileRow2), 1);
+    }
+}
+
+class TargetFile
+{
+    public $file;
+    public $deadline;
+    public $goalPoints;
+
+    public function __construct($files, $row)
+    {
+        list($id, $this->deadline, $this->goalPoints) = explode(' ', $row);
+        $this->file = $files[$id];
     }
 }
 
@@ -37,9 +46,7 @@ for ($i = 0; $i < count($filesFileRows); $i += 2) {
     $files[$file->id] = $file;
 }
 
+$targets = [];
 foreach ($targetsFileRows as $targetsFileRow) {
-    list($id, $deadline, $points) = explode(' ', $targetsFileRow);
-    $files[$id]->isTarget = true;
-    $files[$id]->deadline = $deadline;
-    $files[$id]->goalPoints = $points;
+    $targets[] = new TargetFile($files, $targetsFileRow);
 }
