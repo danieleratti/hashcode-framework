@@ -5,11 +5,12 @@ include('reader.php');
 /**
  * @param string $filename
  * @param array $actualDep
+ * @param int $level
  * @return mixed
  */
 
 //DFS DEEP FIRST SEARCH A MANETTAAAA :)
-function getDependencies(string $filename, &$actualDep, $level)
+function getDependencies($filename, &$actualDep, $level)
 {
     global $files;
 
@@ -43,8 +44,11 @@ foreach ($targetFiles as $file) {
 
     array_multisort($keys, SORT_DESC, $dependencies);
 
-    foreach ($dependencies as $singleDep) {
-        // dependencies ordinate
-    }
+    $file->dependencies = $dependencies;
 }
+
+array_multisort(array_map('dependencies', $targetFiles), SORT_ASC, $targetFiles);
+
+echo "CIAO";
+
 
