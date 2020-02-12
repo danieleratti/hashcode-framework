@@ -4,7 +4,10 @@
     "amphp/parallel": "^1.1",
     "amphp/parallel-functions": "^0.1.3",
     "tightenco/collect": "^6.11",
-    "ext-json": "*"
+    "ext-json": "*",
+    "clue/graph": "^0.9.1",
+    "graphp/graph": "^0.9.1",
+    "graphp/algorithms": "^0.8.1"
   },
   "autoload": {
     "psr-4": {
