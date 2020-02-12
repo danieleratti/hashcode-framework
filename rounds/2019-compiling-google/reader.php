@@ -23,7 +23,7 @@ class File
 }
 
 // Reading the inputs
-$fileManager = new FileManager('a');
+$fileManager = new FileManager($fileName);
 $fileRows = explode("\n", $fileManager->get());
 
 list($filesCount, $targetCount, $serversCount) = explode(' ', $fileRows[0]);
