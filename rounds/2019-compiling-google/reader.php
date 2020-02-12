@@ -9,7 +9,7 @@ class File
     public $id;
     public $compilingTime;
     public $replicationTime;
-    /** @var File[]  */
+    /** @var File[] */
     public $dependencies;
 
     public function __construct($fileRow1, $fileRow2, $files)
@@ -28,11 +28,28 @@ class TargetFile
     public $file;
     public $deadline;
     public $goalPoints;
+    public $depth;
 
     public function __construct($files, $row)
     {
         list($id, $this->deadline, $this->goalPoints) = explode(' ', $row);
         $this->file = $files[$id];
+
+        $this->calculateMaxDepth($this->file, 0);
+    }
+
+    /**
+     * @param File $file
+     * @param $depth
+     */
+    public function calculateMaxDepth($file, $depth)
+    {
+        if ($depth > $this->depth)
+            $this->depth = $depth;
+
+        foreach ($file->dependencies as $dependency) {
+            $this->calculateMaxDepth($dependency, $depth + 1);
+        }
     }
 }
 

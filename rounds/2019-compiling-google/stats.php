@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'a';
+$fileName = 'c';
 
 require_once 'reader.php';
 
@@ -19,7 +19,3 @@ $min = $files->min('replicationTime');
 $avg = $files->avg('replicationTime');
 echo "Tempo replicazione: max $max min $min avg $avg\n\n";
 
-$max = $targets->max('deadline');
-$min = $targets->min('deadline');
-$avg = $targets->avg('deadline');
-echo "Deadline: max $max min $min avg $avg\n\n";
