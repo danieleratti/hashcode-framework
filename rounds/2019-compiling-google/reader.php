@@ -9,6 +9,7 @@ class File
     public $id;
     public $compilingTime;
     public $replicationTime;
+    /** @var File[]  */
     public $dependencies;
 
     public function __construct($fileRow1, $fileRow2, $files)
