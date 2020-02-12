@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'b';
+$fileName = 'a';
 
 require_once 'reader.php';
 
@@ -18,9 +18,6 @@ $max = $files->max('replicationTime');
 $min = $files->min('replicationTime');
 $avg = $files->avg('replicationTime');
 echo "Tempo replicazione: max $max min $min avg $avg\n\n";
-
-$targets =  collect($targets);
-echo "MAX SCORE: " . $targets->sum('goalPoints') . "\n";
 
 $max = $targets->max('deadline');
 $min = $targets->min('deadline');
