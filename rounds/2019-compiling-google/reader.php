@@ -47,16 +47,22 @@ class File
         return $totalTime + $max;
     }
 
-    public function calculateBestTime($maxServers)
+    public function getTimeCompilation()
+    {
+        return $this->alreadyCompiled ? 0 : $this->timeCompilation;
+    }
+
+    public function calculateBestTime()
     {
         global $files;
+        global $servers;
         if (!$this->hasDependencies) {
             // caso base 1
-            return $this->timeCompilation;
+            return $this->getTimeCompilation();
         }
         if (count($this->dependencies) == 1) {
             // caso base 2
-            return $files[$this->dependencies[0]]->calculateBestTime($maxServers) + $this->timeCompilation;
+            return $files[$this->dependencies[0]]->calculateBestTime() + $this->getTimeCompilation();
         } else {
             // caso ricorsivo
             $remainingDependencies = $this->dependencies;
@@ -65,7 +71,7 @@ class File
             $totalTimeWithoutReplication = 0;
             for ($i = 0; $i < count($this->dependencies); $i++) {
                 $file = $files[$this->dependencies[$i]];
-                $withoutReplication[$file->filename] = $file->calculateBestTime($maxServers);
+                $withoutReplication[$file->filename] = $file->calculateBestTime();
                 $withReplication[$file->filename] = $withoutReplication[$file->filename] + $file->timeReplication;
                 $totalTimeWithoutReplication += $withoutReplication[$file->filename];
             }
@@ -76,12 +82,12 @@ class File
                     $maxTimeWithReplication = $withReplication[$file->filename];
             }
             if ($totalTimeWithoutReplication < $maxTimeWithReplication) {
-                return $this->timeCompilation + $totalTimeWithoutReplication;
+                return $this->getTimeCompilation() + $totalTimeWithoutReplication;
             }
             $serversUsage = [];
             $serverIndex = 0;
             do {
-                if ($serverIndex > $maxServers)
+                if ($serverIndex > count($servers))
                     $serverIndex = 0;
                 if (!isset($serversUsage[$serverIndex]))
                     $serversUsage[$serverIndex] = [];
@@ -111,7 +117,7 @@ class File
                     }
                 }
             } while (count($remainingDependencies) > 0);
-            $totalTime = $this->timeCompilation;
+            $totalTime = $this->getTimeCompilation();
             $maxServerUsage = 0;
             for ($i = 0; $i < count($serversUsage); $i++) {
                 $serverUsage = $serversUsage[$i];
@@ -119,6 +125,78 @@ class File
                     $maxServerUsage = $withReplication[$serverUsage[0]->filename];
             }
             return $totalTime + $maxServerUsage;
+        }
+    }
+
+    public function compileFile()
+    {
+        global $files;
+        global $servers;
+        if (!$this->hasDependencies) {
+            // caso base 1
+            $servers[getBestServerIndex()]->addToQueue($this);
+        } elseif (count($this->dependencies) == 1) {
+            // caso base 2
+            $serverIndex = getBestServerIndex();
+            $servers[$serverIndex]->addToQueue($files[$this->dependencies[0]]);
+            $servers[$serverIndex]->addToQueue($this);
+        } else {
+            // caso ricorsivo
+            $remainingDependencies = $this->dependencies;
+            $withReplication = [];
+            $withoutReplication = [];
+            $totalTimeWithoutReplication = 0;
+            for ($i = 0; $i < count($this->dependencies); $i++) {
+                $file = $files[$this->dependencies[$i]];
+                $withoutReplication[$file->filename] = $file->calculateBestTime();
+                $withReplication[$file->filename] = $withoutReplication[$file->filename] + $file->timeReplication;
+                $totalTimeWithoutReplication += $withoutReplication[$file->filename];
+            }
+            $maxTimeWithReplication = 0;
+            for ($i = 0; $i < count($remainingDependencies); $i++) {
+                $file = $files[$remainingDependencies[$i]];
+                if ($withReplication[$file->filename] > $maxTimeWithReplication)
+                    $maxTimeWithReplication = $withReplication[$file->filename];
+            }
+            if ($totalTimeWithoutReplication < $maxTimeWithReplication) {
+                $serverIndex = getBestServerIndex();
+                for ($i = 0; $i < count($remainingDependencies); $i++) {
+                    $file = $files[$remainingDependencies[$i]];
+                    $servers[$serverIndex]->addToQueue($file);
+                }
+                $servers[$serverIndex]->addToQueue($this);
+                return;
+            }
+            do {
+                $serverIndex = getBestServerIndex();
+                $fileWithMaxReplicationTime = null;
+                for ($i = 0; $i < count($remainingDependencies); $i++) {
+                    $file = $files[$remainingDependencies[$i]];
+                    if ($file->timeReplication > $fileWithMaxReplicationTime->timeReplication)
+                        $fileWithMaxReplicationTime = $file;
+                }
+                $remainingReplicationTime = $fileWithMaxReplicationTime->timeReplication;
+                // tolgo l'elemento con tempo di replicazione più alto
+                $servers[$serverIndex]->addToQueue($fileWithMaxReplicationTime);
+                if (($key = array_search($fileWithMaxReplicationTime->filename, $remainingDependencies)) !== false) {
+                    unset($remainingDependencies[$key]);
+                }
+                // se ci sono elementi con un tempo totale che è minore del tempo di replicazione più alto allora li
+                // faccio eseguire dallo stesso server
+                for ($i = 0; $i < count($remainingDependencies); $i++) {
+                    $file = $files[$remainingDependencies[$i]];
+                    if ($withReplication[$file->filename] < $remainingReplicationTime) {
+                        // tolgo l'elemento se ci sta
+                        $servers[$serverIndex]->addToQueue($file);
+                        unset($remainingDependencies[$i]);
+                        // ricalcolo il tempo rimanente in cui far stare una compilazione
+                        $remainingReplicationTime -= $withReplication[$file->filename];
+                        $i--;
+                    }
+                }
+            } while (count($remainingDependencies) > 0);
+            $serverIndex = getBestServerIndex();
+            $servers[$serverIndex]->addToQueue($this);
         }
     }
 
@@ -151,12 +229,17 @@ class Server
     public function addToQueue(File $file)
     {
         global $files;
-
-        $files[$file->filename]->alreadyCompiled = true;
-        $this->currentTime += $file->timeCompilation;
-        $this->queue[] = $file->filename;
+        global $compilationHistory;
+        if (!$files[$file->filename]->alreadyCompiled) {
+            $files[$file->filename]->alreadyCompiled = true;
+            $this->currentTime += $file->timeCompilation;
+            $this->queue[] = $file->filename;
+            $compilationHistory[] = $file->filename . " " . $this->id;
+        }
     }
 }
+
+$compilationHistory = [];
 
 $fileName = 'a';
 

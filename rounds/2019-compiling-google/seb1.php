@@ -2,6 +2,32 @@
 
 include('reader.php');
 
+function getBestServerIndex()
+{
+    global $servers;
+    $bestIndex = 0;
+    $minCurrentTime = $servers[0]->currentTime;
+    for ($i = 1; $i < count($servers); $i++) {
+        if ($servers[$i]->currentTime < $minCurrentTime) {
+            $minCurrentTime = $servers[$i]->currentTime;
+            $bestIndex = $i;
+        }
+    }
+    return $bestIndex;
+}
+
+function writeOutput()
+{
+    global $fileManager;
+    global $compilationHistory;
+    $content = "";
+    $content .= count($compilationHistory) . "\n";
+    for ($i = 0; $i < count($compilationHistory); $i++) {
+        $content .= $compilationHistory[$i] . "\n";
+    }
+    $fileManager->output(trim($content));
+}
+
 /**
  * @param string $filename
  * @param array $actualDep
@@ -16,7 +42,7 @@ function getDependencies($filename, &$actualDep, $level)
 
     /** @var File $file */
     $file = $files[$filename];
-    if ($level > 0)
+    if ($level > 0 && !in_array(['filename' => $filename, 'level' => $level], $actualDep))
         $actualDep[] = ['filename' => $filename, 'level' => $level];
     if (!$file->hasDependencies) {
         return $actualDep;
@@ -38,7 +64,9 @@ $arr = [];
 foreach ($targetFiles as $file) {
     $level = 0;
     $dependencies = [];
-    getDependencies($file->filename, $dependencies, $level);
+    if (is_string($file->filename)) {
+        getDependencies($file->filename, $dependencies, $level);
+    }
 
     $keys = array_column($dependencies, 'level');
 
