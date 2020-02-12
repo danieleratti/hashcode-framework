@@ -16,13 +16,18 @@ class File
     public $goalPoints = 0;
 
     public $dependantsIds;
-    public $goalPointsOfDependants;
 
     public $indirectDependantsIds;
     public $indirectDependenciesIds;
 
     public $replicatedAt = null; //time replicated everywhere
     public $readyAt = []; //<serverId> : <time>
+
+    public $nRemainingDependencies;
+    public $goalPointsOfDependants;
+    public $goalPointsOfIndirectDependants;
+
+    public $nearestStartDeadlineNotExpired;
 
     public function __construct($fileRow1, $fileRow2)
     {
