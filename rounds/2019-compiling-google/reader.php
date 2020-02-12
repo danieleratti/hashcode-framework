@@ -275,7 +275,7 @@ for ($i = 0; $i < $numCompiledFiles; $i++) {
 $startingT = $i * 2;
 for ($i = 0; $i < $numTargetFiles; $i++) {
     list($fileName, $deadline, $score) = explode(' ', $content[$i + $startingT]);
-    $files[$fileName]->deadline = (int) $deadline;
+    $files[$fileName]->deadLine = (int) $deadline;
     $files[$fileName]->score = (int) $score;
 }
 
