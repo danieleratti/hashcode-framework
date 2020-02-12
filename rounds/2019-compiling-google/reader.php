@@ -16,6 +16,7 @@ class File
     public $hasDependencies = false;
     public $alreadyCompiled = false;
     public $alreadyReplicated = false;
+    public $dipendenzeSeb = [];
 
     public function __construct($filename, $timeCompilation, $timeReplication, $dependencies = null)
     {
@@ -276,6 +277,55 @@ for ($i = $startingT; $i < $numTargetFiles; $i++) {
     list($fileName, $deadline, $score) = explode(' ', $content[$i]);
     $files[$fileName]->deadline = $deadline;
     $files[$fileName]->score = $score;
+}
+
+
+class FileReady
+{
+    public $filename;
+    public $time;
+
+    public function __construct($filename, $time)
+    {
+        $this->filename = $filename;
+        $this->time = $time;
+    }
+}
+
+class ServerManager
+{
+    /** @var Server $server [] */
+    public $server = [];
+    public $time;
+    public $listaFile = [];
+    public $currentTime = 0;
+
+    public function __construct($server)
+    {
+        $this->server = $server;
+    }
+
+    /** @var File $file */
+    public function addFile($file)
+    {
+        if (!self::isFilenamePresent($file->filename)) {
+            // Devo scegliere su quale server metterlo
+            $this->server[0]->addToQueue($file);
+            $this->currentTime += $file->timeCompilation;
+            $this->listaFile[] = new FileReady($file->filename, $this->currentTime);
+        }
+        // File già inserito per cui vai avanti
+    }
+
+    protected function isFilenamePresent($filename)
+    {
+        /** @var FileReady $filePresente */
+        foreach ($this->listaFile as $filePresente) {
+            if ($filePresente->filename === $filename)
+                return true;
+        }
+        return false;
+    }
 }
 
 

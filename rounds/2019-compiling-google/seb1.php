@@ -40,6 +40,11 @@ function getDependencies($filename, &$actualDep, $level)
 {
     global $files;
 
+    $a = 0;
+
+    if ($filename == 'c5')
+        $a = 1;
+
     /** @var File $file */
     $file = $files[$filename];
     if ($level > 0 && !in_array(['filename' => $filename, 'level' => $level], $actualDep))
@@ -55,28 +60,23 @@ function getDependencies($filename, &$actualDep, $level)
     // return $actualDep;
 }
 
-$targetCounter = $numTargetFiles;
-
-$targetFiles = array_slice($files, -$targetCounter);
+$targetFiles = array_slice($files, -$numTargetFiles);
 $arr = [];
-
 /** @var File $file */
 foreach ($targetFiles as $file) {
     $level = 0;
     $dependencies = [];
-    if (is_string($file->filename)) {
-        getDependencies($file->filename, $dependencies, $level);
-    }
-
+    getDependencies($file->filename, $dependencies, $level);
     $keys = array_column($dependencies, 'level');
-
     array_multisort($keys, SORT_DESC, $dependencies);
-
-    $file->dependencies = $dependencies;
+    $file->dipendenzeSeb = $dependencies;
 }
-
-array_multisort(array_map('dependencies', $targetFiles), SORT_ASC, $targetFiles);
-
-echo "CIAO";
-
+array_multisort(array_map('dipendenzeSeb', $targetFiles), SORT_ASC, $targetFiles);
+$serverManager = new ServerManager($servers);
+foreach ($targetFiles as $file) {
+    for ($i = 0; $i < count($file->dipendenzeSeb); $i++) {
+        $serverManager->addFile($files[$file->dipendenzeSeb[$i]['filename']]);
+    }
+    $serverManager->addFile($files[$file->filename]);
+}
 
