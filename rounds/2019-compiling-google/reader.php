@@ -272,11 +272,11 @@ for ($i = 0; $i < $numCompiledFiles; $i++) {
     $files[$fileName] = new File($fileName, $compilationTime, $replicationTime, $dependencies);
 }
 
-$startingT = $i;
-for ($i = $startingT; $i < $numTargetFiles; $i++) {
-    list($fileName, $deadline, $score) = explode(' ', $content[$i]);
-    $files[$fileName]->deadline = $deadline;
-    $files[$fileName]->score = $score;
+$startingT = $i * 2;
+for ($i = 0; $i < $numTargetFiles; $i++) {
+    list($fileName, $deadline, $score) = explode(' ', $content[$i + $startingT]);
+    $files[$fileName]->deadline = (int) $deadline;
+    $files[$fileName]->score = (int) $score;
 }
 
 $targetFiles = array_slice($files, -$numTargetFiles);
