@@ -281,58 +281,13 @@ for ($i = 0; $i < $numTargetFiles; $i++) {
 
 $targetFiles = array_slice($files, -$numTargetFiles);
 
-//scoring
-$arr = [
-    7,
-    [[
-        'name' => 'c1',
-        'deadline' => 20,
-        'goal' => 10,
-        'compiled' => 10
-    ], 1],
-    [
-        [
-            'name' => 'c0',
-            'deadline' => 20,
-            'goal' => 10,
-            'compiled' => 10
-        ], 0],
-    [[
-        'name' => 'c3',
-        'deadline' =>40,
-        'goal' => 8,
-        'compiled' => 23
-    ], 1],
-    [[
-        'name' => 'c1',
-        'deadline' => 20,
-        'goal' => 10,
-        'compiled' => 10
-    ], 0],
-    [[
-        'name' => 'c2',
-        'deadline' => 20,
-        'goal' => 10,
-        'compiled' => 10
-    ], 1],
-    [[
-        'name' => 'c4',
-        'deadline' => 45,
-        'goal' => 10,
-        'compiled' => 50
-    ], 0],
-    [[
-        'name' => 'c5',
-        'deadline' => 53,
-        'goal' => 35,
-        'compiled' => 53
-    ], 1],
-]; //example
+
 
 class FileReady
 {
     public $filename;
     public $time;
+
 
     public function __construct($filename, $time)
     {
@@ -377,22 +332,29 @@ class ServerManager
     }
 }
 
-
-
+//scoring
+$arr = [7, ['c1', 1], ['c0', 1], ['c3',1], ['c1',1], ['c2',1], ['c4',1], ['c5',1]];
 
 function getScore($arr)
 {
-    global $targetFiles;
+    global $targetFiles, $files;
     $score = 0;
     array_shift($arr);
     foreach ($arr as $a){
-        $file = $a[0]['name'];
+        $file = $files[$a[0]];
+        //$server = $a[1];
+        if(in_array($file->filename, array_keys($targetFiles))){
+            if($file->timeCompilation <= $file->deadLine){
+                $score += $file->deadLine - $file->timeCompilation  + $file->score;
+            }
+        }
+        /*$file = $a[0]['name'];
         $server = $a[1];
         if(in_array($file, array_keys($targetFiles))){
             if($a[0]['compiled'] <= $a[0]['deadline']){
                 $score += $a[0]['deadline'] - $a[0]['compiled'] + $a[0]['goal'];
             }
-        }
+        }*/
     }
     echo 'SCORE: '.$score.PHP_EOL;
 }
