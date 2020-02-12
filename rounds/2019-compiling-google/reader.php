@@ -242,7 +242,7 @@ class Server
 
 $compilationHistory = [];
 
-$fileName = 'a';
+$fileName = 'b';
 
 $servers = $files = [];
 
@@ -331,32 +331,3 @@ class ServerManager
         return false;
     }
 }
-
-//scoring
-$arr = [7, ['c1', 1], ['c0', 1], ['c3',1], ['c1',1], ['c2',1], ['c4',1], ['c5',1]];
-
-function getScore($arr)
-{
-    global $targetFiles, $files;
-    $score = 0;
-    array_shift($arr);
-    foreach ($arr as $a){
-        $file = $files[$a[0]];
-        //$server = $a[1];
-        if(in_array($file->filename, array_keys($targetFiles))){
-            if($file->timeCompilation <= $file->deadLine){
-                $score += $file->deadLine - $file->timeCompilation  + $file->score;
-            }
-        }
-        /*$file = $a[0]['name'];
-        $server = $a[1];
-        if(in_array($file, array_keys($targetFiles))){
-            if($a[0]['compiled'] <= $a[0]['deadline']){
-                $score += $a[0]['deadline'] - $a[0]['compiled'] + $a[0]['goal'];
-            }
-        }*/
-    }
-    echo 'SCORE: '.$score.PHP_EOL;
-}
-getScore($arr);
-
