@@ -15,17 +15,16 @@ function getDependencies(string $filename, &$actualDep, $level)
 
     /** @var File $file */
     $file = $files[$filename];
-
-    $actualDep[] = ['filename' => $filename, 'level' => $level];
+    if ($level > 0)
+        $actualDep[] = ['filename' => $filename, 'level' => $level];
     if (!$file->hasDependencies) {
         return $actualDep;
     }
     $dipendenzeAttuali = $file->dependencies;
 
     foreach ($dipendenzeAttuali as $fileNameDep) {
-        getDependencies($fileNameDep, $actualDep, $level+1);
+        getDependencies($fileNameDep, $actualDep, $level + 1);
     }
-
     // return $actualDep;
 }
 
@@ -33,7 +32,19 @@ $targetCounter = $numTargetFiles;
 
 $targetFiles = array_slice($files, -$targetCounter);
 $arr = [];
-$level = 0;
 
-$array = getDependencies('c5', $arr, $level);
+/** @var File $file */
+foreach ($targetFiles as $file) {
+    $level = 0;
+    $dependencies = [];
+    getDependencies($file->filename, $dependencies, $level);
+
+    $keys = array_column($dependencies, 'level');
+
+    array_multisort($keys, SORT_DESC, $dependencies);
+
+    foreach ($dependencies as $singleDep) {
+        // dependencies ordinate
+    }
+}
 

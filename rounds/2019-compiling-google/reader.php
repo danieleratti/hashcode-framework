@@ -147,6 +147,15 @@ class Server
     {
         $this->id = (int)$id;
     }
+
+    public function addToQueue(File $file)
+    {
+        global $files;
+
+        $files[$file->filename]->alreadyCompiled = true;
+        $this->currentTime += $file->timeCompilation;
+        $this->queue[] = $file->filename;
+    }
 }
 
 $fileName = 'a';
