@@ -1,7 +1,10 @@
 <?php
 
-$fileName = 'a';
+$fileName = 'e';
 
-require_once 'reader.php';
+require_once(__DIR__ . '/reader.php');
 
-foreach ($ta)
+/** @var TargetFile[] $targets */
+/** @var File[] $files */
+
+
