@@ -28,7 +28,7 @@ class TargetFile
     public $file;
     public $deadline;
     public $goalPoints;
-    public $depth;
+    public $maxDepth;
 
     public function __construct($files, $row)
     {
@@ -44,8 +44,8 @@ class TargetFile
      */
     public function calculateMaxDepth($file, $depth)
     {
-        if ($depth > $this->depth)
-            $this->depth = $depth;
+        if ($depth > $this->maxDepth)
+            $this->maxDepth = $depth;
 
         foreach ($file->dependencies as $dependency) {
             $this->calculateMaxDepth($dependency, $depth + 1);
