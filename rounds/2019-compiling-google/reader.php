@@ -242,11 +242,11 @@ class Server
 
 $compilationHistory = [];
 
-$fileName = 'b';
+
 
 $servers = $files = [];
 
-$fileManager = new FileManager($fileName);
+$fileManager = new FileManager($inputName);
 
 $content = str_replace("\r", "", $fileManager->get());
 $content = explode("\n", $content);
@@ -289,9 +289,11 @@ class FileReady
     public $time;
 
 
-    public function __construct($filename, $time)
+    public function __construct($filename, $time, $deadline, $score)
     {
         $this->filename = $filename;
+        $this->deadline = $deadline;
+        $this->score = $score;
         $this->time = $time;
     }
 }
@@ -316,7 +318,7 @@ class ServerManager
             // Devo scegliere su quale server metterlo
             $this->server[0]->addToQueue($file);
             $this->currentTime += $file->timeCompilation;
-            $this->listaFile[] = new FileReady($file->filename, $this->currentTime);
+            $this->listaFile[] = new FileReady($file->filename, $this->currentTime, $file->deadLine, $file->score);
         }
         // File già inserito per cui vai avanti
     }

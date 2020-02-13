@@ -1,5 +1,5 @@
 <?php
-$inputName = 'a_example';
+$inputName = 'f_big';
 include('reader.php');
 
 function getBestServerIndex()
@@ -36,7 +36,7 @@ function writeOutput()
  * @return mixed
  */
 
-//DFS DEEP FIRST SEARCH A MANETTAAAA :)
+//DFS DEEP FIRST SEARC$inputNameH A MANETTAAAA :)
 function getDependencies($filename, &$actualDep, $level)
 {
     global $files;
@@ -100,12 +100,12 @@ $rows = explode("\n", $content);
 $score = 0;
 array_shift($rows);
 
-foreach ($serverManager->listaFile as $f) {
+foreach ($serverManager->listaFile as $file) {
     //$server = $a[1];
-    $file = $f->file;
+   // $file = $f->file;
     if (in_array($file->filename, array_keys($targetFiles))) {
-        if ($file->timeCompilation <= $file->deadLine) {
-            $score += $file->deadLine - $file->timeCompilation + $file->score;
+        if ($file->time <= $file->deadline) {
+            $score += $file->deadline - $file->time + $file->score;
         }
     }
 }
