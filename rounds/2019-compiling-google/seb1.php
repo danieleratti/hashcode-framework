@@ -1,5 +1,5 @@
 <?php
-
+$inputName = 'a_example';
 include('reader.php');
 
 function getBestServerIndex()
@@ -90,16 +90,33 @@ for ($i = 0; $i < count($serverManager->listaFile); $i++) {
 
 $fileManager->output(implode("\n", $output));
 
-$content = trim(file_get_contents(__DIR__ . '/output/' . 'seb1_b_narrow.txt'));
+
+
+
+$content = trim(file_get_contents(__DIR__ . '/output/' . 'seb1_'.$inputName.'.txt'));
 $rows = explode("\n", $content);
 //$rows = explode(" ", $rows);
 
 $score = 0;
 array_shift($rows);
 
+foreach ($serverManager->listaFile as $f) {
+    //$server = $a[1];
+    $file = $f->file;
+    if (in_array($file->filename, array_keys($targetFiles))) {
+        if ($file->timeCompilation <= $file->deadLine) {
+            $score += $file->deadLine - $file->timeCompilation + $file->score;
+        }
+    }
+}
+/*
+ *
+$score = 0;
+array_shift($rows);
+
 foreach ($rows as $el) {
     $a = explode(" ", $el);
-    $file = $files[$a[0]];
+    $file = $serverManager->listaFile[$a[0]];
     //$server = $a[1];
     if (in_array($file->filename, array_keys($targetFiles))) {
         if ($file->timeCompilation <= $file->deadLine) {
@@ -107,6 +124,7 @@ foreach ($rows as $el) {
         }
     }
 }
+ */
 echo 'SCORE: ' . $score . PHP_EOL;
 
 
