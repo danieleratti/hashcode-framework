@@ -1,6 +1,7 @@
 <?php
 
 use Utils\FileManager;
+use Utils\Log;
 
 require_once '../../bootstrap.php';
 
@@ -98,9 +99,9 @@ class Cache
         global $videos;
         /** @var Video[] $videos */
         $this->videos[] = $videoId;
+        if ($videos[$videoId]->size > $this->storage)
+            die('Non puoi aggiungere il video ' . $videoId . ' (size=' . $videos[$videoId]->size . ') alla cache ' . $this->cacheId . ' (storage=' . $this->storage . ') perché non c\'è abbastanza spazio');
         $this->storage -= $videos[$videoId]->size;
-        if ($this->storage < 0)
-            die('Non puoi aggiungere il video ' . $videoId . ' alla cache ' . $this->cacheId . ' perché non c\'è abbastanza spazio');
     }
 }
 
@@ -126,7 +127,7 @@ function alignLocalScores($videoId = null, $cacheId = null) // ricalcolare la vi
     foreach ($tuple as $tupla) {
         /** @var Tupla $tupla */
         if (!isset($videoId) || $tupla->videoId == $videoId) {
-            $tempoRisparmiatoRispettoBest = $endpoints[$tupla->endpointId]->videosBestLatency[$videoId] - $endpoints[$tupla->endpointId]->caches2latency[$tupla->cacheId];
+            $tempoRisparmiatoRispettoBest = $endpoints[$tupla->endpointId]->videosBestLatency[$tupla->videoId] - $endpoints[$tupla->endpointId]->caches2latency[$tupla->cacheId];
             if ($tempoRisparmiatoRispettoBest < 0) {
                 // fuck tupla
                 $tuple->forget($tupla->id); // TODO: Controllare!!!!!!!
@@ -152,7 +153,7 @@ function alignCaches($cacheId) // eliminare le tuple con video che non stanno ne
 
     foreach ($tuple as $tupla) {
         /** @var Tupla $tupla */
-        if($tupla->cacheId == $cacheId && $videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
+        if ($tupla->cacheId == $cacheId && $videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
             // fuck tupla
             $tuple->forget($tupla->id); // TODO: Controllare!!!!!!!
         }
@@ -162,6 +163,8 @@ function alignCaches($cacheId) // eliminare le tuple con video che non stanno ne
 function putVideoInCache($requestId, $videoId, $cacheId)
 {
     global $caches, $tuple, $SCORE;
+    Log::out("Aggiungo il video $videoId alla cache $cacheId", 0);
+
     /** @var Cache[] $caches */
     $caches[$cacheId]->addVideo($videoId);
 
@@ -174,12 +177,13 @@ function putVideoInCache($requestId, $videoId, $cacheId)
     alignLocalScores($videoId, $cacheId);
     alignCaches($cacheId);
     alignTotalScore();
-    echo "SCORE = $SCORE\n";
+
+    Log::out("SCORE = " . $SCORE, 1);
 }
 
 function alignTotalScore()
 {
-    global $SCORE, $totalQuantityOfRequests;
+    global $SCORE, $endpoints, $totalQuantityOfRequests;
 
     $sumOfLatenciesSaved = 0;
 
@@ -252,12 +256,14 @@ foreach ($endpoints as $endpoint) {
         $endpoint->videosBestLatency[$request->videoId] = $endpoint->latencyDataCenter;
 
         foreach ($endpoint->caches2latency as $cacheServerId => $latency) {
-            $tuple->add(new Tupla(
-                $request->requestId,
-                $request->videoId,
-                $request->endpointId,
-                $cacheServerId
-            ));
+            if ($videos[$request->videoId]->size <= $cacheCapacity) {
+                $tuple->add(new Tupla(
+                    $request->requestId,
+                    $request->videoId,
+                    $request->endpointId,
+                    $cacheServerId
+                ));
+            }
         }
     }
 }
