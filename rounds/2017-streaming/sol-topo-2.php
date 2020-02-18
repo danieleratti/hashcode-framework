@@ -1,15 +1,19 @@
 <?php
 
 use Utils\Log;
+use Utils\Stopwatch;
 
 $fileName = 'c';
+$topPercentage = 0.3;
 
 require_once 'reader.php';
-
 
 /* functions */
 function alignLocalScores($videoId = null, $cacheId = null) // ricalcolare la videosBestLatency + allineare local score di ogni tupla & eliminare tuple con score negativi (cache già migliori esistenti x quella req)
 {
+    global $sw_alignLocalScores;
+    //$sw_alignLocalScores->tik();
+
     /** @var Video[] $videos */
     global $tuple, $requests, $endpoints, $videos;
 
@@ -45,25 +49,31 @@ function alignLocalScores($videoId = null, $cacheId = null) // ricalcolare la vi
             $tupla->localScore = $localScore;
         }
     }
+    //$sw_alignLocalScores->tok(false);
 }
 
-function alignCaches($cacheId) // eliminare le tuple con video che non stanno nella cache (per size)
+function alignCaches() // eliminare le tuple con video che non stanno nella cache (per size)
 {
+    global $sw_alignCaches;
+    //$sw_alignCaches->tik();
+
     /** @var Video[] $videos */
     /** @var Cache[] $caches */
     global $tuple, $caches, $videos;
 
     foreach ($tuple as $tupla) {
         /** @var Tupla $tupla */
-        if ($tupla->cacheId == $cacheId && $videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
+        if ($videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
             // fuck tupla
             $tuple->forget($tupla->id); // TODO: Controllare!!!!!!!
         }
     }
+    //$sw_alignCaches->tok(false);
 }
 
 function putVideoInCache($requestId, $videoId, $cacheId)
 {
+    global $recalculateScore;
     global $caches, $tuple, $SCORE;
     Log::out("Aggiungo il video $videoId alla cache $cacheId", 0);
 
@@ -77,14 +87,20 @@ function putVideoInCache($requestId, $videoId, $cacheId)
     });
 
     alignLocalScores($videoId, $cacheId);
-    alignCaches($cacheId);
-    alignTotalScore();
+    //alignCaches();
 
-    Log::out("SCORE = " . $SCORE, 1);
+    $recalculateScore++;
+    if($recalculateScore%10==0) {
+        alignTotalScore();
+        Log::out("SCORE = " . $SCORE, 1);
+    }
 }
 
 function alignTotalScore()
 {
+    global $sw_alignTotalScore;
+
+    //$sw_alignTotalScore->tik();
     global $SCORE, $endpoints, $totalQuantityOfRequests;
 
     $sumOfLatenciesSaved = 0;
@@ -98,6 +114,7 @@ function alignTotalScore()
         }
     }
     $SCORE = $sumOfLatenciesSaved / $totalQuantityOfRequests * 1000;
+    //$sw_alignTotalScore->tok(false);
 }
 
 
@@ -126,12 +143,29 @@ foreach ($endpoints as $endpoint) {
 }
 
 /* algorithm */
+$sw_alignLocalScores = new Stopwatch('alignLocalScores');
+$sw_alignCaches = new Stopwatch('alignCaches');
+$sw_alignTotalScore = new Stopwatch('alignTotalScore');
+
 alignLocalScores();
 
 Log::out('Filename ' . $fileName);
 
 /** @var Tupla $first */
-while($first = $tuple->sortByDesc('localScore')->first()) {
-    Log::out('Tuple rimanenti = ' . $tuple->count());
+$tuple = $tuple->sortByDesc('localScore')->take($tuple->count() * $topPercentage);
+while ($first = $tuple->sortByDesc('localScore')->first()) {
+
+    if($videos[$first->videoId]->size > $caches[$first->cacheId]->storage) {
+        alignCaches();
+        continue;
+    }
+
+    Log::out('Tuple rimanenti = ' . $tuple->count(), 3);
     putVideoInCache($first->requestId, $first->videoId, $first->cacheId);
+    //$sw_alignLocalScores->printTime();
+    //$sw_alignCaches->printTime();
+    //$sw_alignTotalScore->printTime();
 }
+
+alignTotalScore();
+Log::out("FINAL SCORE = " . $SCORE, 1);

@@ -2,6 +2,7 @@
 
 use Utils\FileManager;
 use Utils\Log;
+use Utils\Stopwatch;
 
 require_once '../../bootstrap.php';
 
@@ -96,106 +97,15 @@ class Cache
 
     public function addVideo($videoId)
     {
+        global $STORAGE;
         global $videos;
         /** @var Video[] $videos */
         $this->videos[] = $videoId;
         if ($videos[$videoId]->size > $this->storage)
             die('Non puoi aggiungere il video ' . $videoId . ' (size=' . $videos[$videoId]->size . ') alla cache ' . $this->cacheId . ' (storage=' . $this->storage . ') perché non c\'è abbastanza spazio');
         $this->storage -= $videos[$videoId]->size;
+        $STORAGE -= $videos[$videoId]->size;
     }
-}
-
-/* functions */
-function alignLocalScores($videoId = null, $cacheId = null) // ricalcolare la videosBestLatency + allineare local score di ogni tupla & eliminare tuple con score negativi (cache già migliori esistenti x quella req)
-{
-    /** @var Video[] $videos */
-    global $tuple, $requests, $endpoints, $videos;
-
-    /* recalc video best latency */
-    if ($videoId) {
-        /** @var Endpoint[] $endpoints */
-        foreach ($endpoints as $endpoint) {
-            if (isset($endpoint->requests[$videoId])) {
-                if (isset($endpoint->caches2latency[$cacheId])) {
-                    $bestLatency = min($endpoint->videosBestLatency[$videoId], $endpoint->caches2latency[$cacheId]);
-                    $endpoint->videosBestLatency[$videoId] = $bestLatency;
-                }
-            }
-        }
-    }
-
-    foreach ($tuple as $tupla) {
-        /** @var Tupla $tupla */
-        if (!isset($videoId) || $tupla->videoId == $videoId) {
-            $tempoRisparmiatoRispettoBest = $endpoints[$tupla->endpointId]->videosBestLatency[$tupla->videoId] - $endpoints[$tupla->endpointId]->caches2latency[$tupla->cacheId];
-            if ($tempoRisparmiatoRispettoBest < 0) {
-                // fuck tupla
-                $tuple->forget($tupla->id); // TODO: Controllare!!!!!!!
-                continue;
-            }
-
-            // TODO: tuning con km e kp
-            $localScore = (
-                ($requests[$tupla->requestId]->numRequests * $tempoRisparmiatoRispettoBest)
-                /
-                ($videos[$tupla->videoId]->sizePerc * 100)
-            );
-            $tupla->localScore = $localScore;
-        }
-    }
-}
-
-function alignCaches($cacheId) // eliminare le tuple con video che non stanno nella cache (per size)
-{
-    /** @var Video[] $videos */
-    /** @var Cache[] $caches */
-    global $tuple, $caches, $videos;
-
-    foreach ($tuple as $tupla) {
-        /** @var Tupla $tupla */
-        if ($tupla->cacheId == $cacheId && $videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
-            // fuck tupla
-            $tuple->forget($tupla->id); // TODO: Controllare!!!!!!!
-        }
-    }
-}
-
-function putVideoInCache($requestId, $videoId, $cacheId)
-{
-    global $caches, $tuple, $SCORE;
-    Log::out("Aggiungo il video $videoId alla cache $cacheId", 0);
-
-    /** @var Cache[] $caches */
-    $caches[$cacheId]->addVideo($videoId);
-
-    // eliminare tutte le tuple delle richiesta $requestId, poiché ormai è fullfillata
-    $tuple = $tuple->reject(function ($tupla) use ($requestId) {
-        /** @var Tupla $tupla */
-        return $tupla->requestId == $requestId;
-    });
-
-    alignLocalScores($videoId, $cacheId);
-    alignCaches($cacheId);
-    alignTotalScore();
-
-    Log::out("SCORE = " . $SCORE, 1);
-}
-
-function alignTotalScore()
-{
-    global $SCORE, $endpoints, $totalQuantityOfRequests;
-
-    $sumOfLatenciesSaved = 0;
-
-    /** @var Endpoint[] $endpoints */
-    foreach ($endpoints as $endpoint) {
-        foreach ($endpoint->requests as $request) {
-            /** @var  Request $request */
-            $latencySaved = $request->numRequests * ($endpoint->latencyDataCenter - $endpoint->videosBestLatency[$request->videoId]);
-            $sumOfLatenciesSaved += $latencySaved;
-        }
-    }
-    $SCORE = $sumOfLatenciesSaved / $totalQuantityOfRequests * 1000;
 }
 
 /* read input */
@@ -213,9 +123,13 @@ list($numVideos, $numEndpoints, $numRequests, $numCacheServers, $cacheCapacity) 
 
 $videoSizes = explode(" ", $fileRows[1]);
 
+Log::out('Heating 1/3');
+
 foreach ($videoSizes as $size) {
     $videos[] = new Video($size);
 }
+
+Log::out('Heating 2/3');
 
 $startingFrom = 2;
 for ($i = 0; $i < $numEndpoints; $i++) {
@@ -233,6 +147,8 @@ for ($i = 0; $i < $numEndpoints; $i++) {
 
 $startingFrom += $numEndpoints;
 
+Log::out('Heating 3/3');
+
 for ($j = 0; $j < $numRequests; $j++) {
     list($idVideo, $idEndPoint, $nVideoRequests) = explode(' ', $fileRows[$j + $startingFrom]);
     $request = new Request($idVideo, $idEndPoint, $nVideoRequests);
@@ -244,29 +160,4 @@ for ($j = 0; $j < $numRequests; $j++) {
 for ($cacheId = 0; $cacheId < $numCacheServers; $cacheId++)
     $caches[] = new Cache($cacheId);
 
-/* runtime */
-
-$tuple = collect();
-
-/** @var Endpoint[] $endpoints */
-foreach ($endpoints as $endpoint) {
-    foreach ($endpoint->requests as $request) {
-        /** @var Request $request */
-
-        $endpoint->videosBestLatency[$request->videoId] = $endpoint->latencyDataCenter;
-
-        foreach ($endpoint->caches2latency as $cacheServerId => $latency) {
-            if ($videos[$request->videoId]->size <= $cacheCapacity) {
-                $tuple->add(new Tupla(
-                    $request->requestId,
-                    $request->videoId,
-                    $request->endpointId,
-                    $cacheServerId
-                ));
-            }
-        }
-    }
-}
-
-/* algorithm */
-alignLocalScores();
+Log::out('Heated');

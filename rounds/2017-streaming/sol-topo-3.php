@@ -1,15 +1,30 @@
 <?php
 
 use Utils\Log;
+use Utils\Stopwatch;
 
-$fileName = 'c';
+/*
+    c, 0.3, 1000 => 141k
+    
+    d, 0.05, 1000 => 77,5k
+
+    e, 0.05, 1000 => KO
+    
+    e, 0.01, 1000 => KO
+*/
+
+$fileName = 'e';
+$topPercentage = 0.01;
+$takeChunk = 1000;
 
 require_once 'reader.php';
-
 
 /* functions */
 function alignLocalScores($videoId = null, $cacheId = null) // ricalcolare la videosBestLatency + allineare local score di ogni tupla & eliminare tuple con score negativi (cache già migliori esistenti x quella req)
 {
+    global $sw_alignLocalScores;
+    //$sw_alignLocalScores->tik();
+
     /** @var Video[] $videos */
     global $tuple, $requests, $endpoints, $videos;
 
@@ -45,21 +60,26 @@ function alignLocalScores($videoId = null, $cacheId = null) // ricalcolare la vi
             $tupla->localScore = $localScore;
         }
     }
+    //$sw_alignLocalScores->tok(false);
 }
 
-function alignCaches($cacheId) // eliminare le tuple con video che non stanno nella cache (per size)
+function alignCaches() // eliminare le tuple con video che non stanno nella cache (per size)
 {
+    global $sw_alignCaches;
+    //$sw_alignCaches->tik();
+
     /** @var Video[] $videos */
     /** @var Cache[] $caches */
     global $tuple, $caches, $videos;
 
     foreach ($tuple as $tupla) {
         /** @var Tupla $tupla */
-        if ($tupla->cacheId == $cacheId && $videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
+        if ($videos[$tupla->videoId]->size > $caches[$tupla->cacheId]->storage) {
             // fuck tupla
             $tuple->forget($tupla->id); // TODO: Controllare!!!!!!!
         }
     }
+    //$sw_alignCaches->tok(false);
 }
 
 function putVideoInCache($requestId, $videoId, $cacheId)
@@ -77,14 +97,14 @@ function putVideoInCache($requestId, $videoId, $cacheId)
     });
 
     alignLocalScores($videoId, $cacheId);
-    alignCaches($cacheId);
-    alignTotalScore();
-
-    Log::out("SCORE = " . $SCORE, 1);
+    //alignCaches();
 }
 
 function alignTotalScore()
 {
+    global $sw_alignTotalScore;
+
+    //$sw_alignTotalScore->tik();
     global $SCORE, $endpoints, $totalQuantityOfRequests;
 
     $sumOfLatenciesSaved = 0;
@@ -98,15 +118,19 @@ function alignTotalScore()
         }
     }
     $SCORE = $sumOfLatenciesSaved / $totalQuantityOfRequests * 1000;
+    //$sw_alignTotalScore->tok(false);
 }
 
 
 /* runtime */
 
+Log::out('Adding tuples');
+
 $tuple = collect();
 
 /** @var Endpoint[] $endpoints */
-foreach ($endpoints as $endpoint) {
+foreach ($endpoints as $endpointId => $endpoint) {
+    Log::out('Tupling endpoind ' . $endpointId . '/' . count($endpoints));
     foreach ($endpoint->requests as $request) {
         /** @var Request $request */
 
@@ -126,12 +150,40 @@ foreach ($endpoints as $endpoint) {
 }
 
 /* algorithm */
-alignLocalScores();
+$STORAGE = $numCacheServers * $cacheCapacity;
+
+$sw_alignLocalScores = new Stopwatch('alignLocalScores');
+$sw_alignCaches = new Stopwatch('alignCaches');
+$sw_alignTotalScore = new Stopwatch('alignTotalScore');
 
 Log::out('Filename ' . $fileName);
+Log::out('First align');
+alignLocalScores();
 
 /** @var Tupla $first */
-while($first = $tuple->sortByDesc('localScore')->first()) {
-    Log::out('Tuple rimanenti = ' . $tuple->count());
-    putVideoInCache($first->requestId, $first->videoId, $first->cacheId);
+$tuple = $tuple->sortByDesc('localScore')->take($tuple->count() * $topPercentage);
+while ($firsts = $tuple->sortByDesc('localScore')->take($takeChunk)) {
+    $videosDone = [];
+    foreach($firsts as $first) {
+        if(!isset($videosDone[$first->videoId])) {
+            $videosDone[$first->videoId] = true;
+
+            if ($videos[$first->videoId]->size > $caches[$first->cacheId]->storage) {
+                alignCaches();
+                continue;
+            }
+
+            Log::out('Tuple rimanenti = ' . $tuple->count(), 3);
+            putVideoInCache($first->requestId, $first->videoId, $first->cacheId);
+            //$sw_alignLocalScores->printTime();
+            //$sw_alignCaches->printTime();
+            //$sw_alignTotalScore->printTime();
+        }
+    }
+
+    alignTotalScore();
+    Log::out("SCORE = " . $SCORE . " // STORAGE = " . $STORAGE, 1);
 }
+
+alignTotalScore();
+Log::out("FINAL SCORE = " . $SCORE, 1);
