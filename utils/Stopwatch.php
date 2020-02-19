@@ -4,46 +4,34 @@ namespace Utils;
 
 class Stopwatch
 {
-    private $tik;
-    private $label;
+    public static $watches = [];
+    private static $watches_tik = [];
 
-    private $last;
-    private $max;
-    private $min;
-    private $sum;
-    private $count;
-
-    function __construct($label)
+    public static function reset()
     {
-        $this->label = $label;
+        self::$watches = [];
+        self::$watches_tik = [];
     }
 
-    public function tik()
+    public static function tik($name)
     {
-        $this->tik = microtime(true);
+        self::$watches_tik[$name] = microtime(true);
     }
 
-    public function tok($print = true)
+    public static function tok($name)
     {
-        $this->last = microtime(true) - $this->tik;
-        $this->sum += $this->last;
-        $this->count++;
-        $this->min = min($this->min, $this->last);
-        $this->max = max($this->max, $this->last);
-
-        if ($print)
-            $this->printTime();
+        if (!(@self::$watches[$name]))
+            self::$watches[$name] = ['time' => 0, 'calls' => 0];
+        self::$watches[$name]['calls']++;
+        self::$watches[$name]['time'] += microtime(true) - self::$watches_tik[$name];
     }
 
-    public function printTime()
+    public static function print($name = null, $level = 0)
     {
-        $r = 4;
-
-        $average = round($this->sum / $this->count, $r);
-        $last = round($this->last, $r);
-        $max = round($this->max, $r);
-        $min = round($this->min, $r);
-
-        echo $this->label . ": {$last}s (μ: $average, max: $max, min: $min)\n";
+        foreach (self::$watches as $n => $w) {
+            if ($name === null || $n == $name) {
+                Log::out("StopWatch[$n]: " . round($w['time'], 4) . "s (calls: ".$w['calls'].", time per call: ".round($w['time']/$w['calls']*1000)."ms)", $level, 'light_cyan');
+            }
+        }
     }
 }

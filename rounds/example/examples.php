@@ -1,6 +1,8 @@
 <?php
 
+use Utils\Fastwatch;
 use Utils\FileManager;
+use Utils\Log;
 use Utils\Stopwatch;
 use Utils\Visual\Colors;
 use Utils\Visual\VisualGradient;
@@ -41,11 +43,15 @@ for ($row = 0; $row < $ROWS; $row++) {
 }
 $visualStandard->save('standard');
 
+// Logging
+Log::out('Output colored', 1, 'white', 'red');
+Log::out('Output colored', 1, 'blue');
 
 // Check the execution times
-$watcher = new Stopwatch('watcher1');
 for ($i = 0; $i < 10; $i++) {
-    $watcher->tik();
+    Stopwatch::tik('w1');
     usleep(100000);
-    $watcher->tok();
+    Stopwatch::tok('w1');
 }
+Stopwatch::print('w1');
+Stopwatch::print();

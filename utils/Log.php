@@ -11,13 +11,20 @@ class Log
         self::$verbose = $verbose;
     }
 
-    public static function out($content, $level = 0)
+    public static function out($content, $level = 0, $textColor = null, $backgroundColor = null)
     {
         if (self::$verbose) {
             $padding = "";
-            for($i=0;$i<$level;$i++)
+            for ($i = 0; $i < $level; $i++)
                 $padding .= "   ";
-            echo date("Y-m-d H:i:s") . " => " . $padding . $content . "\n";
+
+            $outputString = date("Y-m-d H:i:s") . " => " . $padding . $content;
+
+            if ($textColor !== null || $backgroundColor !== null) {
+                $colors = new ColoredString();
+                echo $colors->getColoredString($outputString, $textColor, $backgroundColor) . "\n";
+            } else
+                echo $outputString . "\n";
         }
     }
 }
