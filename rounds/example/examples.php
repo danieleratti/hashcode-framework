@@ -1,6 +1,5 @@
 <?php
 
-use Utils\Fastwatch;
 use Utils\FileManager;
 use Utils\Log;
 use Utils\Stopwatch;
