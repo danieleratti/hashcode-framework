@@ -42,7 +42,8 @@ class Library
 // Reading the inputs
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
-list($countBooks, $countLibraries, $countDays) = $content[0];
+
+list($countBooks, $countLibraries, $countDays) = explode(' ', $content[0]);
 
 $books = [];
 foreach (explode(' ', $content[1]) as $id => $bookAward) {

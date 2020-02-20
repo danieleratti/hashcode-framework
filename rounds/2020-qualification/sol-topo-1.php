@@ -2,7 +2,7 @@
 
 use Utils\Collection;
 
-$fileName = 'a';
+$fileName = 'e';
 
 include 'reader.php';
 
@@ -14,7 +14,10 @@ include 'reader.php';
  * @var Collection $libraries
  */
 
-echo $libraries->avg('signUpDuration');
+echo $countDays . "\n";
+$avg = $libraries->avg('signUpDuration');
+echo $avg . "\n";
+echo ($countDays / $avg) . "\n";
 
 $output = '';
 
