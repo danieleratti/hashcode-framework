@@ -34,6 +34,9 @@ class Library
     public $booksChunked;
     public $booksChunkedScore;
 
+    public $done = false;
+    public $booksNumber = 0;
+
     public function __construct($id, $fileRow1, $fileRow2)
     {
         global $books;
@@ -47,6 +50,7 @@ class Library
             $book->inLibraries->put($id, $this);
         }
         $this->books = collect($this->books)->keyBy('id');
+        $this->booksNumber = $booksCount;
     }
 }
 
