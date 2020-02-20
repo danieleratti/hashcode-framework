@@ -1,18 +1,20 @@
 <?php
 
+use Utils\Collection;
+
 $fileName = 'a';
 
 include 'reader.php';
 
 /**
- * Algo Functions
+ * @var integer $countBooks
+ * @var integer $countLibraries
+ * @var integer $countDays
+ * @var Collection $books
+ * @var Collection $libraries
  */
 
-
-
-/**
- * Runtime
- */
+echo $libraries->avg('signUpDuration');
 
 $output = '';
 

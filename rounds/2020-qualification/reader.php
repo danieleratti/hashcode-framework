@@ -48,6 +48,7 @@ $books = [];
 foreach (explode(' ', $content[1]) as $id => $bookAward) {
     $books[$id] = new Book($id, $bookAward);
 }
+$books = collect($books);
 
 $libraries = [];
 $librariesRows = array_slice($content, 2, count($content));
@@ -57,4 +58,4 @@ for ($line = 0; $line < count($librariesRows); $line += 2) {
     $libraries[$id] = new Library($id, $librariesRows[$line], $librariesRows[$line + 1]);
     $id++;
 }
-
+$libraries = collect($libraries);
