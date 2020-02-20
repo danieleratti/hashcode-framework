@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'd';
+$fileName = 'b';
 
 include 'reader.php';
 
@@ -27,6 +27,8 @@ function fullAlignLibrary($libraryId)
     global $countDays;
     global $currentDay;
     global $libraries;
+    global $avgSignupDuration;
+
     /** @var Library $library */
     $library = $libraries[$libraryId];
     if ($library) {
@@ -45,8 +47,13 @@ function fullAlignLibrary($libraryId)
             $booksChunkedScore = $booksChunked->reduce(function ($carry, $books) {
                 return $carry + $books->sum('award');
             }, 0);
+            $booksChunkedScoreTail = $booksChunked->take(-round($avgSignupDuration))->reduce(function ($carry, $books) {
+                return $carry + $books->sum('award');
+            }, 0);
             $library->booksChunked = $booksChunked;
-            $library->booksChunkedScore = $booksChunkedScore;
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1.5) / pow(10 * $library->signUpDuration / $avgSignupDuration, 0.75); //NEW FAKE SCORE!!!
+            $library->booksChunkedScore = pow($booksChunkedScore, 1) / pow(1 + $library->signUpDuration / $avgSignupDuration, 1) / pow($booksChunkedScoreTail * 0.3, 1); //NEW FAKE SCORE!!!
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($booksChunkedScoreTail * 0.3, 1); //NEW FAKE SCORE!!!
         } else {
             $library->booksChunked = collect();
             $library->booksChunkedScore = 0;
@@ -59,7 +66,7 @@ function alignLibraries($cutDays)
     global $libraries, $currentDay, $countDays;
     foreach ($libraries as $library) {
         /** @var Library $library */
-        if ($countDays-$currentDay-$library->signUpDuration >= $cutDays) {
+        if ($countDays - $currentDay - $library->signUpDuration >= $cutDays) {
             /*
             $outChunks = $library->booksChunked->splice($library->booksChunked->count() - $cutDays); // prendo gli ultimi
             $outChunksScore = $outChunks->reduce(function ($carry, $books) {
@@ -100,6 +107,7 @@ function takeLibrary($library)
 
     $outputLibraries[] = [
         'libraryId' => $library->id,
+        //'books' => $library->books->pluck('id')->toArray()
         'books' => $takenBooks->pluck('id')->toArray()
     ];
 
@@ -133,6 +141,8 @@ function takeLibrary($library)
 /// prendo la prima library sortByDesc(totalRemainingScore)
 /// takeLibrary($first->libraryId)
 
+$avgSignupDuration = $libraries->avg('signUpDuration');
+
 Log::out('fullAlignLibraries');
 foreach ($libraries as $library)
     fullAlignLibrary($library->id);
@@ -144,7 +154,7 @@ while ($firstLibrary = $libraries->sortByDesc('booksChunkedScore')->first()) {
     takeLibrary($firstLibrary);
     Log::out('dEnd = ' . $currentDay . '/' . $countDays);
     Log::out('remaining Libraries = ' . count($libraries));
-    Log::out('SCORE('.$fileName.') = ' . $score, 'red');
+    Log::out('SCORE(' . $fileName . ') = ' . $score, 'red');
 }
 
 // output

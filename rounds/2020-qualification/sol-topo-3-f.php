@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'd';
+$fileName = 'f';
 
 include 'reader.php';
 
@@ -27,6 +27,8 @@ function fullAlignLibrary($libraryId)
     global $countDays;
     global $currentDay;
     global $libraries;
+    global $avgSignupDuration;
+
     /** @var Library $library */
     $library = $libraries[$libraryId];
     if ($library) {
@@ -46,7 +48,7 @@ function fullAlignLibrary($libraryId)
                 return $carry + $books->sum('award');
             }, 0);
             $library->booksChunked = $booksChunked;
-            $library->booksChunkedScore = $booksChunkedScore;
+            $library->booksChunkedScore = pow($booksChunkedScore, 1) / pow(10*$library->signUpDuration / $avgSignupDuration, 0.75); //NEW FAKE SCORE!!!
         } else {
             $library->booksChunked = collect();
             $library->booksChunkedScore = 0;
@@ -100,7 +102,8 @@ function takeLibrary($library)
 
     $outputLibraries[] = [
         'libraryId' => $library->id,
-        'books' => $takenBooks->pluck('id')->toArray()
+        'books' => $library->books->pluck('id')->toArray()
+        //'books' => $takenBooks->pluck('id')->toArray()
     ];
 
     $score += $takenBooks->sum('award');
@@ -132,6 +135,8 @@ function takeLibrary($library)
 /// WHILE d < D:
 /// prendo la prima library sortByDesc(totalRemainingScore)
 /// takeLibrary($first->libraryId)
+
+$avgSignupDuration = $libraries->avg('signUpDuration');
 
 Log::out('fullAlignLibraries');
 foreach ($libraries as $library)

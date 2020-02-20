@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'd';
+$fileName = 'c';
 
 include 'reader.php';
 
@@ -27,6 +27,8 @@ function fullAlignLibrary($libraryId)
     global $countDays;
     global $currentDay;
     global $libraries;
+    global $avgSignupDuration;
+
     /** @var Library $library */
     $library = $libraries[$libraryId];
     if ($library) {
@@ -46,7 +48,7 @@ function fullAlignLibrary($libraryId)
                 return $carry + $books->sum('award');
             }, 0);
             $library->booksChunked = $booksChunked;
-            $library->booksChunkedScore = $booksChunkedScore;
+            $library->booksChunkedScore = $booksChunkedScore / ($library->signUpDuration / $avgSignupDuration); //NEW FAKE SCORE!!!
         } else {
             $library->booksChunked = collect();
             $library->booksChunkedScore = 0;
@@ -100,6 +102,7 @@ function takeLibrary($library)
 
     $outputLibraries[] = [
         'libraryId' => $library->id,
+        //'books' => $library->books->pluck('id')->toArray()
         'books' => $takenBooks->pluck('id')->toArray()
     ];
 
@@ -133,18 +136,30 @@ function takeLibrary($library)
 /// prendo la prima library sortByDesc(totalRemainingScore)
 /// takeLibrary($first->libraryId)
 
+$avgSignupDuration = $libraries->avg('signUpDuration');
+
 Log::out('fullAlignLibraries');
 foreach ($libraries as $library)
     fullAlignLibrary($library->id);
 
 Log::out('algo...');
-while ($firstLibrary = $libraries->sortByDesc('booksChunkedScore')->first()) {
-    Log::out('dStart = ' . $currentDay . '/' . $countDays);
-    Log::out('taken library ' . $firstLibrary->id . ' on ' . $libraries->count() . ' libraries');
-    takeLibrary($firstLibrary);
-    Log::out('dEnd = ' . $currentDay . '/' . $countDays);
-    Log::out('remaining Libraries = ' . count($libraries));
-    Log::out('SCORE('.$fileName.') = ' . $score, 'red');
+while ($firstLibraries = $libraries->sortByDesc('booksChunkedScore')->take(100)) {
+    foreach($firstLibraries as $firstLibrary) {
+        Log::out('dStart = ' . $currentDay . '/' . $countDays);
+        Log::out('taken library ' . $firstLibrary->id . ' on ' . $libraries->count() . ' libraries');
+        takeLibrary($firstLibrary);
+        Log::out('dEnd = ' . $currentDay . '/' . $countDays);
+        Log::out('remaining Libraries = ' . count($libraries));
+        Log::out('SCORE('.$fileName.') = ' . $score, 'red');
+    }
+    
+    $output = [];
+    $output[] = count($outputLibraries);
+    foreach ($outputLibraries as $l) {
+        $output[] = $l['libraryId'] . " " . count($l['books']);
+        $output[] = implode(" ", $l['books']);
+    }
+    $fileManager->output(implode("\n", $output));
 }
 
 // output
