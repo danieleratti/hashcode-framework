@@ -40,7 +40,7 @@ class Library
             /** @var Book $book */
             $book = $books[$bookId];
             $this->books[$bookId] = $book;
-            $book->inLibraries->add($book);
+            $book->inLibraries->add($this);
         }
         $this->books = collect($this->books);
     }
