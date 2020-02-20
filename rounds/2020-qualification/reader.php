@@ -4,26 +4,32 @@ use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
-/**
- * Reader Classes
- */
-class Foo
+class Book
 {
     public $id;
+    public $award;
 
-    public function __construct($id)
+    public function __construct($id, $award)
     {
         $this->id = $id;
+        $this->award = $award;
     }
 }
 
-/**
- * Reader Functions
- */
-
-function Bar($a)
+class Library
 {
-    return $a;
+    public $id;
+    public $books;
+
+    public function __construct($id, $fileRow)
+    {
+        global $books;
+        $this->id = $id;
+        $this->books = [];
+        foreach (explode(' ', $fileRow) as $bookId) {
+            $this->books[$bookId] = $books[$id];
+        }
+    }
 }
 
 /**
@@ -32,17 +38,16 @@ function Bar($a)
 
 // Reading the inputs
 $fileManager = new FileManager($fileName);
-$fileContent = $fileManager->get();
+$content = explode("\n", $fileManager->get());
+list($countBooks, $countLibraries, $countDays) = $content[0];
 
-$rows = explode("\n", $fileContent);
-list($N) = explode(' ', $rows[0]);
-array_shift($rows); //remove 1st element
-
-/*
-$rides = collect();
-foreach ($rows as $i => $row) {
-    $row = explode(' ', $row);
-    $rides->add(new Ride($i, $row[0], $row[1], $row[2], $row[3], $row[4], $row[5]));
+$books = [];
+foreach (explode(' ', $content[1]) as $id => $bookAward) {
+    $books[$id] = new Book($id, $bookAward);
 }
-$rides = $rides->keyBy('id');
-*/
+
+$libraries = [];
+$librariesRows = array_slice($content, 2, count($content));
+foreach ($librariesRows as $id => $libraryRow) {
+    $libraries[$id] = new Library($id, $libraryRow);
+}
