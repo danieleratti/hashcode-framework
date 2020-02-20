@@ -28,7 +28,11 @@ class Library
     public $shipsPerDay;
 
     /** @var Collection $books */
+    /** @var Collection $booksChunked */
+    /** @var Collection $booksChunkedScore */
     public $books;
+    public $booksChunked;
+    public $booksChunkedScore;
 
     public function __construct($id, $fileRow1, $fileRow2)
     {
