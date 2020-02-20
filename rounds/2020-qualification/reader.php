@@ -1,5 +1,6 @@
 <?php
 
+use Utils\Collection;
 use Utils\FileManager;
 
 require_once '../../bootstrap.php';
@@ -9,10 +10,14 @@ class Book
     public $id;
     public $award;
 
+    /** @var Collection $inLibraries */
+    public $inLibraries;
+
     public function __construct($id, $award)
     {
         $this->id = $id;
         $this->award = $award;
+        $this->inLibraries = collect();
     }
 }
 
@@ -21,6 +26,8 @@ class Library
     public $id;
     public $signUpDuration;
     public $shipsPerDay;
+
+    /** @var Collection $books */
     public $books;
 
     public function __construct($id, $fileRow1, $fileRow2)
@@ -30,8 +37,12 @@ class Library
         $this->books = [];
         list($booksCount, $this->signUpDuration, $this->shipsPerDay) = explode(' ', $fileRow1);
         foreach (explode(' ', $fileRow2) as $bookId) {
-            $this->books[$bookId] = $books[$bookId];
+            /** @var Book $book */
+            $book = $books[$bookId];
+            $this->books[$bookId] = $book;
+            $book->inLibraries->add($book);
         }
+        $this->books = collect($this->books);
     }
 }
 
