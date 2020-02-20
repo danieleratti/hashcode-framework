@@ -19,15 +19,18 @@ class Book
 class Library
 {
     public $id;
+    public $signUpDuration;
+    public $shipsPerDay;
     public $books;
 
-    public function __construct($id, $fileRow)
+    public function __construct($id, $fileRow1, $fileRow2)
     {
         global $books;
         $this->id = $id;
         $this->books = [];
-        foreach (explode(' ', $fileRow) as $bookId) {
-            $this->books[$bookId] = $books[$id];
+        list($booksCount, $this->signUpDuration, $this->shipsPerDay) = explode(' ', $fileRow1);
+        foreach (explode(' ', $fileRow2) as $bookId) {
+            $this->books[$bookId] = $books[$bookId];
         }
     }
 }
@@ -48,6 +51,10 @@ foreach (explode(' ', $content[1]) as $id => $bookAward) {
 
 $libraries = [];
 $librariesRows = array_slice($content, 2, count($content));
-foreach ($librariesRows as $id => $libraryRow) {
-    $libraries[$id] = new Library($id, $libraryRow);
+
+$id = 0;
+for ($line = 0; $line < count($librariesRows); $line += 2) {
+    $libraries[$id] = new Library($id, $librariesRows[$line], $librariesRows[$line + 1]);
+    $id++;
 }
+
