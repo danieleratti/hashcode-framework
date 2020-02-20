@@ -104,3 +104,8 @@ for ($i = 0; $i < 1000; $i++)
     $coll->add(['id' => $i, 'num' => $i]);
 $coll = $coll->reverse();
 $coll->forget(999); // does NOT delete by ID, but by insertion order
+
+/**
+ * KeyBy a given field
+ */
+$coll = $coll->keyBy('id');
