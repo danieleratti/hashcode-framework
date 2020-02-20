@@ -40,9 +40,9 @@ class Library
             /** @var Book $book */
             $book = $books[$bookId];
             $this->books[$bookId] = $book;
-            $book->inLibraries->add($this);
+            $book->inLibraries->put($id, $this);
         }
-        $this->books = collect($this->books);
+        $this->books = collect($this->books)->keyBy('id');
     }
 }
 
@@ -60,7 +60,7 @@ $books = [];
 foreach (explode(' ', $content[1]) as $id => $bookAward) {
     $books[$id] = new Book($id, $bookAward);
 }
-$books = collect($books);
+$books = collect($books)->keyBy('id');
 
 $libraries = [];
 $librariesRows = array_slice($content, 2, count($content));
@@ -70,4 +70,4 @@ for ($line = 0; $line < count($librariesRows); $line += 2) {
     $libraries[$id] = new Library($id, $librariesRows[$line], $librariesRows[$line + 1]);
     $id++;
 }
-$libraries = collect($libraries);
+$libraries = collect($libraries)->keyBy('id');
