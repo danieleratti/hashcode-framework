@@ -1,8 +1,9 @@
 <?php
 
 use Utils\Collection;
+use Utils\Log;
 
-$fileName = 'a';
+$fileName = 'b';
 
 include 'reader.php';
 
@@ -15,7 +16,9 @@ include 'reader.php';
  */
 
 /// VAR:
+$score = 0;
 $currentDay = 0;
+$outputLibraries = [];
 
 /// FUNZIONI:
 /// fullAlignLibrary($libraryId) rifà l'allineamento totale
@@ -26,30 +29,38 @@ function fullAlignLibrary($libraryId)
     global $libraries;
     /** @var Library $library */
     $library = $libraries[$libraryId];
-    $takeDays = $countDays - $currentDay - $library->signUpDuration;
-    if ($takeDays > 0) {
-        $booksChunked = $library->books
-            ->sortByDesc('award')
-            ->chunk($library->shipsPerDay)
-            ->take($takeDays);
-        $booksChunkedScore = $booksChunked->reduce(function ($carry, $books) {
-            return $carry + $books->sum('award');
-        }, 0);
-        $library->booksChunked = $booksChunked;
-        $library->booksChunkedScore = $booksChunkedScore;
-    } else {
-        $library->booksChunked = collect();
-        $library->booksChunkedScore = 0;
+    if ($library) {
+        $takeDays = $countDays - $currentDay - $library->signUpDuration;
+        if ($takeDays > 0) {
+            $booksChunked = $library->books
+                ->sortByDesc('award')
+                ->chunk($library->shipsPerDay)
+                ->take($takeDays);
+
+            /*
+            if($library->id == 1) {
+                Log::out("booksChunked->count() = " . $booksChunked->count(), 'red');
+            }*/
+
+            $booksChunkedScore = $booksChunked->reduce(function ($carry, $books) {
+                return $carry + $books->sum('award');
+            }, 0);
+            $library->booksChunked = $booksChunked;
+            $library->booksChunkedScore = $booksChunkedScore;
+        } else {
+            $library->booksChunked = collect();
+            $library->booksChunkedScore = 0;
+        }
     }
 }
 
 function alignLibraries($cutDays)
 {
-    global $libraries;
+    global $libraries, $currentDay, $countDays;
     foreach ($libraries as $library) {
         /** @var Library $library */
-        if ($library->booksChunked->count() > $cutDays) {
-            $outChunks = $library->booksChunked->splice($cutDays); // prendo gli ultimi
+        if ($countDays-$currentDay-$library->signUpDuration >= $cutDays) {
+            $outChunks = $library->booksChunked->splice($library->booksChunked->count() - $cutDays); // prendo gli ultimi
             $outChunksScore = $outChunks->reduce(function ($carry, $books) {
                 return $carry + $books->sum('award');
             }, 0);
@@ -78,6 +89,32 @@ function purgeBooksFromLibraries($bookIds)
     }
 }
 
+function takeLibrary($library)
+{
+    global $outputLibraries, $libraries, $currentDay, $score;
+
+    /** @var Library $library */
+    $takenBooks = $library->booksChunked->collapse();
+
+    $outputLibraries[] = [
+        'libraryId' => $library->id,
+        'books' => $takenBooks->pluck('id')->toArray()
+    ];
+
+    $score += $takenBooks->sum('award');
+
+    foreach ($library->books as $book) {
+        /** @var Book $book */
+        $book->inLibraries->forget($library->id);
+    }
+
+    $libraries->forget($library->id);
+    alignLibraries($library->signUpDuration);
+    purgeBooksFromLibraries($takenBooks->pluck('id')->toArray());
+
+    $currentDay += $library->signUpDuration;
+}
+
 /// alignLibraries($cutD) che taglia la coda di tutte le libraries rimanenti e ridà il nuovo punteggio temporaneo
 /// takeLibrary($libraryId) prende tutti i books rimanenti nella library [d|signupDuration|<tempo utile chunkato>]=D, li mette nell'output e chiama la fx purgeBooksFromLibraries + cancellare library
 /// purgeBooksFromLibraries($bookIds)
@@ -94,12 +131,26 @@ function purgeBooksFromLibraries($bookIds)
 /// prendo la prima library sortByDesc(totalRemainingScore)
 /// takeLibrary($first->libraryId)
 
-$countDays = 4; // 1 gg + signup
-fullAlignLibrary(0);
-fullAlignLibrary(1);
-//alignLibraries(1);
-echo "ciao";
-purgeBooksFromLibraries([4]);
-echo "ciao";
+Log::out('fullAlignLibraries');
+foreach ($libraries as $library)
+    fullAlignLibrary($library->id);
 
-//$fileManager->output(implode("\n", $output));
+Log::out('algo...');
+while ($firstLibrary = $libraries->sortByDesc('booksChunkedScore')->first()) {
+    Log::out('dStart = ' . $currentDay . '/' . $countDays);
+    Log::out('taken library ' . $firstLibrary->id . ' on ' . $libraries->count() . ' libraries');
+    takeLibrary($firstLibrary);
+    Log::out('dEnd = ' . $currentDay . '/' . $countDays);
+    Log::out('remaining Libraries = ' . count($libraries));
+    Log::out('SCORE = ' . $score, 'red');
+}
+
+// output
+$output = [];
+$output[] = count($outputLibraries);
+foreach ($outputLibraries as $l) {
+    $output[] = $l['libraryId'] . " " . count($l['books']);
+    $output[] = implode(" ", $l['books']);
+}
+
+$fileManager->output(implode("\n", $output));
