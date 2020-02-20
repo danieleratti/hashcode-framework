@@ -60,11 +60,13 @@ function alignLibraries($cutDays)
     foreach ($libraries as $library) {
         /** @var Library $library */
         if ($countDays-$currentDay-$library->signUpDuration >= $cutDays) {
+            /*
             $outChunks = $library->booksChunked->splice($library->booksChunked->count() - $cutDays); // prendo gli ultimi
             $outChunksScore = $outChunks->reduce(function ($carry, $books) {
                 return $carry + $books->sum('award');
             }, 0);
-            $library->booksChunkedScore -= $outChunksScore;
+            $library->booksChunkedScore -= $outChunksScore;*/
+            fullAlignLibrary($library->id); //TMP
         } else {
             $libraries->forget($library->id);
         }
