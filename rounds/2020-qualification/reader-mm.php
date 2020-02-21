@@ -8,6 +8,7 @@ class Book
 {
     public $id;
     public $award;
+    public $rAward;
 
     /** @var Library[] $inLibraries */
     public $inLibraries = [];
@@ -23,9 +24,10 @@ class Book
         foreach ($this->inLibraries as $library) {
             unset($library->books[$this->id]);
             $library->currentTotalAward -= $this->award;
+            $library->rCurrentTotalAward -= $this->rAward;
         }
         $byLibrary->scannedBooks[$this->id] = $this;
-        echo "Scan book {$this->id} by library {$byLibrary->id}\n";
+        //echo "Scan book {$this->id} by library {$byLibrary->id}\n";
     }
 }
 
@@ -40,6 +42,7 @@ class Library
     public $isSignupped = false;
     public $signupFinishAt = -1;
     public $currentTotalAward = 0;
+    public $rCurrentTotalAward = 0;
     /** @var Book[] $scannedBooks */
     public $scannedBooks = [];
 
@@ -65,13 +68,13 @@ class Library
     public function startSignup($now)
     {
         $this->signupFinishAt = $now + $this->signUpDuration;
-        echo "Start signup for {$this->id}\n";
+        //echo "Start signup for {$this->id}\n";
     }
 
     public function finishSignup()
     {
         $this->isSignupped = true;
-        echo "Finish signup for {$this->id}\n";
+        //echo "Finish signup for {$this->id}\n";
     }
 }
 

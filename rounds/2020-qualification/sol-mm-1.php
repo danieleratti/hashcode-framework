@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'f';
+$fileName = 'd';
 
 include 'reader-mm.php';
 
@@ -18,6 +18,8 @@ $totalScore = 0;
 $scannedBooks = [];
 /** @var Book[] $notScannedBooks */
 $notScannedBooks = $books;
+/** @var Library[] $orderedSignuppedLibraries */
+$orderedSignuppedLibraries = [];
 /** @var Library[] $signuppedLibraries */
 $signuppedLibraries = [];
 /** @var Library[] $notSignuppedLibraries */
@@ -27,6 +29,15 @@ $currentSignupLibrary = null;
 
 // Algo
 
+foreach ($books as $b) {
+    $b->rAward = $b->award / pow(count($b->inLibraries), 1);
+}
+foreach ($libraries as $l) {
+    foreach ($l->books as $b) {
+        $l->rCurrentTotalAward += $b->rAward;
+    }
+}
+
 for ($t = 0; $t < $countDays; $t++) {
 
     echo "[t = {$t}]\n";
@@ -35,7 +46,11 @@ for ($t = 0; $t < $countDays; $t++) {
     if ($currentSignupLibrary !== null && $t >= $currentSignupLibrary->signupFinishAt) {
         $currentSignupLibrary->finishSignup();
         $signuppedLibraries[$currentSignupLibrary->id] = $currentSignupLibrary;
+        $orderedSignuppedLibraries[$currentSignupLibrary->id] = $currentSignupLibrary;
         $currentSignupLibrary = null;
+        uasort($signuppedLibraries, function (Library $l1, Library $l2) {
+            return count($l1->books) < count($l2->books);
+        });
     }
 
     // Per le library già signuppate scanno i libri in ordine di award e al max shipsPerDay
@@ -59,9 +74,15 @@ for ($t = 0; $t < $countDays; $t++) {
     if ($currentSignupLibrary === null) {
         // Do degli score alle library non ancora signuppate
         $libraryScores = [];
+        $remainingTime = $countDays - $t;
         foreach ($notSignuppedLibraries as $nsl) {
-            if ($countDays - $t - $nsl->signUpDuration > 0) {
-                $score = $nsl->currentTotalAward * $nsl->shipsPerDay / $nsl->signUpDuration;  /* - ($countDays - $nsl->signUpDuration)*/
+            $avanzo = $remainingTime - $nsl->signUpDuration;
+            if ($avanzo > 0) {
+                //$score = $nsl->rCurrentTotalAward / $nsl->signUpDuration * $avanzo / $remainingTime;
+                //$score = $nsl->currentTotalAward * $nsl->shipsPerDay / $nsl->signUpDuration * $avanzo;
+                $score = $nsl->currentTotalAward * $nsl->shipsPerDay;
+                //$score = pow($nsl->currentTotalAward * $nsl->shipsPerDay, 0.71) / $nsl->signUpDuration * pow($avanzo / $remainingTime, 9);
+
                 $libraryScores[$nsl->id] = $score;
             }
         }
@@ -84,13 +105,13 @@ echo "\n\nTotal score: {$totalScore}";
 // Output
 
 $output = '';
-foreach ($signuppedLibraries as $lId => $sl) {
+foreach ($orderedSignuppedLibraries as $lId => $sl) {
     if (count($sl->scannedBooks) === 0) {
-        unset($signuppedLibraries[$lId]);
+        unset($orderedSignuppedLibraries[$lId]);
     }
 }
 $output .= count($signuppedLibraries) . "\n";
-foreach ($signuppedLibraries as $sl) {
+foreach ($orderedSignuppedLibraries as $sl) {
     $scannedBooksCount = count($sl->scannedBooks);
     $output .= "{$sl->id} {$scannedBooksCount}\n";
     $scannedIds = [];
