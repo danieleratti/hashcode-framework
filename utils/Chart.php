@@ -88,6 +88,7 @@ Class Chart
                 $item['yaxis'] = 'y' . $customAxis;
                 $layout = [
                     'yaxis' . $customAxis => [
+                        'title' => $line['name'],
                         'overlaying' => 'y',
                         'side' => $line['side'] ?: 'left',
                     ]

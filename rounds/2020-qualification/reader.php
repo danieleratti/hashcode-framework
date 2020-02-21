@@ -9,6 +9,7 @@ class Book
 {
     public $id;
     public $award;
+    public $awardWeighted;
 
     /** @var Collection $inLibraries */
     public $inLibraries;

@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'e';
+$fileName = 'd';
 
 include 'reader.php';
 
@@ -47,12 +47,12 @@ function fullAlignLibrary($libraryId)
             $booksChunkedScore = $booksChunked->reduce(function ($carry, $books) {
                 return $carry + $books->sum('award');
             }, 0);
-            /*$booksChunkedScoreTail = $booksChunked->take(-round($avgSignupDuration))->reduce(function ($carry, $books) {
+            $booksChunkedScoreTail = $booksChunked->take(-round($avgSignupDuration))->reduce(function ($carry, $books) {
                 return $carry + $books->sum('award');
             }, 0);
             $booksChunkedScoreHead = $booksChunked->take($library->signUpDuration)->reduce(function ($carry, $books) {
                 return $carry + $books->sum('award');
-            }, 0);*/
+            }, 0);
             $library->booksChunked = $booksChunked;
             //$library->booksChunkedScore = pow($booksChunkedScore, 1.5) / pow(10 * $library->signUpDuration / $avgSignupDuration, 0.75); //NEW FAKE SCORE!!!
             //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow(1 + $library->signUpDuration / $avgSignupDuration, 1) / pow($booksChunkedScoreTail * 0.3, 1); //NEW FAKE SCORE!!!
@@ -65,7 +65,7 @@ function fullAlignLibrary($libraryId)
             //$library->booksChunkedScore = pow($booksChunkedScore, 1.5) / pow($library->signUpDuration, 1);
             //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - 29, 1);
             //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - ($libraries->min('signUpDuration')-1), 1);
-            $library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration, 1);
+            $library->booksChunkedScore = $booksChunkedScore + $booksChunkedScoreTail*0.5;
             
         } else {
             $library->booksChunked = collect();
