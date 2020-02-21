@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'c';
+$fileName = 'f';
 
 include 'reader.php';
 
@@ -60,7 +60,13 @@ function fullAlignLibrary($libraryId)
             //$library->booksChunkedScore = $booksChunkedScore + $booksChunkedScoreTail*1; //NEW FAKE SCORE!!!
             //$library->booksChunkedScore = $booksChunkedScore - $booksChunkedScoreHead + $booksChunkedScoreTail; //NEW FAKE SCORE!!!
             
-            $library->booksChunkedScore = ($avgSignupDuration / $library->signUpDuration) * $booksChunkedScore;
+            //$library->booksChunkedScore = pow($avgSignupDuration / $library->signUpDuration, 1.5) * ($booksChunkedScore /*+ $booksChunkedScoreTail*/);
+            
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1.5) / pow($library->signUpDuration, 1);
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - 29, 1);
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - ($libraries->min('signUpDuration')-1), 1);
+            $library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration, 1);
+            
         } else {
             $library->booksChunked = collect();
             $library->booksChunkedScore = 0;
@@ -68,12 +74,12 @@ function fullAlignLibrary($libraryId)
     }
 }
 
-function alignLibraries($cutDays)
+function alignLibraries()
 {
     global $libraries, $currentDay, $countDays;
     foreach ($libraries as $library) {
         /** @var Library $library */
-        if ($countDays - $currentDay - $library->signUpDuration >= $cutDays) {
+        if ($countDays - $currentDay - $library->signUpDuration >= 0) {
             /*
             $outChunks = $library->booksChunked->splice($library->booksChunked->count() - $cutDays); // prendo gli ultimi
             $outChunksScore = $outChunks->reduce(function ($carry, $books) {
@@ -101,7 +107,7 @@ function purgeBooksFromLibraries($bookIds)
         // ELIMINO TUTTI STI LIBRI DI MERDA!!!!!
         foreach ($bookIds as $bookId)
             $library->books->forget($bookId);
-        fullAlignLibrary($libraryId);
+        //fullAlignLibrary($libraryId);
     }
 }
 
@@ -126,10 +132,9 @@ function takeLibrary($library)
     }
 
     $libraries->forget($library->id);
-    alignLibraries($library->signUpDuration);
     purgeBooksFromLibraries($takenBooks->pluck('id')->toArray());
-
     $currentDay += $library->signUpDuration;
+    alignLibraries();
 }
 
 /// alignLibraries($cutD) che taglia la coda di tutte le libraries rimanenti e ridà il nuovo punteggio temporaneo
@@ -154,6 +159,9 @@ Log::out('fullAlignLibraries');
 foreach ($libraries as $library)
     fullAlignLibrary($library->id);
 
+// passa alto
+//$libraries = $libraries->where('booksChunkedScore', '>', 10000);
+    
 Log::out('algo...');
 while ($firstLibrary = $libraries->sortByDesc('booksChunkedScore')->first()) {
     Log::out('dStart = ' . $currentDay . '/' . $countDays);

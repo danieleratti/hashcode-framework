@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'c';
+$fileName = 'd';
 
 include 'reader.php';
 
@@ -60,7 +60,13 @@ function fullAlignLibrary($libraryId)
             //$library->booksChunkedScore = $booksChunkedScore + $booksChunkedScoreTail*1; //NEW FAKE SCORE!!!
             //$library->booksChunkedScore = $booksChunkedScore - $booksChunkedScoreHead + $booksChunkedScoreTail; //NEW FAKE SCORE!!!
             
-            $library->booksChunkedScore = ($avgSignupDuration / $library->signUpDuration) * $booksChunkedScore;
+            //$library->booksChunkedScore = pow($avgSignupDuration / $library->signUpDuration, 1.5) * ($booksChunkedScore /*+ $booksChunkedScoreTail*/);
+            
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1.5) / pow($library->signUpDuration, 1);
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - 29, 1);
+            //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - ($libraries->min('signUpDuration')-1), 1);
+            $library->booksChunkedScore = $booksChunkedScore;
+            
         } else {
             $library->booksChunked = collect();
             $library->booksChunkedScore = 0;
@@ -126,8 +132,8 @@ function takeLibrary($library)
     }
 
     $libraries->forget($library->id);
-    alignLibraries($library->signUpDuration);
     purgeBooksFromLibraries($takenBooks->pluck('id')->toArray());
+    alignLibraries($library->signUpDuration);
 
     $currentDay += $library->signUpDuration;
 }
@@ -154,6 +160,9 @@ Log::out('fullAlignLibraries');
 foreach ($libraries as $library)
     fullAlignLibrary($library->id);
 
+// passa alto
+//$libraries = $libraries->where('booksChunkedScore', '>', 10000);
+    
 Log::out('algo...');
 while ($firstLibrary = $libraries->sortByDesc('booksChunkedScore')->first()) {
     Log::out('dStart = ' . $currentDay . '/' . $countDays);

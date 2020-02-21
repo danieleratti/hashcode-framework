@@ -28,4 +28,5 @@ $chart->plotHistogram($histogramData);
 //$chart->plotLineY([1,2,3,4,3,2,1]);
 //$chart->plotPoints([[1,1], [2,2], [3,3], [5,10]]);
 //$chart->plotBubbles([[1, 1, 1, 'red', '1 small red'], [2, 2, 2, 'blue', '2 medium blue'], [3, 3, 3, 'green', '3 big green']]);
-$chart->plotPoints3D([[1,1,1], [2,2,2], [3,3,3], [5,10,5]]);
+//$chart->plotPoints3D([[1,1,1], [2,2,2], [3,3,3], [5,10,5]]);
+$chart->plotMultiLineY([['name' => 'series1', 'line' => [1, 2, 3, 4, 3, 2, 1]], ['name' => 'series2', 'line' => [2, 3, 4, 3, 2, 1, 2], 'custom_axis' => true, 'side' => 'right']]);
