@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7c88c1f114be8fb024fce62a134dcbb",
+    "content-hash": "afe3ce6ea2708340f9ef0a98d94f404c",
     "packages": [
         {
             "name": "amphp/amp",
@@ -593,6 +593,50 @@
                 "graphviz"
             ],
             "time": "2019-10-04T13:30:55+00:00"
+        },
+        {
+            "name": "jan-swiecki/simple-annotations",
+            "version": "0.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jan-swiecki/php-simple-annotations.git",
+                "reference": "a10f772b24ecbc6b2a9c93c7ba9f4c6e879133a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jan-swiecki/php-simple-annotations/zipball/a10f772b24ecbc6b2a9c93c7ba9f4c6e879133a6",
+                "reference": "a10f772b24ecbc6b2a9c93c7ba9f4c6e879133a6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "DocBlockReader": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Święcki",
+                    "email": "jan.swiecki@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple annotation parser",
+            "homepage": "https://github.com/jan-swiecki/php-simple-annotations",
+            "keywords": [
+                "annotation",
+                "annotations",
+                "docblock",
+                "parser"
+            ],
+            "time": "2015-08-17T18:38:50+00:00"
         },
         {
             "name": "opis/closure",

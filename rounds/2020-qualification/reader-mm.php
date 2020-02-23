@@ -6,8 +6,11 @@ require_once '../../bootstrap.php';
 
 class Book
 {
+    /** @var int $id */
     public $id;
+    /** @var int $award */
     public $award;
+    /** @var int $rAward */
     public $rAward;
 
     /** @var Library[] $inLibraries */
@@ -34,7 +37,9 @@ class Book
 class Library
 {
     public $id;
+    /** @var int $signUpDuration */
     public $signUpDuration;
+    /** @var int $shipsPerDay */
     public $shipsPerDay;
     /** @var Book[] $books */
     public $books;
