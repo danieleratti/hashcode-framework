@@ -11,7 +11,7 @@ $kPow = null;
 $kPow2 = null;
 $penalizeTail = null;
 $kPenalizeTail = null;
-Cerberus::runClient(['fileName' => 'f', 'kPow' => 0.65, 'kPow2' => 1.0, 'penalizeTail' => 1, 'kPenalizeTail' => 1.0]);
+Cerberus::runClient(['fileName' => 'c', 'kPow' => 1.0, 'kPow2' => 1.0, 'penalizeTail' => 1, 'kPenalizeTail' => 1.0]);
 
 include 'reader.php';
 
@@ -77,8 +77,9 @@ function fullAlignLibrary($libraryId)
             //$library->booksChunkedScore = pow($booksChunkedScore, 1.5) / pow($library->signUpDuration, 1);
             //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - 29, 1);
             //$library->booksChunkedScore = pow($booksChunkedScore, 1) / pow($library->signUpDuration - ($libraries->min('signUpDuration')-1), 1);
-            echo "PenalTail : ".($penalizeTail*($booksChunkedScoreTail*$kPenalizeTail))."\n";
-            $library->booksChunkedScore = pow($booksChunkedScore + $penalizeTail*($booksChunkedScoreTail*$kPenalizeTail), $kPow2) / pow($library->signUpDuration, $kPow);
+            //echo "PenalTail : ".($penalizeTail*($booksChunkedScoreTail*$kPenalizeTail))."\n";
+            //$library->booksChunkedScore = pow($booksChunkedScore + $penalizeTail*($booksChunkedScoreTail*$kPenalizeTail), $kPow2) / pow($library->signUpDuration, $kPow);
+            //$library->booksChunkedScore = pow($booksChunkedScore, $kPow2) / pow($library->signUpDuration, $kPow);
 
         } else {
             $library->booksChunked = collect();

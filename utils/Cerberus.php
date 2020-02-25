@@ -82,7 +82,7 @@ class Cerberus
             Log::out("\n" . count($scripts) . ' scripts', 1);
 
             foreach ($scripts as $script) {
-                Log::out($script['id'] . ') ' . $script['name'] . ' (' . json_encode($script['params']) . ') => ' . trim($script['lastline']), 1, $script['status'] == 'running' ? 'light_purple' : 'yellow');
+                Log::out($script['id'] . ') ' . $script['script'] . ' (' . json_encode($script['params']) . ') => ' . trim($script['lastline']), 1, $script['status'] == 'running' ? 'light_purple' : 'yellow');
             }
 
 
