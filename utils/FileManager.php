@@ -30,11 +30,11 @@ class FileManager
         }
     }
 
-    public function output($content)
+    public function output($content, $extra = '')
     {
         $baseInputName = $this->getInputName();
         $scriptName = DirUtils::getScriptName();
-        $this->write(DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . '.txt', $content);
+        $this->write(DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . ($extra ? ('_' . $extra) : '') . '.txt', $content);
     }
 
     public function getInputName()

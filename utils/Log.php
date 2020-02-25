@@ -5,6 +5,7 @@ namespace Utils;
 class Log
 {
     public static $verbose = true;
+    public static $dates = true;
 
     public static function verbose($verbose)
     {
@@ -18,7 +19,9 @@ class Log
             for ($i = 0; $i < $level; $i++)
                 $padding .= "   ";
 
-            $outputString = date("Y-m-d H:i:s") . " => " . $padding . $content;
+            if (self::$dates)
+                $outputString = date("Y-m-d H:i:s") . " => ";
+            $outputString .= $padding . $content;
 
             if ($textColor !== null || $backgroundColor !== null) {
                 $colors = new ColoredString();
