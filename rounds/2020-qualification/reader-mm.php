@@ -49,6 +49,7 @@ class Library
     public $currentTotalAward = 0;
     public $rCurrentTotalAward = 0;
     public $dCurrentTotalAward = 0;
+    public $dLastChunkAward = 0;
     /** @var Book[] $scannedBooks */
     public $scannedBooks = [];
 
@@ -86,11 +87,21 @@ class Library
     public function recalculateDCurrentTotalAward($remainingTime)
     {
         $this->dCurrentTotalAward = 0;
+        $dLastChunkAward = 0;
         $maxBooksCount = ($remainingTime - $this->signUpDuration) * $this->shipsPerDay;
         foreach ($this->books as $book) {
             if ($maxBooksCount < 0) break;
             $this->dCurrentTotalAward += $book->award;
+            if($maxBooksCount <= $this->shipsPerDay) {
+                $dLastChunkAward += $book->award;
+            }
             $maxBooksCount--;
+        }
+        
+        if(ceil(count($this->books)/$this->shipsPerDay)+$this->signUpDuration >= $remainingTime) {
+            $this->dLastChunkAward = $dLastChunkAward;
+        } else {
+            $this->dLastChunkAward = 0;
         }
     }
 }
