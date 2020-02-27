@@ -1,6 +1,6 @@
 <?php
 
-$fileName = 'b';
+$fileName = 'd';
 
 include 'reader-mm.php';
 
@@ -29,6 +29,7 @@ $currentSignupLibrary = null;
 
 // Algo
 
+
 foreach ($books as $b) {
     $b->rAward = $b->award / pow(count($b->inLibraries), 1);
 }
@@ -37,6 +38,7 @@ foreach ($libraries as $l) {
         $l->rCurrentTotalAward += $b->rAward;
     }
 }
+
 
 for ($t = 0; $t < $countDays; $t++) {
 
@@ -76,11 +78,34 @@ for ($t = 0; $t < $countDays; $t++) {
         $libraryScores = [];
         $remainingTime = $countDays - $t;
         foreach ($notSignuppedLibraries as $nsl) {
+            if ($fileName === 'f') {
+                $nsl->recalculateDCurrentTotalAward($remainingTime);
+            }
             $avanzo = $remainingTime - $nsl->signUpDuration;
             if ($avanzo > 0) {
+                switch ($fileName) {
+                    case 'a':
+                    case 'b':
+                    case 'c':
+                        $score = $nsl->currentTotalAward / $nsl->signUpDuration; // per C
+                        break;
+                    case 'd':
+                        $score = count($nsl->books) + $nsl->rCurrentTotalAward / 1000000; // per D
+                        break;
+                    case 'e':
+                        $score = pow($nsl->currentTotalAward * $nsl->shipsPerDay, 0.71) / $nsl->signUpDuration * pow($avanzo / $remainingTime, 8.9); // per E
+                        break;
+                    case 'f':
+                        $score = $nsl->dCurrentTotalAward / pow($nsl->signUpDuration, 0.6); // per F
+                        break;
+                }
+                //$score = $nsl->currentTotalAward / $nsl->signUpDuration; // per C
+                //$score = count($nsl->books) + $nsl->rCurrentTotalAward / 1000000; // per D
+                //$score = pow($nsl->dCurrentTotalAward * $nsl->shipsPerDay, 0.71) / $nsl->signUpDuration * pow($avanzo / $remainingTime, 8.9); // per E
+                //$score = $nsl->dCurrentTotalAward / pow($nsl->signUpDuration, 0.6); // per F
                 //$score = $nsl->rCurrentTotalAward / $nsl->signUpDuration * $avanzo / $remainingTime;
                 //$score = $nsl->currentTotalAward * $nsl->shipsPerDay / $nsl->signUpDuration * $avanzo;
-                $score = $nsl->currentTotalAward * $nsl->shipsPerDay;
+                //$score = $nsl->currentTotalAward * $nsl->shipsPerDay;
                 //$score = pow($nsl->currentTotalAward * $nsl->shipsPerDay, 0.71) / $nsl->signUpDuration * pow($avanzo / $remainingTime, 9);
 
                 $libraryScores[$nsl->id] = $score;

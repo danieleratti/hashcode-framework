@@ -48,6 +48,7 @@ class Library
     public $signupFinishAt = -1;
     public $currentTotalAward = 0;
     public $rCurrentTotalAward = 0;
+    public $dCurrentTotalAward = 0;
     /** @var Book[] $scannedBooks */
     public $scannedBooks = [];
 
@@ -80,6 +81,17 @@ class Library
     {
         $this->isSignupped = true;
         //echo "Finish signup for {$this->id}\n";
+    }
+
+    public function recalculateDCurrentTotalAward($remainingTime)
+    {
+        $this->dCurrentTotalAward = 0;
+        $maxBooksCount = ($remainingTime - $this->signUpDuration) * $this->shipsPerDay;
+        foreach ($this->books as $book) {
+            if ($maxBooksCount < 0) break;
+            $this->dCurrentTotalAward += $book->award;
+            $maxBooksCount--;
+        }
     }
 }
 
