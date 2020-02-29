@@ -65,6 +65,20 @@ class Book
         }
         unset($byLibrary->scannedBooks[$this->id]);
     }
+
+    public function unscanFirst(Library $byLibrary)
+    {
+        $this->scanned = false;
+        foreach ($this->originalInLibraries as $library) {
+            $library->books[$this->id] = $this;
+            $library->currentTotalAward += $this->award;
+            $library->rCurrentTotalAward += $this->rAward;
+            uasort($library->books, function (Book $b1, Book $b2) {
+                return $b1->award < $b2->award;
+            });
+        }
+        unset($byLibrary->scannedBooks[$this->id]);
+    }
 }
 
 class Library
