@@ -12,9 +12,14 @@ class Book
     public $award;
     /** @var int $rAward */
     public $rAward;
+    /** @var bool $scanned */
+    public $scanned;
 
     /** @var Library[] $inLibraries */
     public $inLibraries = [];
+
+    /** @var Library[] $originalInLibraries */
+    public $originalInLibraries = [];
 
     public function __construct($id, $award)
     {
@@ -24,6 +29,7 @@ class Book
 
     public function scan(Library $byLibrary)
     {
+        $this->scanned = true;
         foreach ($this->inLibraries as $library) {
             unset($library->books[$this->id]);
             $library->currentTotalAward -= $this->award;
@@ -31,6 +37,17 @@ class Book
         }
         $byLibrary->scannedBooks[$this->id] = $this;
         //echo "Scan book {$this->id} by library {$byLibrary->id}\n";
+    }
+
+    public function unscan(Library $byLibrary)
+    {
+        $this->scanned = false;
+        foreach ($this->originalInLibraries as $library) {
+            $library->books[$this->id] = $this;
+            $library->currentTotalAward += $this->award;
+            $library->rCurrentTotalAward += $this->rAward;
+        }
+        unset($byLibrary->scannedBooks[$this->id]);
     }
 }
 
@@ -43,6 +60,8 @@ class Library
     public $shipsPerDay;
     /** @var Book[] $books */
     public $books;
+    /** @var Book[] $originalBooks */
+    public $originalBooks;
     // Computed
     public $isSignupped = false;
     public $signupFinishAt = -1;
@@ -70,6 +89,7 @@ class Library
         uasort($this->books, function (Book $b1, Book $b2) {
             return $b1->award < $b2->award;
         });
+        $this->originalBooks = $this->books;
     }
 
     public function startSignup($now)
