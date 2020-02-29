@@ -38,6 +38,11 @@ class Library
     public $done = false;
     public $booksNumber = 0;
 
+    public $librariesConnected = [];
+    public $librariesConnectedCount = 0;
+
+    public $percentileChunkScore = 0;
+
     public function __construct($id, $fileRow1, $fileRow2)
     {
         global $books;
