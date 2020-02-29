@@ -66,8 +66,8 @@ function switchBook($switch)
 
     $books[$switch['switch_book']]->unscan($libFrom);
     $books[$switch['pop_book_to']]->unscan($libTo);
-    $books[$switch['switch_book']]->scan($libTo);
-    $books[$switch['push_book_from']]->scan($libFrom);
+    $books[$switch['switch_book']]->scanFirst($libTo);
+    $books[$switch['push_book_from']]->scanFirst($libFrom);
 }
 
 // Algo

@@ -39,6 +39,22 @@ class Book
         //echo "Scan book {$this->id} by library {$byLibrary->id}\n";
     }
 
+    public function scanFirst(Library $byLibrary)
+    {
+        $this->scanned = true;
+        foreach ($this->inLibraries as $library) {
+            unset($library->books[$this->id]);
+            $library->currentTotalAward -= $this->award;
+            $library->rCurrentTotalAward -= $this->rAward;
+        }
+        $byLibrary->scannedBooks[$this->id] = $this;
+
+        uasort($byLibrary->scannedBooks, function (Book $b1, Book $b2) {
+            return $b1->award < $b2->award;
+        });
+
+    }
+
     public function unscan(Library $byLibrary)
     {
         $this->scanned = false;
