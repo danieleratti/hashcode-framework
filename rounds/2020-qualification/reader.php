@@ -13,6 +13,7 @@ class Book
 
     /** @var Collection $inLibraries */
     public $inLibraries;
+    public $inLibrariesCount;
 
     public function __construct($id, $award)
     {
@@ -43,6 +44,10 @@ class Library
 
     public $percentileChunkScore = 0;
 
+    public $uniqueness = 0;
+    public $booksCut = null;
+    public $booksCutScore = 0;
+
     public function __construct($id, $fileRow1, $fileRow2)
     {
         global $books;
@@ -55,6 +60,7 @@ class Library
             $this->books[$bookId] = $book;
             $book->inLibraries->put($id, $this);
         }
+        $book->inLibrariesCount = $book->inLibraries->count();
         $this->books = collect($this->books)->keyBy('id');
         $this->booksNumber = $booksCount;
     }
