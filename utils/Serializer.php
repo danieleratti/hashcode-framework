@@ -62,4 +62,43 @@ class Serializer
     {
         unlink(self::fileName($name, $method));
     }
+
+    public static function getContext($_name, $_context)
+    {
+        $__newcontext = [];
+        foreach ($_context as $_var) {
+            $__newcontext[$_var] = self::get($_name . '/' . $_var);
+            if (!$__newcontext[$_var]) {
+                return false;
+            }
+        }
+        foreach ($__newcontext as $_var => $_obj) {
+            global $$_var;
+            $$_var = $_obj;
+        }
+        return true;
+    }
+
+    public static function setContext($_name, $_context)
+    {
+        if (!is_dir('serialize'))
+            mkdir('serialize');
+        if (!is_dir('serialize/' . $_name))
+            mkdir('serialize/' . $_name);
+        foreach ($_context as $_var) {
+            global $$_var;
+            Log::out('Saving context for ' . $_var . '...', 1, 'gray');
+            self::set($_name . '/' . $_var, $$_var);
+        }
+    }
+
+    public static function cleanContext($name)
+    {
+        foreach ($files1 = scandir('serialize/' . $name) as $fname) {
+            if ($fname != "." && $fname != "..") {
+                list($fname) = explode(".s", $fname);
+                self::clean($name . '/' . $fname);
+            }
+        }
+    }
 }

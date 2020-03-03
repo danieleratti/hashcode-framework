@@ -47,6 +47,7 @@ class Library
     public $uniqueness = 0;
     public $booksCut = null;
     public $booksCutScore = 0;
+    public $booksCutCount = 0;
 
     public function __construct($id, $fileRow1, $fileRow2)
     {
