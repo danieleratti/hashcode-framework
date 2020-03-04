@@ -33,17 +33,21 @@ class Building
             }
         }
 
-        $this->height = count($booleanPlan);
-        $this->width = count($booleanPlan[0]);
-        $this->plan = $booleanPlan;
+        $height = count($booleanPlan);
+        $width = count($booleanPlan[0]);
 
         foreach ($booleanPlan as $row => $planRow) {
             foreach ($planRow as $col => $cell) {
                 if (!$cell)
                     continue;
-                if ($col)
+                if ($row == 0 || $row == ($height - 1) || $col == 0 || $col == ($width - 1))
+                    $this->perimeter = 0;
             }
         }
+
+        $this->width = $width;
+        $this->height = $height;
+        $this->plan = $booleanPlan;
     }
 }
 
