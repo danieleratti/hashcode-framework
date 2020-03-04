@@ -12,3 +12,4 @@ $chart->plotMultiLineY([
     ['name' => 'SignupDuration', 'line' => $libraries->sortBy('signUpDuration')->pluck('signUpDuration')->toArray()],
     ['name' => 'booksChunkedScore', 'line' => $libraries->sortBy('signUpDuration')->pluck('booksChunkedScore')->toArray(), 'custom_axis' => true, 'side' => 'right']
 ]);
+echo $buildings->count();

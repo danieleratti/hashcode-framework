@@ -1,32 +1,63 @@
 <?php
 
-use Utils\Collection;
 use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
-/**
- * Runtime
- */
+class Building
+{
+    public $id;
+    public $plan;
+    public $buildingType;
+
+    public function __construct($id, $plan, $buildingType)
+    {
+        $this->id = $id;
+        $this->plan = $plan;
+        $this->buildingType = $buildingType;
+    }
+}
+
+class Residence extends Building
+{
+    public $capacity;
+
+    public function __construct($id, $plan, $capacity)
+    {
+        parent::__construct($id, $plan, 'R');
+        $this->capacity = $capacity;
+    }
+}
+
+class Utility extends Building
+{
+    public $utilityType;
+
+    public function __construct($id, $plan, $type)
+    {
+        parent::__construct($id, $plan, 'U');
+        $this->utilityType = $type;
+    }
+}
 
 // Reading the inputs
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-list($countBooks, $countLibraries, $countDays) = explode(' ', $content[0]);
+list($cityRows, $cityColumns, $maxWalkingDistance, $buildingPlansCount) = explode(' ', $content[0]);
 
-$books = [];
-foreach (explode(' ', $content[1]) as $id => $bookAward) {
-    $books[$id] = new Book($id, $bookAward);
-}
-$books = collect($books)->keyBy('id');
+$buildings = collect();
 
-$libraries = [];
-$librariesRows = array_slice($content, 2, count($content));
-
+$fileRow = 1;
 $id = 0;
-for ($line = 0; $line < count($librariesRows); $line += 2) {
-    $libraries[$id] = new Library($id, $librariesRows[$line], $librariesRows[$line + 1]);
+while ($fileRow < count($content)) {
+    list($projectType, $rows, $columns, $data) = explode(' ', $content[$fileRow]);
+    $fileRow++;
+    $plan = array_slice($content, $fileRow, $rows);
+    if ($projectType == 'U')
+        $buildings->add(new Utility($id, $plan, $data));
+    else
+        $buildings->add(new Residence($id, $plan, $data));
+    $fileRow += $rows;
     $id++;
 }
-$libraries = collect($libraries)->keyBy('id');
