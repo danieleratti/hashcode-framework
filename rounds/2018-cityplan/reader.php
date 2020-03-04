@@ -8,7 +8,7 @@ class Building
 {
     /** @var int $id */
     public $id;
-    /** @var string[][] $plan */
+    /** @var bool[][] $plan */
     public $plan;
     /** @var string $buildingType */
     public $buildingType;
