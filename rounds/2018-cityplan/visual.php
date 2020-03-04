@@ -35,7 +35,7 @@ $maxUtilitiesWidth = $utilities->groupBy('utilityType')->map(function ($group) {
     return $group->sum('width');
 })->max();
 
-$rows = $padding * 6 + $maxResidenceHeight + $maxUtilityHeight;
+$rows = $padding * 15 + $maxResidenceHeight + $maxUtilityHeight;
 $cols = $padding * 2 + max($residenceWidth, $maxUtilitiesWidth);
 
 $visualStandard = new VisualStandard($rows, $cols);
