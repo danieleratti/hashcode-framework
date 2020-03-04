@@ -270,25 +270,35 @@ class City
 
     public function getScore()
     {
-        global $maxWalkingDistance;
+        global $maxWalkingDistance, $utilities;
 
-        $residences = $this->placedBuildings->where('type', '=', 'R');
-        $utilities = $this->placedBuildings->where('type', '=', 'U');
+        $placedResidences = $this->placedBuildings->where('type', '=', 'R');
 
         $score = 0;
-        foreach ($residences as $placedR) {
+        $foundedBuildings = [];
+        foreach ($placedResidences as $placedR) {
             /** @var Residence $residence */
             $residence = $placedR['building'];
-            foreach ($utilities as $placedU) {
-                /** @var Utility $utility */
-                $utility = $placedU['building'];
-                $distance = calculateDistance($residence, $placedR['r'], $placedR['c'], $utility, $placedU['r'], $placedU['c']);
+            foreach ($residence->getRelativePerimeter($placedR['r'], $placedR['c']) as $cell) {
+                for ($r = -$maxWalkingDistance; $r <= $maxWalkingDistance; $r++) {
+                    for ($c = abs($r) - $maxWalkingDistance; $c <= $maxWalkingDistance - abs($r); $c++) {
+                        $foundedBuildings[$this->map[$r][$c]] = true;
+                    }
+                }
+            }
 
-                if ($distance > $maxWalkingDistance)
+            $utilitiesType = [];
+            foreach ($foundedBuildings as $id => $null) {
+                if (!$id)
                     continue;
 
-                $score += $residence->capacity;
+                $build = $utilities->get($id);
+                if ($build->buildingType != 'U')
+                    continue;
+                $utilitiesType[$build->utilityType] = true;
             }
+
+            $score += count($utilitiesType) * $residence->capacity;
         }
 
         return $score;
@@ -336,7 +346,7 @@ class City
             $cells = $building->getRelativeCellsList($placedBuilding['r'], $placedBuilding['c']);
             foreach ($cells as $cell) {
                 $visualStandard->setPixel($cell[0], $cell[1], $color);
-}
+            }
         }
         $visualStandard->save('city_' . $fileName);
     }
@@ -366,5 +376,6 @@ while ($fileRow < count($content)) {
     $id++;
 }
 
-$residences = $buildings->where('buildingType', 'R');
-$utilities = $buildings->where('buildingType', 'U');
+$buildings = $buildings->keyBy('id');
+$residences = $buildings->where('buildingType', 'R')->keyBy('id');
+$utilities = $buildings->where('buildingType', 'U')->keyBy('id');
