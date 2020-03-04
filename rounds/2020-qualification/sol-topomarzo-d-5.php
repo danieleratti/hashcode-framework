@@ -119,8 +119,8 @@ while (true) {
     Log::out('iteration ' . $iteration, 1, 'purple');
     $thresoldUp = $libraries->where('taken', true)->min('uniqueBooksCount');
     $thresoldDown = $libraries->where('taken', false)->max('uniqueBooksCount');
-    $libUp = $libraries->where('taken', true)->where('uniqueBooksCount', $thresoldUp)->random(1);
-    $libDown = $libraries->where('taken', false)->where('uniqueBooksCount', '>=', $thresoldDown)->random(1);
+    $libUp = $libraries->where('taken', true)->where('uniqueBooksCount', $thresoldUp)->random(1)[0];
+    $libDown = $libraries->where('taken', false)->where('uniqueBooksCount', '>=', $thresoldDown)->random(1)[0];
     if ($libUp && $libDown)
         $deltaScore = ($libDown->uniqueBooksCount - $libUp->uniqueBooksCount) * 65;
     else
