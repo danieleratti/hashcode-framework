@@ -6,8 +6,11 @@ require_once '../../bootstrap.php';
 
 class Building
 {
+    /** @var int $id */
     public $id;
+    /** @var string[][] $plan */
     public $plan;
+    /** @var string $buildingType */
     public $buildingType;
 
     public function __construct($id, $plan, $buildingType)
@@ -20,6 +23,7 @@ class Building
 
 class Residence extends Building
 {
+    /** @var int $capacity */
     public $capacity;
 
     public function __construct($id, $plan, $capacity)
@@ -31,6 +35,7 @@ class Residence extends Building
 
 class Utility extends Building
 {
+    /** @var int $utilityType */
     public $utilityType;
 
     public function __construct($id, $plan, $type)
