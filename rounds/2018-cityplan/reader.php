@@ -4,9 +4,71 @@ use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
+/**
+ * @param Building $build1
+ * @param int $r1
+ * @param int $c1
+ * @param Building $build2
+ * @param int $r2
+ * @param int $c2
+ * @return int
+ */
 function calculateDistance($build1, $r1, $c1, $build2, $r2, $c2)
 {
+    $perimeter1 = $build1->getRelativePerimeter($r1, $c1);
+    $perimeter2 = $build2->getRelativePerimeter($r2, $c2);
 
+    $minDistance = null;
+    foreach ($perimeter1 as $pcell1) {
+        foreach ($perimeter2 as $pcell2) {
+            $distance = abs($pcell1[0] - $pcell2[0]) + abs($pcell1[1] - $pcell2[1]);
+            if (is_null($minDistance) || $distance < $minDistance)
+                $minDistance = $distance;
+        }
+    }
+
+    return $minDistance;
+}
+
+/**
+ * @param Building $build1
+ * @param int $r1
+ * @param int $c1
+ * @param Building $build2
+ * @param int $r2
+ * @param int $c2
+ * @return int
+ */
+function collide($build1, $r1, $c1, $build2, $r2, $c2)
+{
+    $top1 = $r1;
+    $bottom1 = $r1 + $build1->height;
+    $left1 = $c1;
+    $right1 = $c1 + $build1->width;
+
+    $top2 = $r2;
+    $bottom2 = $r2 + $build2->height;
+    $left2 = $c2;
+    $right2 = $c2 + $build2->width;
+
+    if (
+        $bottom1 < $top2
+        || $right1 < $left2
+        || $bottom2 < $top1
+        || $right2 < $left1
+    )
+        return false;
+
+    $cells1 = $build1->getRelativeCellsList($r1, $c1);
+    $cells2 = $build2->getRelativeCellsList($r2, $c2);
+
+    foreach ($cells1 as $cell1) {
+        foreach ($cells2 as $cell2) {
+            if ($cell1[0] == $cell2[0] && $cell1[1] == $cell2[1])
+                return true;
+        }
+    }
+    return false;
 }
 
 class Building
@@ -27,6 +89,7 @@ class Building
     private $_stringPlan;
     private $complexity;    // count(perimeter) -
     private $efficiency;    // capacity / area
+    private $cellsList = null;
 
     public function __construct($id, $plan, $buildingType)
     {
@@ -67,6 +130,40 @@ class Building
         $this->width = $width;
         $this->height = $height;
         $this->plan = $booleanPlan;
+    }
+
+    public function getRelativePerimeter($r, $c)
+    {
+        $relativePerimeter = [];
+        foreach ($this->perimeter as $cell) {
+            $relativePerimeter[] = [($cell[0] + $r), ($cell[1] + $c)];
+        }
+        return $relativePerimeter;
+    }
+
+    public function getRelativeCellsList($r, $c)
+    {
+        $list = [];
+        foreach ($this->getCellsList() as $cell) {
+            $list[] = [($cell[0] + $r), ($cell[1] + $c)];
+        }
+        return $list;
+    }
+
+    public function getCellsList()
+    {
+        if (is_null($this->cellsList)) {
+            $this->cellsList = [];
+            foreach ($this->plan as $row => $planRow) {
+                foreach ($planRow as $col => $cell) {
+                    if (!$cell)
+                        continue;
+                    $this->cellsList = [$row, $col];
+                }
+            }
+        }
+
+        return $this->cellsList;
     }
 }
 
