@@ -4,6 +4,11 @@ use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
+function calculateDistance($build1, $r1, $c1, $build2, $r2, $c2)
+{
+
+}
+
 class Building
 {
     /** @var int $id */
@@ -45,10 +50,10 @@ class Building
                     || $row == ($height - 1)
                     || $col == 0
                     || $col == ($width - 1)
-                    || $booleanPlan[$row + 1][$col]
-                    || $booleanPlan[$row - 1][$col]
-                    || $booleanPlan[$row][$col + 1]
-                    || $booleanPlan[$row][$col - 1]
+                    || !$booleanPlan[$row + 1][$col]
+                    || !$booleanPlan[$row - 1][$col]
+                    || !$booleanPlan[$row][$col + 1]
+                    || !$booleanPlan[$row][$col - 1]
                 ) {
                     $this->perimeter[] = [$row, $col];
                 }
