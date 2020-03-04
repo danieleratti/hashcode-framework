@@ -87,9 +87,6 @@ class Building
     public $width;
 
     private $_stringPlan;
-    private $complexity;    // count(perimeter) -
-    private $efficiency;    // capacity / area
-    private $cellsList = null;
 
     public function __construct($id, $plan, $buildingType)
     {
@@ -172,10 +169,14 @@ class Residence extends Building
     /** @var int $capacity */
     public $capacity;
 
+    /** @var double $efficiency */
+    public $efficiency;    // capacity / area
+
     public function __construct($id, $plan, $capacity)
     {
         parent::__construct($id, $plan, 'R');
         $this->capacity = $capacity;
+        $this->efficiency = $capacity / $this->width / $this->height;
     }
 }
 
