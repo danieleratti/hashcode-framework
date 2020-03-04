@@ -131,6 +131,11 @@ class Building
         $this->plan = $booleanPlan;
     }
 
+    public function __toString()
+    {
+        return implode("\n", $this->_stringPlan);
+    }
+
     public function getRelativePerimeter($r, $c)
     {
         $relativePerimeter = [];
@@ -329,7 +334,7 @@ class City
             $cells = $building->getRelativeCellsList($placedBuilding['r'], $placedBuilding['c']);
             foreach ($cells as $cell) {
                 $visualStandard->setPixel($cell[0], $cell[1], $color);
-            }
+}
         }
         $visualStandard->save('city_' . $fileName);
     }
