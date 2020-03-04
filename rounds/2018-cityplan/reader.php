@@ -263,11 +263,28 @@ class City
 
     public function getScore()
     {
-        $this->placedBuildings
-            ->where('type', '=', 'R')
-            ->each(function ($residence) {
+        global $maxWalkingDistance;
 
-            });
+        $residences = $this->placedBuildings->where('type', '=', 'R');
+        $utilities = $this->placedBuildings->where('type', '=', 'U');
+
+        $score = 0;
+        foreach ($residences as $placedR) {
+            /** @var Residence $residence */
+            $residence = $placedR['building'];
+            foreach ($utilities as $placedU) {
+                /** @var Utility $utility */
+                $utility = $placedU['building'];
+                $distance = calculateDistance($residence, $placedR['r'], $placedR['c'], $utility, $placedU['r'], $placedU['c']);
+
+                if ($distance > $maxWalkingDistance)
+                    continue;
+
+                $score += $residence->capacity;
+            }
+        }
+
+        return $score;
     }
 
     public function print()
