@@ -41,7 +41,7 @@ $cols = $padding * 2 + max($residenceWidth, $maxUtilitiesWidth);
 $visualStandard = new VisualStandard($rows, $cols);
 $r = $padding;
 $c = $padding;
-foreach ($residences->sortByDesc('capacity') as $residence) {
+foreach ($residences->sortByDesc('efficiency') as $residence) { //sort efficiency, capacity
     printVisual($residence, $r, $c);
     $c += $residence->width + $padding;
 }
@@ -58,4 +58,4 @@ foreach ($utilities->groupBy('utilityType') as $utilityGroup) {
     }
 }
 
-$visualStandard->save('visual_' . $fileName);
+$visualStandard->save('visualEfficiency_' . $fileName);

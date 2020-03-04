@@ -40,4 +40,19 @@ abstract class Visual
     }
 
     public abstract function setPixel($row, $col, $color);
+
+    /**
+     * @param $points
+     * points [[0, 0],  [0, 2],  [2, 2],  [2, 0]]
+     * @param $color
+     */
+    public function setBgPolygon($points, $color)
+    {
+        $_points = [];
+        foreach($points as $p) {
+            $_points[] = $p[0];
+            $_points[] = $p[1];
+        }
+        imagefilledpolygon($this->image, $_points, count($points), $color);
+    }
 }
