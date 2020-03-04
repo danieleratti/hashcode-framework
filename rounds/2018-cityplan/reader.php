@@ -25,6 +25,8 @@ class Building
     public $width;
 
     private $_stringPlan;
+    private $complexity;    // count(perimeter) -
+    private $efficiency;    // capacity / area
 
     public function __construct($id, $plan, $buildingType)
     {
