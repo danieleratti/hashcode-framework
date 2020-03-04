@@ -194,16 +194,16 @@ class Utility extends Building
 
 class City
 {
-    public $row;
-    public $col;
+    public $rows;
+    public $cols;
 
     public $placedBuildings;
     public $map;
 
-    public function __construct($row, $col)
+    public function __construct($rows, $cols)
     {
-        $this->row = $row;
-        $this->col = $col;
+        $this->rows = $rows;
+        $this->cols = $cols;
         $this->placedBuildings = collect();
     }
 
@@ -246,7 +246,13 @@ class City
         $relativeCells = $building->getRelativeCellsList($row, $col);
 
         foreach ($relativeCells as $cell) {
-            if (!is_null($this->map[$cell[0]][$cell[1]]))
+            if (
+                $cell[0] < 0
+                || $cell[0] >= $this->rows
+                || $cell[1] < 0
+                || $cell[1] >= $this->cols
+                || !is_null($this->map[$cell[0]][$cell[1]])
+            )
                 return false;
         }
 
@@ -255,11 +261,28 @@ class City
 
     public function getScore()
     {
-        $this->placedBuildings
-            ->where('type', '=', 'R')
-            ->each(function ($residence) {
-                
-            });
+        global $maxWalkingDistance;
+
+        $residences = $this->placedBuildings->where('type', '=', 'R');
+        $utilities = $this->placedBuildings->where('type', '=', 'U');
+
+        $score = 0;
+        foreach ($residences as $placedR) {
+            /** @var Residence $residence */
+            $residence = $placedR['building'];
+            foreach ($utilities as $placedU) {
+                /** @var Utility $utility */
+                $utility = $placedU['building'];
+                $distance = calculateDistance($residence, $placedR['r'], $placedR['c'], $utility, $placedU['r'], $placedU['c']);
+
+                if ($distance > $maxWalkingDistance)
+                    continue;
+
+                $score += $residence->capacity;
+            }
+        }
+
+        return $score;
     }
 }
 
