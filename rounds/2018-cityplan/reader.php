@@ -12,12 +12,25 @@ class Building
     public $plan;
     /** @var string $buildingType */
     public $buildingType;
+    public $perimeter;
+
+    public $height;
+    public $width;
 
     public function __construct($id, $plan, $buildingType)
     {
         $this->id = $id;
-        $this->plan = $plan;
         $this->buildingType = $buildingType;
+
+        foreach ($plan as $row => $planRow) {
+            foreach (str_split($planRow, 1) as $col => $planCell) {
+                $cell = $planCell == '#';
+                $this->plan[$row][$col] = $cell;
+            }
+        }
+
+        $this->height = count($this->plan);
+        $this->width = count($this->plan[0]);
     }
 }
 
