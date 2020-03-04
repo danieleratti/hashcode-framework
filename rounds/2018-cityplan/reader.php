@@ -192,11 +192,79 @@ class Utility extends Building
     }
 }
 
+class City
+{
+    public $row;
+    public $col;
+
+    public $placedBuildings;
+    public $map;
+
+    public function __construct($row, $col)
+    {
+        $this->row = $row;
+        $this->col = $col;
+    }
+
+    /**
+     * @param Building $building
+     * @param $row
+     * @param $col
+     * @param bool $check
+     * @return bool
+     */
+    public function placeBuilding($building, $row, $col, $check = true)
+    {
+
+        if ($check) {
+            $this->canPlace($building, $row, $col);
+        }
+
+        $this->placedBuildings[] = [
+            "r" => $row,
+            "c" => $col,
+            "building" => $building,
+        ];
+
+        $relativeCells = $building->getRelativeCellsList($row, $col);
+        foreach ($relativeCells as $cell) {
+            $this->map[$cell[0]][$cell[1]] = $building->id;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Building $building
+     * @param $row
+     * @param $col
+     * @return bool
+     */
+    public function canPlace($building, $row, $col)
+    {
+        $relativeCells = $building->getRelativeCellsList($row, $col);
+
+        foreach ($relativeCells as $cell) {
+            if (!is_null($this->map[$cell[0]][$cell[1]]))
+                return false;
+        }
+
+        return true;
+    }
+
+    public function getScore()
+    {
+        
+    }
+}
+
 // Reading the inputs
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
 [$cityRows, $cityColumns, $maxWalkingDistance, $buildingPlansCount] = explode(' ', $content[0]);
+
+$city = new City($cityRows, $cityColumns);
 
 $buildings = collect();
 
