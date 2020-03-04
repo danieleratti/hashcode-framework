@@ -12,6 +12,8 @@ class Building
     public $plan;
     /** @var string $buildingType */
     public $buildingType;
+
+    private $_stringPlan;
     public $perimeter;
 
     public $height;
@@ -21,16 +23,27 @@ class Building
     {
         $this->id = $id;
         $this->buildingType = $buildingType;
+        $this->_stringPlan = $plan;
 
+        $booleanPlan = [];
         foreach ($plan as $row => $planRow) {
             foreach (str_split($planRow, 1) as $col => $planCell) {
                 $cell = $planCell == '#';
-                $this->plan[$row][$col] = $cell;
+                $booleanPlan[$row][$col] = $cell;
             }
         }
 
-        $this->height = count($this->plan);
-        $this->width = count($this->plan[0]);
+        $this->height = count($booleanPlan);
+        $this->width = count($booleanPlan[0]);
+        $this->plan = $booleanPlan;
+
+        foreach ($booleanPlan as $row => $planRow) {
+            foreach ($planRow as $col => $cell) {
+                if (!$cell)
+                    continue;
+                if ($col)
+            }
+        }
     }
 }
 
@@ -79,3 +92,6 @@ while ($fileRow < count($content)) {
     $fileRow += $rows;
     $id++;
 }
+
+$residences = $buildings->where('buildingType', 'R');
+$utilities = $buildings->where('buildingType', 'U');
