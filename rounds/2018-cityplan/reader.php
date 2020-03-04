@@ -1,6 +1,8 @@
 <?php
 
 use Utils\FileManager;
+use Utils\Visual\Colors;
+use Utils\Visual\VisualStandard;
 
 require_once '../../bootstrap.php';
 
@@ -258,8 +260,55 @@ class City
         $this->placedBuildings
             ->where('type', '=', 'R')
             ->each(function ($residence) {
-                
+
             });
+    }
+
+    public function print()
+    {
+        global $fileName;
+        $visualStandard = new VisualStandard($this->row, $this->col);
+
+        $utilityColors = [
+            //Colors::blue0,
+            Colors::blue1,
+            Colors::blue2,
+            Colors::blue3,
+            Colors::blue4,
+            Colors::blue5,
+            Colors::blue6,
+            Colors::blue7,
+            Colors::blue8,
+            Colors::blue9,
+        ];
+        $utilityIdx = 0;
+
+        $residenceColors = [
+            //Colors::red0,
+            Colors::red1,
+            Colors::red2,
+            Colors::red3,
+            Colors::red4,
+            Colors::red5,
+            Colors::red6,
+            Colors::red7,
+            Colors::red8,
+            Colors::red9,
+        ];
+        $residenceIdx = 0;
+
+        foreach ($this->placedBuildings as $placedBuilding) {
+            /** @var Building $building */
+            $building = $placedBuilding['building'];
+
+            $color = $building instanceof Utility ? $utilityColors[($utilityIdx++) % count($utilityColors)] : $residenceColors[($residenceIdx++) % count($residenceColors)];
+
+            $cells = $building->getRelativeCellsList($placedBuilding['r'], $placedBuilding['c']);
+            foreach ($cells as $cell) {
+                $visualStandard->setPixel($cell[0], $cell[1], $color);
+            }
+        }
+        $visualStandard->save('city_' . $fileName);
     }
 }
 
