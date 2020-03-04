@@ -88,6 +88,8 @@ class Building
     /** @var int $width */
     public $width;
 
+    private $cellsList;
+
     private $_stringPlan;
 
     public function __construct($id, $plan, $buildingType)
@@ -162,7 +164,7 @@ class Building
                 foreach ($planRow as $col => $cell) {
                     if (!$cell)
                         continue;
-                    $this->cellsList = [$row, $col];
+                    $this->cellsList[] = [$row, $col];
                 }
             }
         }
@@ -295,7 +297,7 @@ class City
     public function print()
     {
         global $fileName;
-        $visualStandard = new VisualStandard($this->row, $this->col);
+        $visualStandard = new VisualStandard($this->rows, $this->cols);
 
         $utilityColors = [
             //Colors::blue0,

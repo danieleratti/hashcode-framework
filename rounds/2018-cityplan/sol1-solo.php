@@ -1,15 +1,13 @@
 <?php
 
-use Utils\Visual\Colors;
-use Utils\Visual\VisualStandard;
-
-$fileName = 'b';
+$fileName = 'a';
 
 include 'reader.php';
 
-for($i=0;$i<100;$i++)
-    $city->placeBuilding($utilities->first(), 10+$i, 10);
-$city->placeBuilding($residences->first(), 100, 100);
-$city->placeBuilding($residences->first(), 101, 101);
-$city->placeBuilding($residences->first(), 102, 102);
+/** @var City $city */
+$city->placeBuilding($buildings[0], 0, 0);
+$city->placeBuilding($buildings[0], 0, 5);
+$city->placeBuilding($buildings[1], 3, 0);
+$city->placeBuilding($buildings[2], 0, 2);
 $city->print();
+echo $city->getScore();
