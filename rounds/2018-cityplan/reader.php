@@ -17,12 +17,14 @@ class Building
     public $plan;
     /** @var string $buildingType */
     public $buildingType;
+    /** @var bool[] $perimeter */
+    public $perimeter;
+    /** @var int $height */
+    public $height;
+    /** @var int $width */
+    public $width;
 
     private $_stringPlan;
-    public $perimeter;
-
-    public $height;
-    public $width;
 
     public function __construct($id, $plan, $buildingType)
     {
@@ -94,14 +96,14 @@ class Utility extends Building
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-list($cityRows, $cityColumns, $maxWalkingDistance, $buildingPlansCount) = explode(' ', $content[0]);
+[$cityRows, $cityColumns, $maxWalkingDistance, $buildingPlansCount] = explode(' ', $content[0]);
 
 $buildings = collect();
 
 $fileRow = 1;
 $id = 0;
 while ($fileRow < count($content)) {
-    list($projectType, $rows, $columns, $data) = explode(' ', $content[$fileRow]);
+    [$projectType, $rows, $columns, $data] = explode(' ', $content[$fileRow]);
     $fileRow++;
     $plan = array_slice($content, $fileRow, $rows);
     if ($projectType == 'U')
