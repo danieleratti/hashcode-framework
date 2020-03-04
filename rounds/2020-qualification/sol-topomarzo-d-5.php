@@ -131,8 +131,11 @@ while (true) {
         if ($_score + $deltaScore != $score) {
             echo("Wrong (2) inconsistent $iteration");
         }
-        Log::out('WOW! Plus deltaScore ' . $deltaScore . '... SCORE = ' . $score);
-        writeOutput();
+        Log::out('Deltascore ' . $deltaScore . '... SCORE = ' . $score);
+        if ($score > $_score) {
+            Log::out('WOW! Plus deltaScore ' . $deltaScore . '... SCORE = ' . $score);
+            writeOutput();
+        }
     } else {
         break;
     }
