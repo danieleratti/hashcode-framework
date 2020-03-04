@@ -41,7 +41,7 @@ $cols = $padding * 2 + max($residenceWidth, $maxUtilitiesWidth);
 $visualStandard = new VisualStandard($rows, $cols);
 $r = $padding;
 $c = $padding;
-foreach ($residences as $residence) {
+foreach ($residences->sortByDesc('capacity') as $residence) {
     printVisual($residence, $r, $c);
     $c += $residence->width + $padding;
 }
