@@ -204,6 +204,7 @@ class City
     {
         $this->row = $row;
         $this->col = $col;
+        $this->placedBuildings = collect();
     }
 
     /**
@@ -215,16 +216,16 @@ class City
      */
     public function placeBuilding($building, $row, $col, $check = true)
     {
-
         if ($check) {
             $this->canPlace($building, $row, $col);
         }
 
-        $this->placedBuildings[] = [
+        $this->placedBuildings->add([
+            "type" => $building->buildingType,
             "r" => $row,
             "c" => $col,
             "building" => $building,
-        ];
+        ]);
 
         $relativeCells = $building->getRelativeCellsList($row, $col);
         foreach ($relativeCells as $cell) {
@@ -254,7 +255,11 @@ class City
 
     public function getScore()
     {
-        
+        $this->placedBuildings
+            ->where('type', '=', 'R')
+            ->each(function ($residence) {
+                
+            });
     }
 }
 
