@@ -282,7 +282,7 @@ class City
             foreach ($residence->getRelativePerimeter($placedR['r'], $placedR['c']) as $cell) {
                 for ($r = -$maxWalkingDistance; $r <= $maxWalkingDistance; $r++) {
                     for ($c = abs($r) - $maxWalkingDistance; $c <= $maxWalkingDistance - abs($r); $c++) {
-                        $foundedBuildings[$this->map[$r][$c]] = true;
+                        $foundedBuildings[$this->map[$r + $placedR['r']][$c + $placedR['c']]] = true;
                     }
                 }
             }
