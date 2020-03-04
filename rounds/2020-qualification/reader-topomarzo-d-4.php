@@ -7,8 +7,8 @@ require_once '../../bootstrap.php';
 
 class Book
 {
-    public int $id;
-    public int $takenTimes = 0;
+    public $id;
+    public $takenTimes;
 
     /** @var array $inLibraries */
     /** @var array $inLibrariesRemaining */
@@ -18,7 +18,7 @@ class Book
     /** @var int $inLibrariesRemainingCount */
     public $inLibrariesCount;
     public $inLibrariesRemainingCount;
-    public bool $shuffled = false;
+    public $shuffled;
 
     public function __construct($id, $award)
     {
@@ -26,25 +26,27 @@ class Book
         $this->id = $id;
         $this->inLibraries = [];
         $this->inLibrariesRemaining = [];
+        $this->takenTimes = 0;
+        $this->shuffled = false;
     }
 }
 
 class Library
 {
-    public int $id;
-    public bool $taken = false;
-    public int $signUpDuration;
-    public int $shipsPerDay;
+    public $id;
+    public $taken = false;
+    public $signUpDuration;
+    public $shipsPerDay;
 
     /** @var Collection $books */
     /** @var Collection $booksChunked */
     /** @var Collection $booksChunkedScore */
     public $books;
-    public int $booksCount;
+    public $booksCount;
     public $booksRemaining;
-    public int $booksRemainingCount;
-    public array $uniqueBooks = [];
-    public int $uniqueBooksCount = 0;
+    public $booksRemainingCount;
+    public $uniqueBooks = [];
+    public $uniqueBooksCount;
 
     public function __construct($id, $fileRow1, $fileRow2)
     {
@@ -52,6 +54,7 @@ class Library
         $id = (int)$id;
         $this->id = $id;
         $this->books = [];
+        $this->uniqueBooksCount = 0;
         list($booksCount, $this->signUpDuration, $this->shipsPerDay) = explode(' ', $fileRow1);
         foreach (explode(' ', $fileRow2) as $bookId) {
             /** @var Book $book */
@@ -67,14 +70,17 @@ class Library
         $this->booksRemainingCount = (int)$booksCount;
     }
 
-    public function take()
+    public function take($unique=false)
     {
         /** @var Collection $books */
         /** @var Collection $libraries */
         global $books, $libraries, $score, $currentDay;
 
         $this->taken = true;
-        $score += $this->booksRemainingCount * 65;
+        if(!$unique)
+            $score += $this->booksRemainingCount * 65;
+        else
+            $score += $this->uniqueBooksCount * 65;
         $currentDay += 2;
 
         foreach ($this->books as $bookId) {
@@ -150,7 +156,7 @@ class Library
         /** @var Library $library */
         global $libraries, $books;
         $this->untake();
-        $libraries[$libAltId]->take();
+        $libraries[$libAltId]->take(true);
 
         $this->shuffled = true;
         $libraries->shuffled = true;
@@ -158,6 +164,13 @@ class Library
         $this->calcUnique(); //implicit
         $libraries[$libAltId]->calcUnique();
         foreach ($this->books as $bookId) {
+            $book = $books[$bookId];
+            foreach ($book->inLibraries as $libraryId) {
+                $library = $libraries[$libraryId];
+                $library->calcUnique();
+            }
+        }
+        foreach ($libraries[$libAltId]->books as $bookId) {
             $book = $books[$bookId];
             foreach ($book->inLibraries as $libraryId) {
                 $library = $libraries[$libraryId];
