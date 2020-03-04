@@ -69,7 +69,8 @@ class Analyzer
             }
             foreach ($dataset->properties as $property) {
                 try {
-                    $reflection = new \ReflectionClass(get_class($dataset->data[0]));
+                    reset($dataset->data);
+                    $reflection = new \ReflectionClass(get_class($dataset->data[key($dataset->data)]));
                     [, , $type] = explode(' ', $reflection->getProperty($property)->getDocComment());
                     if (in_array($type, ['int', 'double'])) {
                         $type = 'number';
