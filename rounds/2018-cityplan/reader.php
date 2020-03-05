@@ -175,13 +175,18 @@ class Building
     public function getWalkableArea()
     {
         global $maxWalkingDistance;
-        $area = [];
+
+        $founded = [];
         foreach ($this->perimeter as $cell) {
             for ($r = -$maxWalkingDistance; $r <= $maxWalkingDistance; $r++) {
                 for ($c = abs($r) - $maxWalkingDistance; $c <= $maxWalkingDistance - abs($r); $c++) {
-                    $area[] = [$r + $cell[0], $c + $cell[1]];
+                    $founded[($r + $cell[0]) . "-" . ($c + $cell[1])] = true;
                 }
             }
+        }
+        $area = [];
+        foreach ($founded as $rc => $null) {
+            $area[] = explode("-", $rc);
         }
 
         return $area;
