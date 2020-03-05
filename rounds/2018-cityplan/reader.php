@@ -88,6 +88,11 @@ class Building
     /** @var int $width */
     public $width;
 
+    /** @var int $squareArea */
+    public $squareArea;
+    /** @var int $buildArea */
+    public $buildArea;
+
     private $cellsList;
 
     private $_stringPlan;
@@ -131,6 +136,8 @@ class Building
         $this->width = $width;
         $this->height = $height;
         $this->plan = $booleanPlan;
+        $this->squareArea = $width * $height;
+        $this->buildArea = count($this->getCellsList());
     }
 
     public function __toString()
@@ -180,13 +187,13 @@ class Building
         foreach ($this->perimeter as $cell) {
             for ($r = -$maxWalkingDistance; $r <= $maxWalkingDistance; $r++) {
                 for ($c = abs($r) - $maxWalkingDistance; $c <= $maxWalkingDistance - abs($r); $c++) {
-                    $founded[($r + $cell[0]) . "-" . ($c + $cell[1])] = true;
+                    $founded[($r + $cell[0]) . "|" . ($c + $cell[1])] = true;
                 }
             }
         }
         $area = [];
         foreach ($founded as $rc => $null) {
-            $area[] = explode("-", $rc);
+            $area[] = explode("|", $rc);
         }
 
         return $area;
@@ -254,9 +261,8 @@ class City
      */
     public function placeBuilding($building, $row, $col, $check = true)
     {
-        if ($check) {
-            $this->canPlace($building, $row, $col);
-        }
+        if ($check && !$this->canPlace($building, $row, $col))
+            return false;
 
         $this->placedBuildings->add([
             "type" => $building->buildingType,
@@ -374,6 +380,67 @@ class City
             }
         }
         $visualStandard->save('city_' . $fileName);
+    }
+
+
+    public function printUtilityCoverage($type)
+    {
+        global $fileName;
+        $visualStandard = new VisualStandard($this->rows, $this->cols);
+        $placedUtility = $this->placedBuildings
+            ->where('type', '=', 'U')
+            ->where('building.utilityType', '=', $type);
+
+        $greens = [
+            Colors::green0,
+            Colors::green1,
+            Colors::green2,
+            Colors::green3,
+            Colors::green4,
+            Colors::green5,
+            Colors::green6,
+            Colors::green7,
+            Colors::green8,
+            Colors::green9,
+        ];
+        $coverageMap = [];
+        foreach ($placedUtility as $placed) {
+            /** @var Utility $utility */
+            $utility = $placed['building'];
+
+            foreach ($utility->getRelativeWalkableArea($placed['r'], $placed['c']) as $cell) {
+                if (
+                    $cell[0] < 0
+                    || $cell[0] >= $this->rows
+                    || $cell[1] < 0
+                    || $cell[1] >= $this->cols
+                )
+                    continue;
+                if (!isset($coverageMap[$cell[0]][$cell[1]]))
+                    $coverageMap[$cell[0]][$cell[1]] = 1;
+                else
+                    $coverageMap[$cell[0]][$cell[1]]++;
+            }
+        }
+
+        foreach ($coverageMap as $r => $mapRow) {
+            foreach ($mapRow as $c => $value) {
+                if (!$value)
+                    continue;
+                $color = $greens[min($value, count($greens)) - 1];
+                $visualStandard->setPixel($r, $c, $color);
+            }
+        }
+
+        foreach ($placedUtility as $placed) {
+            /** @var Utility $utility */
+            $utility = $placed['building'];
+            foreach ($utility->getRelativeCellsList($placed['r'], $placed['c']) as $cell) {
+                $visualStandard->setPixel($cell[0], $cell[1], Colors::red5);
+            }
+        }
+
+        $visualStandard->save($fileName . "_${type}_coverage");
     }
 }
 
