@@ -171,6 +171,30 @@ class Building
 
         return $this->cellsList;
     }
+
+    public function getWalkableArea()
+    {
+        global $maxWalkingDistance;
+        $area = [];
+        foreach ($this->perimeter as $cell) {
+            for ($r = -$maxWalkingDistance; $r <= $maxWalkingDistance; $r++) {
+                for ($c = abs($r) - $maxWalkingDistance; $c <= $maxWalkingDistance - abs($r); $c++) {
+                    $area[] = [$r + $cell[0], $c + $cell[1]];
+                }
+            }
+        }
+
+        return $area;
+    }
+
+    public function getRelativeWalkableArea($r, $c)
+    {
+        $area = [];
+        foreach ($this->getWalkableArea() as $cell) {
+            $area[] = [$r + $cell[0], $c + $cell[1]];
+        }
+        return $area;
+    }
 }
 
 class Residence extends Building
@@ -279,12 +303,8 @@ class City
             $foundedBuildings = [];
             /** @var Residence $residence */
             $residence = $placedR['building'];
-            foreach ($residence->getRelativePerimeter($placedR['r'], $placedR['c']) as $cell) {
-                for ($r = -$maxWalkingDistance; $r <= $maxWalkingDistance; $r++) {
-                    for ($c = abs($r) - $maxWalkingDistance; $c <= $maxWalkingDistance - abs($r); $c++) {
-                        $foundedBuildings[$this->map[$r + $cell[0]][$c + $cell[1]]] = true;
-                    }
-                }
+            foreach ($residence->getRelativeWalkableArea($placedR['r'], $placedR['c']) as $cell) {
+                $foundedBuildings[$this->map[$cell[0]][$cell[1]]] = true;
             }
 
             $utilitiesType = [];

@@ -7,22 +7,22 @@ $fileName = 'f';
 
 include 'reader.php';
 
-function printVisual(Building $building, $r, $c)
+function printVisual(Building $building, $r, $c, $showWD = false)
 {
     global $visualStandard;
-    foreach ($building->plan as $row => $rows) {
-        foreach ($rows as $col => $cell) {
-            if ($cell)
-                $visualStandard->setPixel($r + $row, $c + $col, $building instanceof Utility ? Colors::blue5 : Colors::red5);
-            else
-                $visualStandard->setPixel($r + $row, $c + $col, $building instanceof Utility ? Colors::blue1 : Colors::red1);
-        }
+
+    foreach ($building->getRelativeWalkableArea($r, $c) as $cell) {
+        $visualStandard->setPixel($cell[0], $cell[1], $building instanceof Utility ? Colors::blue1 : Colors::red1);
     }
-    foreach ($building->perimeter as $p)
-        $visualStandard->setPixel($r + $p[0], $c + $p[1], $building instanceof Utility ? Colors::blue9 : Colors::red9);
+
+    foreach ($building->getRelativeCellsList($r, $c) as $cell) {
+        $visualStandard->setPixel($cell[0], $cell[1], $building instanceof Utility ? Colors::blue5 : Colors::red5);
+    }
+    foreach ($building->getRelativePerimeter($r, $c) as $cell)
+        $visualStandard->setPixel($cell[0], $cell[1], $building instanceof Utility ? Colors::blue9 : Colors::red9);
 }
 
-$padding = 10;
+$padding = 10 + $maxWalkingDistance * 2;
 
 $maxResidenceHeight = $residences->max('height');
 $residenceWidth = $residences->sum('width') + ($residences->count() + 1) * $padding;
@@ -51,7 +51,7 @@ $deltaR = 0;
 foreach ($utilities->groupBy('utilityType') as $utilityGroup) {
     $c = $padding;
     $r += $deltaR + $padding;
-    foreach($utilityGroup as $utility) {
+    foreach ($utilityGroup as $utility) {
         printVisual($utility, $r, $c);
         $c += $utility->width + $padding;
         $deltaR = max($deltaR, $utility->height);
