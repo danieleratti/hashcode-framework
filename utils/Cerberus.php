@@ -152,7 +152,7 @@ class Cerberus
     {
         Log::out('Running ' . $script . ' with ' . json_encode($params), 1, 'green');
         $id = ++self::$db['lastIdx'];
-        $cmd = "nohup php " . $script . ".php cerberus '" . json_encode(["action" => "run", "params" => $params]) . "' &> cerberus/" . $id . ".log & echo $!";
+        $cmd = "nohup php " . $script . ".php cerberus '" . json_encode(["action" => "run", "params" => $params]) . "' " . (PHP_OS_FAMILY === "Linux" ? ">" : "&>") . " cerberus/" . $id . ".log & echo $!";
         $pid = shell_exec($cmd);
         self::$db['scripts'][$id] = [
             'id' => $id,
