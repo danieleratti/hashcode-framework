@@ -79,8 +79,8 @@ class Tile
     public $isManagerDesk;
     /** @var bool $isOccupied */
     public $isOccupied = false;
-
-    /* TODO: vicini ($nears) */
+    /** @var array $nears */
+    public $nears = [];
 
     public function __construct(string $cellLetter, int $r, int $c)
     {
@@ -105,7 +105,7 @@ $numManagers = null;
 $developers = collect();
 $managers = collect();
 $tiles = collect();
-
+$rcTiles = [];
 
 $MAP = []; // # Unavailable, _ Developer, M ProjectManager
 
@@ -136,8 +136,21 @@ foreach ($content as $rowNumber => $row) {
 }
 
 foreach ($MAP as $r => $rows) {
-    foreach ($rows as $c => $val)
-        $tiles->add(new Tile($val, $r, $c));
+    foreach ($rows as $c => $val) {
+        $tile = new Tile($val, $r, $c);
+        $rcTiles[$r][$c] = $tile;
+        $tiles->add($tile);
+    }
+}
+
+foreach ($tiles as $tile) {
+    /** @var Tile $tile */
+    /** @var Tile $_tile */
+    foreach ([[0, -1], [0, 1], [-1, 0], [1, 0]] as $delta) {
+        $_tile = $rcTiles[$tile->r + $delta[0]][$tile->c + $delta[1]];
+        if ($_tile && $_tile->isAvailable)
+            $tile->nears[] = $_tile;
+    }
 }
 
 $managers = $managers->keyBy('id');
