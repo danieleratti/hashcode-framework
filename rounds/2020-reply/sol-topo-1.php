@@ -81,6 +81,8 @@ function occupy(Tile $tile, People $p)
 {
     global $remainingDevTiles, $remainingManagerTiles, $remainingDevs, $remainingManagers;
 
+    if(!$p) return;
+
     $tile->occupy($p);
 
     if ($p instanceof Developer) {
@@ -113,6 +115,10 @@ while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles
     /** @var Tile $tile */
     //Stopwatch::tik('selectTile');
     $tiles = $tiles->where('isDesk', true)->where('isOccupied', false)->sortByDesc('nearsUsedCount');
+    if($remainingDevs == 0 || $remainingDevTiles == 0)
+        $tiles = $tiles->where('isManagerDesk', true);
+    if($remainingManagers == 0 || $remainingManagerTiles == 0)
+        $tiles = $tiles->where('isDevDesk', true);
     //Stopwatch::tok('selectTile');
     //Stopwatch::print('selectTile');
 
