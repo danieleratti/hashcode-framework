@@ -107,6 +107,8 @@ class Developer extends People
 {
     /** @var string[] $skills */
     public $skills;
+    /** @var int $skillsCount */
+    public $skillsCount;
 
     public function __construct($id, $company, $bonus, $skills)
     {
@@ -114,6 +116,7 @@ class Developer extends People
         $this->company = $company;
         $this->bonus = (int)$bonus;
         $this->skills = $skills;
+        $this->skillsCount = count($skills);
     }
 }
 
