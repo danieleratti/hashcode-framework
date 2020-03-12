@@ -155,11 +155,29 @@ class Tile
 
     public function occupy(People $p)
     {
+        global $skill2developers, $company2developers, $company2managers;
         $this->isOccupied = true;
         $this->people = $p;
         $p->placed = true;
         $p->r = $this->r;
         $p->c = $this->c;
+        if ($p instanceof Developer) {
+            foreach ($p->skills as $skill) {
+                $skill2developers[$skill] = array_filter($skill2developers[$skill], function ($v) use ($p) {
+                    if($v->id == $p->id) return false;
+                    return true;
+                });
+            }
+            $company2developers[$p->company] = array_filter($company2developers[$p->company], function ($v) use ($p) {
+                if($v->id == $p->id) return false;
+                return true;
+            });
+        } else {
+            $company2managers[$p->company] = array_filter($company2managers[$p->company], function ($v) use ($p) {
+                if($v->id == $p->id) return false;
+                return true;
+            });
+        }
     }
 }
 
@@ -168,7 +186,7 @@ class Tile
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-
+// Variables
 [$WIDTH, $HEIGHT] = explode(' ', $content[0]);
 $numDevelopers = null;
 $numManagers = null;
@@ -178,8 +196,13 @@ $managers = collect();
 $tiles = collect();
 $rcTiles = [];
 
-$MAP = []; // # Unavailable, _ Developer, M ProjectManager
+$skill2developers = [];
+$company2developers = [];
+$company2managers = [];
 
+$MAP = []; // # Unavailable, _ Developer, M ProjectManager [NON USARE]
+
+// Reader
 foreach ($content as $rowNumber => $row) {
     if ($rowNumber > 0) { /* skip first */
         if ($rowNumber <= $HEIGHT) { //floor
@@ -193,14 +216,20 @@ foreach ($content as $rowNumber => $row) {
                 $bonus = (int)$row[1];
                 $nSkills = (int)$row[2];
                 $skills = array_slice($row, 3, $nSkills);
-                $developers->add(new Developer(count($developers), $company, $bonus, $skills));
+                $developer = new Developer(count($developers), $company, $bonus, $skills);
+                $developers->add($developer);
+                $company2developers[$company][] = $developer;
+                foreach ($skills as $skill)
+                    $skill2developers[$skill][] = $developer;
             } elseif (!$numManagers) {
                 $numManagers = (int)$row;
             } else {
                 $row = explode(" ", $row);
                 $company = $row[0];
                 $bonus = (int)$row[1];
-                $managers->add(new Manager(count($managers), $company, $bonus));
+                $manager = new Manager(count($managers), $company, $bonus);
+                $managers->add($manager);
+                $company2managers[$company][] = $manager;
             }
         }
     }

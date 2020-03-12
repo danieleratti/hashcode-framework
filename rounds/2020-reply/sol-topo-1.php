@@ -25,4 +25,3 @@ $managers[2]->occupy(2, 2);
 Log::out('SCORE = '.getScore());
 
 $fileManager->output(getOutput());
-
