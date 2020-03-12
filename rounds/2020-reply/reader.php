@@ -24,6 +24,57 @@ function getOutput()
     return implode("\n", $ret);
 }
 
+function getScore()
+{
+    global $tiles;
+    $score = 0;
+    foreach ($tiles->where('isOccupied', true) as $tile) {
+        /** @var Tile $tile */
+        /** @var Tile $tile2 */
+        foreach ($tile->nears as $tile2) {
+            if ($tile2->isOccupied) {
+                $score += getPairScore($tile->people, $tile2->people);
+            }
+        }
+    }
+    return $score;
+}
+
+function getPairScore(People $p1, People $p2)
+{
+    $score = 0;
+    if ($p1 instanceof Developer && $p2 instanceof Developer)
+        $score += count(peopleCommonSkills($p1, $p2)) * count(peopleUniqueSkills($p1, $p2));
+    if ($p1->company == $p2->company)
+        $score += $p1->bonus * $p2->bonus;
+    return $score / 2;
+}
+
+function commonSkills($skills1, $skills2)
+{
+    return array_intersect($skills1, $skills2);
+}
+
+function uniqueSkills($skills1, $skills2)
+{
+    $all = [];
+    foreach ($skills1 as $s)
+        $all[$s] = true;
+    foreach ($skills2 as $s)
+        $all[$s] = true;
+    return array_diff(array_keys($all), array_intersect($skills1, $skills2));
+}
+
+function peopleCommonSkills(People $p1, People $p2)
+{
+    return ($p1 instanceof Developer && $p2 instanceof Developer) ? commonSkills($p1->skills, $p2->skills) : 0;
+}
+
+function peopleUniqueSkills(People $p1, People $p2)
+{
+    return ($p1 instanceof Developer && $p2 instanceof Developer) ? uniqueSkills($p1->skills, $p2->skills) : 0;
+}
+
 // Classes
 class People
 {
@@ -45,7 +96,7 @@ class People
         global $rcTiles;
         /** @var Tile $tile */
         $tile = $rcTiles[$r][$c];
-        if(!$tile->isDesk) die("FATAL: Stai tentando di occupare $r,$c che non è Desk");
+        if (!$tile->isDesk) die("FATAL: Stai tentando di occupare $r,$c che non è Desk");
         $tile->occupy($this);
     }
 }
