@@ -135,5 +135,3 @@ foreach($MAP as $r => $rows) {
 
 $managers = $managers->keyBy('id');
 $developers = $developers->keyBy('id');
-
-print_r($tiles);
