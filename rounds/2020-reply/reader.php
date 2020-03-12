@@ -60,6 +60,32 @@ class Manager extends People {
     }
 }
 
+class Tile {
+    /** @var int $r */
+    public $r;
+    /** @var int $c */
+    public $c;
+    /** @var bool $isAvailable */
+    public $isAvailable;
+    /** @var bool $isDevDesk */
+    public $isDevDesk;
+    /** @var bool $isManagerDesk */
+    public $isManagerDesk;
+    /** @var bool $isOccupied */
+    public $isOccupied = false;
+    /* TODO: vicini ($nears) */
+
+    public function __construct(string $cellLetter, int $r, int $c)
+    {
+        $this->r = (int)$r;
+        $this->c = (int)$c;
+        $this->isAvailable = $cellLetter != '#';
+        $this->isDevDesk = $cellLetter == '_';
+        $this->isManagerDesk = $cellLetter == 'M';
+    }
+}
+
+
 // Reading the inputs
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
@@ -71,6 +97,7 @@ $numManagers = null;
 
 $developers = collect();
 $managers = collect();
+$tiles = collect();
 
 
 $MAP = []; // # Unavailable, _ Developer, M ProjectManager
@@ -101,5 +128,12 @@ foreach ($content as $rowNumber => $row) {
     }
 }
 
+foreach($MAP as $r => $rows) {
+    foreach($rows as $c => $val)
+        $tiles->add(new Tile($val, $r, $c));
+}
+
 $managers = $managers->keyBy('id');
 $developers = $developers->keyBy('id');
+
+print_r($tiles);
