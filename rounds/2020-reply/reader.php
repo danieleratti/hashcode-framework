@@ -37,7 +37,7 @@ function getScore()
             }
         }
     }
-    return $score;
+    return $score / 2;
 }
 
 function getPairScore(People $p1, People $p2)
@@ -47,7 +47,7 @@ function getPairScore(People $p1, People $p2)
         $score += count(peopleCommonSkills($p1, $p2)) * count(peopleUniqueSkills($p1, $p2));
     if ($p1->company == $p2->company)
         $score += $p1->bonus * $p2->bonus;
-    return $score / 2;
+    return $score;
 }
 
 function commonSkills($skills1, $skills2)
