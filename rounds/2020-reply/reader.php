@@ -191,9 +191,11 @@ class Tile
                 return true;
             });
         }
-        $this->nearsFreeCount--;
-        $this->nearsUsedCount++;
-        $this->nearsUsedPerc = $this->nearsUsedCount / $this->nearsCount;
+        foreach($this->nears as $near) {
+            $near->nearsFreeCount--;
+            $near->nearsUsedCount++;
+            $near->nearsUsedPerc = $near->nearsUsedCount / $near->nearsCount;
+        }
     }
 }
 

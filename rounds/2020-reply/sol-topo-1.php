@@ -84,14 +84,12 @@ $remainingDevs = $developers->count();
 $remainingManagers = $managers->count();
 
 while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles > 0 && $remainingManagers > 0)) {
-    $tile = $tiles->where()->where('nearsUsedCount');
-    if (count($nearTiles) == 0) {
+    $tile = $tiles->where('isDesk', true)->where('isOccupied', false)->sortByDesc('nearsUsedCount')->first();
+    if (!$tile) {
         $tile = $tiles->where('isDesk', true)->where('isOccupied', false)->first();
-        $nearTiles[$tile->id] = $tile;
     }
-    foreach($nearTiles as $nearTile) {
+    // Cerco il vicino migliore
 
-    }
 }
 
 
