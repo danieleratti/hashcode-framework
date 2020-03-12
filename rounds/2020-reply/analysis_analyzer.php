@@ -8,6 +8,7 @@ include_once '../../utils/Analysis/Analyzer.php';
 /** @var \Utils\Collection $managers */
 /** @var \Utils\Collection $developers */
 /** @var \Utils\Collection $tiles */
+/** @var Tile[] $tiles */
 /** @var int $numDevelopers */
 /** @var int $numManagers */
 /** @var int $WIDTH */
@@ -21,6 +22,6 @@ $analyzer = new Analyzer($fileName, [
 ]);
 $analyzer->addDataset('managers', $managers->toArray(), ['bonus']);
 $analyzer->addDataset('developers', $developers->toArray(), ['skills', 'bonus']);
-$analyzer->addDataset('tiles', $tiles->toArray(), ['isAvailable', 'isDevDesk', 'isManagerDesk']);
+$analyzer->addDataset('tiles', $tiles->toArray(), ['isDesk', 'isDevDesk', 'isManagerDesk']);
 
 $analyzer->analyze();
