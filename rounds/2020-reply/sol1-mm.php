@@ -1,12 +1,10 @@
 <?php
 
-ini_set('xdebug.max_nesting_level', 10000);
-
 use Utils\Cerberus;
 
 require_once '../../bootstrap.php';
 
-$fileName = 'c';
+$fileName = 'd';
 Cerberus::runClient(['fileName' => $fileName]);
 
 /** @var \Utils\Collection $managers */

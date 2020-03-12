@@ -4,6 +4,8 @@ use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
+ini_set('xdebug.max_nesting_level', 10000);
+
 // Functions
 function getOutput()
 {
