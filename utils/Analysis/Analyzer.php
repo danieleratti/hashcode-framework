@@ -72,7 +72,7 @@ class Analyzer
                     reset($dataset->data);
                     $reflection = new \ReflectionClass(get_class($dataset->data[key($dataset->data)]));
                     [, , $type] = explode(' ', $reflection->getProperty($property)->getDocComment());
-                    if (in_array($type, ['int', 'double'])) {
+                    if (in_array($type, ['bool', 'int', 'double'])) {
                         $type = 'number';
                     } elseif ($type == 'array' || strpos($type, '[]') !== false) {
                         $type = 'array';

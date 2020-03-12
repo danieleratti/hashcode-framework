@@ -5,26 +5,28 @@ use Utils\FileManager;
 require_once '../../bootstrap.php';
 
 // Functions
-function getOutput() {
+function getOutput()
+{
     global $developers, $managers;
     $ret = [];
-    foreach($developers->sortBy('id') as $dev) {
-        if(!$dev->placed)
+    foreach ($developers->sortBy('id') as $dev) {
+        if (!$dev->placed)
             $ret[] = "X";
         else
-            $ret[] = $dev->c." ".$dev->r;
+            $ret[] = $dev->c . " " . $dev->r;
     }
-    foreach($managers->sortBy('id') as $man) {
-        if(!$man->placed)
+    foreach ($managers->sortBy('id') as $man) {
+        if (!$man->placed)
             $ret[] = "X";
         else
-            $ret[] = $man->c." ".$man->r;
+            $ret[] = $man->c . " " . $man->r;
     }
     return implode("\n", $ret);
 }
 
 // Classes
-class People {
+class People
+{
     /** @var int $id */
     public $id;
     /** @var string $company */
@@ -39,9 +41,11 @@ class People {
     public $c = false; //x
 }
 
-class Developer extends People {
-    /** @var array $skills */
+class Developer extends People
+{
+    /** @var string[] $skills */
     public $skills;
+
     public function __construct($id, $company, $bonus, $skills)
     {
         $this->id = $id;
@@ -51,7 +55,8 @@ class Developer extends People {
     }
 }
 
-class Manager extends People {
+class Manager extends People
+{
     public function __construct($id, $company, $bonus)
     {
         $this->id = $id;
@@ -60,7 +65,8 @@ class Manager extends People {
     }
 }
 
-class Tile {
+class Tile
+{
     /** @var int $r */
     public $r;
     /** @var int $c */
@@ -73,6 +79,7 @@ class Tile {
     public $isManagerDesk;
     /** @var bool $isOccupied */
     public $isOccupied = false;
+
     /* TODO: vicini ($nears) */
 
     public function __construct(string $cellLetter, int $r, int $c)
@@ -128,8 +135,8 @@ foreach ($content as $rowNumber => $row) {
     }
 }
 
-foreach($MAP as $r => $rows) {
-    foreach($rows as $c => $val)
+foreach ($MAP as $r => $rows) {
+    foreach ($rows as $c => $val)
         $tiles->add(new Tile($val, $r, $c));
 }
 

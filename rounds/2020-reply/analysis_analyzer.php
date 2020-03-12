@@ -5,14 +5,22 @@ $fileName = 'a';
 include 'reader.php';
 include_once '../../utils/Analysis/Analyzer.php';
 
-/** @var \Utils\Collection $residences */
-/** @var \Utils\Collection $utilities */
+/** @var \Utils\Collection $managers */
+/** @var \Utils\Collection $developers */
+/** @var \Utils\Collection $tiles */
+/** @var int $numDevelopers */
+/** @var int $numManagers */
+/** @var int $WIDTH */
+/** @var int $HEIGHT */
 
 $analyzer = new Analyzer($fileName, [
-    //'walking_distance' => $maxWalkingDistance,
-    //'building_plans_count' => $buildingPlansCount,
+    'developers_count' => $numDevelopers,
+    'managers_count' => $numManagers,
+    'office_width' => $WIDTH,
+    'office_height' => $HEIGHT,
 ]);
-//$analyzer->addDataset('residences', $residences->toArray(), ['height', 'width', 'capacity', 'efficiency']);
-//$analyzer->addDataset('utilities', $utilities->toArray(), ['height', 'width']);
+$analyzer->addDataset('managers', $managers->toArray(), ['bonus']);
+$analyzer->addDataset('developers', $developers->toArray(), ['skills', 'bonus']);
+$analyzer->addDataset('tiles', $tiles->toArray(), ['isAvailable', 'isDevDesk', 'isManagerDesk']);
 
 $analyzer->analyze();
