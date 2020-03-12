@@ -77,8 +77,9 @@ Stopwatch::tok('calcAffinity');
 Stopwatch::print();
 
 /* The Real Algo */
-function occupy(Tile $tile, People $p)
+function occupy(Tile $tile, $p)
 {
+    /** @var People $p */
     global $remainingDevTiles, $remainingManagerTiles, $remainingDevs, $remainingManagers;
 
     if(!$p) return;
