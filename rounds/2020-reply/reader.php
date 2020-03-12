@@ -145,6 +145,14 @@ class Tile
     public $isOccupied = false;
     /** @var array $nears */
     public $nears = [];
+    /** @var int $nearsCount */
+    public $nearsCount = 0;
+    /** @var int $nearsUsedCount */
+    public $nearsUsedCount = 0;
+    /** @var int $nearsFreeCount */
+    public $nearsFreeCount = 0;
+    /** @var float $nearsUsedPerc */
+    public $nearsUsedPerc = 0;
     /** @var People $people */
     public $people = null;
 
@@ -183,6 +191,9 @@ class Tile
                 return true;
             });
         }
+        $this->nearsFreeCount--;
+        $this->nearsUsedCount++;
+        $this->nearsUsedPerc = $this->nearsUsedCount / $this->nearsCount;
     }
 }
 
@@ -256,6 +267,8 @@ foreach ($tiles as $tile) {
         if ($_tile && $_tile->isDesk)
             $tile->nears[] = $_tile;
     }
+    $tile->nearsCount = count($tile->nears);
+    $tile->nearsFreeCount = count($tile->nears);
 }
 
 $managers = $managers->keyBy('id');

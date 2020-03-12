@@ -6,7 +6,7 @@ use Utils\Stopwatch;
 
 require_once '../../bootstrap.php';
 
-$fileName = 'b';
+$fileName = 'a';
 Cerberus::runClient(['fileName' => $fileName]);
 
 include 'reader.php';
@@ -78,14 +78,24 @@ Stopwatch::tok('calcAffinity');
 Stopwatch::print();
 
 /* The Real Algo */
-$nearTiles = []; //REMINDER TODO: togliere da questa lista quando si fa occupy (e aggiornarla)
-if (count($nearTiles) == 0) {
-    $tile = $tiles->where('isOccupied', false)->first();
-    $nearTiles[$tile->id] = $tile;
+$remainingDevTiles = $tiles->where('isDevDesk', true)->count(); //REMINDER TODO: -1 per occupy
+$remainingManagerTiles = $tiles->where('isManagerDesk', true)->count(); //REMINDER TODO: -1 per occupy
+$remainingDevs = $developers->count();
+$remainingManagers = $managers->count();
+
+while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles > 0 && $remainingManagers > 0)) {
+    $tile = $tiles->where()->where('nearsUsedCount');
+    if (count($nearTiles) == 0) {
+        $tile = $tiles->where('isDesk', true)->where('isOccupied', false)->first();
+        $nearTiles[$tile->id] = $tile;
+    }
+    foreach($nearTiles as $nearTile) {
+
+    }
 }
 
 
-die("a=$n");
+die("ciao");
 
 /*
 $developers[0]->occupy(1, 1);
