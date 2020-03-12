@@ -39,6 +39,15 @@ class People
     public $r = false; //y
     /** @var int $c */
     public $c = false; //x
+
+    public function occupy($r, $c)
+    {
+        global $rcTiles;
+        /** @var Tile $tile */
+        $tile = $rcTiles[$r][$c];
+        if(!$tile->isDesk) die("FATAL: Stai tentando di occupare $r,$c che non è Desk");
+        $tile->occupy($this);
+    }
 }
 
 class Developer extends People
@@ -71,8 +80,8 @@ class Tile
     public $r;
     /** @var int $c */
     public $c;
-    /** @var bool $isAvailable */
-    public $isAvailable;
+    /** @var bool $isDesk */
+    public $isDesk;
     /** @var bool $isDevDesk */
     public $isDevDesk;
     /** @var bool $isManagerDesk */
@@ -81,14 +90,25 @@ class Tile
     public $isOccupied = false;
     /** @var array $nears */
     public $nears = [];
+    /** @var People $people */
+    public $people = null;
 
     public function __construct(string $cellLetter, int $r, int $c)
     {
         $this->r = (int)$r;
         $this->c = (int)$c;
-        $this->isAvailable = $cellLetter != '#';
+        $this->isDesk = $cellLetter != '#';
         $this->isDevDesk = $cellLetter == '_';
         $this->isManagerDesk = $cellLetter == 'M';
+    }
+
+    public function occupy(People $p)
+    {
+        $this->isOccupied = true;
+        $this->people = $p;
+        $p->placed = true;
+        $p->r = $this->r;
+        $p->c = $this->c;
     }
 }
 
@@ -148,7 +168,7 @@ foreach ($tiles as $tile) {
     /** @var Tile $_tile */
     foreach ([[0, -1], [0, 1], [-1, 0], [1, 0]] as $delta) {
         $_tile = $rcTiles[$tile->r + $delta[0]][$tile->c + $delta[1]];
-        if ($_tile && $_tile->isAvailable)
+        if ($_tile && $_tile->isDesk)
             $tile->nears[] = $_tile;
     }
 }
