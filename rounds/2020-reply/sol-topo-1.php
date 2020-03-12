@@ -83,7 +83,7 @@ function occupy(Tile $tile, $p)
     /** @var People $p */
     global $remainingDevTiles, $remainingManagerTiles, $remainingDevs, $remainingManagers;
 
-    if(!$p) return;
+    if (!$p) return;
 
     $tile->occupy($p);
 
@@ -96,9 +96,10 @@ function occupy(Tile $tile, $p)
     }
 }
 
-function occupySeed(Tile $tile) { //TODO: migliorare questo!!!!!
+function occupySeed(Tile $tile)
+{ //TODO: migliorare questo!!!!!
     global $developers, $managers;
-    if($tile->isDevDesk) {
+    if ($tile->isDevDesk) {
         occupy($tile, $developers->where('placed', false)->first());
     } else {
         occupy($tile, $managers->where('placed', false)->first());
@@ -117,9 +118,9 @@ while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles
     /** @var Tile $tile */
     //Stopwatch::tik('selectTile');
     $tiles = $tiles->where('isDesk', true)->where('isOccupied', false)->sortByDesc('nearsUsedCount');
-    if($remainingDevs == 0 || $remainingDevTiles == 0)
+    if ($remainingDevs == 0 || $remainingDevTiles == 0)
         $tiles = $tiles->where('isManagerDesk', true);
-    if($remainingManagers == 0 || $remainingManagerTiles == 0)
+    if ($remainingManagers == 0 || $remainingManagerTiles == 0)
         $tiles = $tiles->where('isDevDesk', true);
     //Stopwatch::tok('selectTile');
     //Stopwatch::print('selectTile');
@@ -129,7 +130,7 @@ while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles
 
     #$tiles = [$tiles->first()]; #V1!
 
-    foreach($tiles as $tile) {
+    foreach ($tiles as $tile) {
         $nearDevs = [];
         $nearManagers = [];
         $tests = [];
@@ -211,6 +212,6 @@ while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles
     }
 }
 
-Log::out('SCORE = ' . getScore());
+Log::out('SCORE(' . $fileName . ') = ' . getScore());
 
 $fileManager->output(getOutput(), $cerberusLaunch);
