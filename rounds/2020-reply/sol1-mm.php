@@ -4,7 +4,7 @@ use Utils\Cerberus;
 
 require_once '../../bootstrap.php';
 
-$fileName = 'd';
+$fileName = 'c';
 Cerberus::runClient(['fileName' => $fileName]);
 
 /** @var \Utils\Collection $managers */
@@ -33,9 +33,11 @@ include 'reader.php';
 
 /* Create groups */
 include_once 'groups.inc.php';
-/** @var Group[] $groups */
+/** @var \Utils\Collection $groups */
 
 // Do things
+$groups = $groups->sortByDesc('devCount');
+
 
 echo "Created " . count($groups) . " groups\n\n";
 

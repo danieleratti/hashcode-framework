@@ -7,6 +7,8 @@ class Group
     public $id;
     /** @var Tile[] $tiles */
     public $tiles = [];
+    /** @var int $tilesCount */
+    public $tilesCount = 0;
     /** @var int $devCount */
     public $devCount = 0;
     /** @var int $managerCount */
@@ -22,6 +24,14 @@ class Group
         $this->tiles[] = $t;
         if ($t->isDevDesk) $this->devCount++;
         elseif ($t->isManagerDesk) $this->managerCount++;
+        $this->tilesCount++;
+    }
+
+    public function sortByNears()
+    {
+        usort($this->tiles, function (Tile $t1, Tile $t2) {
+            return $t1->nearsCount < $t2->nearsCount;
+        });
     }
 }
 
@@ -44,9 +54,10 @@ foreach ($tiles as $tile) {
     createGroup($tile, $groups, $tile2Group, $tempGroupIdx);
     $tempGroupIdx++;
 }
-$groups = array_map(function ($tg) {
+$groups = collect(array_map(function ($tg) {
     $g = new Group();
     foreach ($tg as $item)
         $g->addTile($item);
+    $g->sortByNears();
     return $g;
-}, $groups);
+}, $groups));
