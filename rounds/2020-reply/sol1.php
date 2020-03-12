@@ -4,7 +4,7 @@ use Utils\Cerberus;
 
 require_once '../../bootstrap.php';
 
-$fileName = 'd';
+$fileName = 'a';
 Cerberus::runClient(['fileName' => $fileName]);
 
 include 'reader.php';
