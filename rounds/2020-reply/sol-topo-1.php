@@ -18,7 +18,7 @@ include 'reader.php';
 /** @var array $company2managers */
 
 /* functions */
-function calcScoreBetweenPeople($p1, $p2) //REMINDER: togliere anche poi dalla lista degli affinity quando si fa occupy
+function calcScoreBetweenPeople($p1, $p2)
 {
     global $scoreDevDev, $scoreDevMan, $scoreManDev, $scoreManMan;
     if ($p1 instanceof Developer) {
@@ -48,6 +48,7 @@ function calcScoreBetweenPeople($p1, $p2) //REMINDER: togliere anche poi dalla l
 /* DEBUG */
 
 /* calculate the score between dev-managers */
+//REMINDER TODO: togliere anche poi dalla lista degli scores quando si fa occupy
 $scoreDevDev = [];
 $scoreDevMan = [];
 $scoreManDev = [];
@@ -77,8 +78,11 @@ Stopwatch::tok('calcAffinity');
 Stopwatch::print();
 
 /* The Real Algo */
-$freeTiles = [];
-
+$nearTiles = []; //REMINDER TODO: togliere da questa lista quando si fa occupy (e aggiornarla)
+if (count($nearTiles) == 0) {
+    $tile = $tiles->where('isOccupied', false)->first();
+    $nearTiles[$tile->id] = $tile;
+}
 
 
 die("a=$n");

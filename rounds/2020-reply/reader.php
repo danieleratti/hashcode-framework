@@ -127,6 +127,8 @@ class Manager extends People
 
 class Tile
 {
+    /** @var int $id */
+    public $id;
     /** @var int $r */
     public $r;
     /** @var int $c */
@@ -151,6 +153,7 @@ class Tile
         $this->isDesk = $cellLetter != '#';
         $this->isDevDesk = $cellLetter == '_';
         $this->isManagerDesk = $cellLetter == 'M';
+        $this->id = $r . '-' . $c;
     }
 
     public function occupy(People $p)
@@ -164,17 +167,17 @@ class Tile
         if ($p instanceof Developer) {
             foreach ($p->skills as $skill) {
                 $skill2developers[$skill] = array_filter($skill2developers[$skill], function ($v) use ($p) {
-                    if($v->id == $p->id) return false;
+                    if ($v->id == $p->id) return false;
                     return true;
                 });
             }
             $company2developers[$p->company] = array_filter($company2developers[$p->company], function ($v) use ($p) {
-                if($v->id == $p->id) return false;
+                if ($v->id == $p->id) return false;
                 return true;
             });
         } else {
             $company2managers[$p->company] = array_filter($company2managers[$p->company], function ($v) use ($p) {
-                if($v->id == $p->id) return false;
+                if ($v->id == $p->id) return false;
                 return true;
             });
         }
