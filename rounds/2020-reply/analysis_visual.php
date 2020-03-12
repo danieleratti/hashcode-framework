@@ -3,11 +3,11 @@
 use Utils\Visual\Colors;
 use Utils\Visual\VisualStandard;
 
-$fileName = 'f';
+$fileName = 'a';
 
 include 'reader.php';
 
-$visualStandard = new VisualStandard($WIDTH, $HEIGHT);
+$visualStandard = new VisualStandard($HEIGHT, $WIDTH);
 foreach($tiles as $tile) {
     /** @var Tile $tile */
     if($tile->isDevDesk)
