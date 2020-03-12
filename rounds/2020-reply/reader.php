@@ -4,6 +4,25 @@ use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
+// Functions
+function getOutput() {
+    global $developers, $managers;
+    $ret = [];
+    foreach($developers->sortBy('id') as $dev) {
+        if(!$dev->placed)
+            $ret[] = "X";
+        else
+            $ret[] = $dev->c." ".$dev->r;
+    }
+    foreach($managers->sortBy('id') as $man) {
+        if(!$man->placed)
+            $ret[] = "X";
+        else
+            $ret[] = $man->c." ".$man->r;
+    }
+    return implode("\n", $ret);
+}
+
 // Classes
 class People {
     /** @var int $id */
@@ -12,9 +31,11 @@ class People {
     public $company;
     /** @var int $bonus */
     public $bonus;
-
+    /** @var bool $placed */
     public $placed = false;
+    /** @var int $r */
     public $r = false; //y
+    /** @var int $c */
     public $c = false; //x
 }
 

@@ -10,3 +10,5 @@ Cerberus::runClient(['fileName' => $fileName]);
 include 'reader.php';
 
 /** Stuff... */
+
+$fileManager->output(getOutput());
