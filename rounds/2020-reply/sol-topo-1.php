@@ -6,7 +6,7 @@ use Utils\Stopwatch;
 
 require_once '../../bootstrap.php';
 
-$fileName = 'a';
+$fileName = 'c';
 Cerberus::runClient(['fileName' => $fileName]);
 
 include 'reader.php';
@@ -48,7 +48,6 @@ function calcScoreBetweenPeople($p1, $p2)
 /* DEBUG */
 
 /* calculate the score between dev-managers */
-//REMINDER TODO: togliere anche poi dalla lista degli scores quando si fa occupy
 $scoreDevDev = [];
 $scoreDevMan = [];
 $scoreManDev = [];
@@ -78,32 +77,131 @@ Stopwatch::tok('calcAffinity');
 Stopwatch::print();
 
 /* The Real Algo */
-$remainingDevTiles = $tiles->where('isDevDesk', true)->count(); //REMINDER TODO: -1 per occupy
-$remainingManagerTiles = $tiles->where('isManagerDesk', true)->count(); //REMINDER TODO: -1 per occupy
+function occupy(Tile $tile, People $p)
+{
+    global $remainingDevTiles, $remainingManagerTiles, $remainingDevs, $remainingManagers;
+
+    $tile->occupy($p);
+
+    if ($p instanceof Developer) {
+        $remainingDevs--;
+        $remainingDevTiles--;
+    } else {
+        $remainingManagers--;
+        $remainingManagerTiles--;
+    }
+}
+
+function occupySeed(Tile $tile) { //TODO: migliorare questo!!!!!
+    global $developers, $managers;
+    if($tile->isDevDesk) {
+        occupy($tile, $developers->where('placed', false)->first());
+    } else {
+        occupy($tile, $managers->where('placed', false)->first());
+    }
+}
+
+$remainingDevTiles = $tiles->where('isDevDesk', true)->count();
+$remainingManagerTiles = $tiles->where('isManagerDesk', true)->count();
 $remainingDevs = $developers->count();
 $remainingManagers = $managers->count();
 
+//Need a seed
+occupySeed($tiles->where('isDevDesk', true)->where('isOccupied', false)->first());
 while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles > 0 && $remainingManagers > 0)) {
-    $tile = $tiles->where('isDesk', true)->where('isOccupied', false)->sortByDesc('nearsUsedCount')->first();
-    if (!$tile) {
-        $tile = $tiles->where('isDesk', true)->where('isOccupied', false)->first();
+    /** @var Tile[] $tiles */
+    /** @var Tile $tile */
+    //Stopwatch::tik('selectTile');
+    $tiles = $tiles->where('isDesk', true)->where('isOccupied', false)->sortByDesc('nearsUsedCount');
+    //Stopwatch::tok('selectTile');
+    //Stopwatch::print('selectTile');
+
+    //Stopwatch::tik('algo');
+    // Cerco la people migliore
+
+    #$tiles = [$tiles->first()]; #V1!
+
+    foreach($tiles as $tile) {
+        $nearDevs = [];
+        $nearManagers = [];
+        $tests = [];
+
+        foreach ($tile->nears as $near) {
+            /** @var Tile $near */
+            if ($near && $near->isOccupied) {
+                if ($near->isDevDesk) {
+                    $nearDevs[] = $near->people;
+                } else {
+                    $nearManagers[] = $near->people;
+                }
+            }
+        }
+
+        if ($tile->isDevDesk) {
+            foreach ($nearDevs as $nearDev) {
+                /** @var Developer $nearDev */
+                foreach ($scoreDevDev[$nearDev->id] as $testDevId => $score) {
+                    /** @var Developer $testDev */
+                    if (!$developers[$testDevId]->placed) {
+                        $tests[$testDevId] += $score;
+                    }
+                }
+            }
+            foreach ($nearManagers as $nearManager) {
+                /** @var Manager $nearManager */
+                foreach ($scoreManDev[$nearManager->id] as $testDevId => $score) {
+                    /** @var Developer $testDev */
+                    if (!$developers[$testDevId]->placed) {
+                        $tests[$testDevId] += $score;
+                    }
+                }
+            }
+        } elseif ($tile->isManagerDesk) {
+            foreach ($nearDevs as $nearDev) {
+                /** @var Developer $nearDev */
+                foreach ($scoreDevMan[$nearDev->id] as $testManId => $score) {
+                    /** @var Manager $testManager */
+                    if (!$managers[$testManId]->placed) {
+                        $tests[$testManId] += $score;
+                    }
+                }
+            }
+            foreach ($nearManagers as $nearManager) {
+                /** @var Manager $nearManager */
+                foreach ($scoreManMan[$nearManager->id] as $testManId => $score) {
+                    /** @var Manager $testManager */
+                    if (!$managers[$testManId]->placed) {
+                        $tests[$testManId] += $score;
+                    }
+                }
+            }
+        }
+
+        $bestScore = 0;
+        $bestPeopleId = null;
+        foreach ($tests as $testPeopleId => $score) {
+            if ($score > $bestScore) {
+                $bestPeopleId = $testPeopleId;
+                $bestScore = $score;
+            }
+        }
+
+        if ($bestScore == 0) {
+            Log::out("Score 0 (search new seed)!!!", 0, 'red'); //Mettere X o cmq qualcosa??? (es. la migliore probabile)
+            occupySeed($tile);
+        } else {
+            if ($tile->isDevDesk) {
+                occupy($tile, $developers[$bestPeopleId]);
+            } elseif ($tile->isManagerDesk) {
+                occupy($tile, $managers[$bestPeopleId]);
+            }
+        }
+
+        //Stopwatch::tok('algo');
+        //Stopwatch::print('algo');
+        Log::out("remainingDevTiles=$remainingDevTiles // remainingDevs=$remainingDevs // remainingManagerTiles=$remainingManagerTiles // remainingManagers=$remainingManagers");
     }
-    // Cerco il vicino migliore
-
 }
-
-
-die("ciao");
-
-/*
-$developers[0]->occupy(1, 1);
-$developers[1]->occupy(1, 4);
-$developers[4]->occupy(2, 3);
-$developers[5]->occupy(2, 4);
-
-$managers[0]->occupy(2, 1);
-$managers[2]->occupy(2, 2);
-*/
 
 Log::out('SCORE = ' . getScore());
 
