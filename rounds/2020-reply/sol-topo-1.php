@@ -6,8 +6,9 @@ use Utils\Stopwatch;
 
 require_once '../../bootstrap.php';
 
-$fileName = 'c';
-Cerberus::runClient(['fileName' => $fileName]);
+$fileName = 'd';
+$cerberusLaunch = '';
+Cerberus::runClient(['fileName' => $fileName, 'cerberusLaunch' => '']);
 
 include 'reader.php';
 
@@ -212,4 +213,4 @@ while (($remainingDevTiles > 0 && $remainingDevs > 0) || ($remainingManagerTiles
 
 Log::out('SCORE = ' . getScore());
 
-$fileManager->output(getOutput());
+$fileManager->output(getOutput(), $cerberusLaunch);
