@@ -2,6 +2,9 @@
   "name": "danieleratti/hashcode-framework",
   "type": "library",
   "description": "Hashcode Framework for PHP",
+  "license": [
+    "MIT"
+  ],
   "require": {
     "ext-gd": "*",
     "amphp/parallel": "^1.1",
