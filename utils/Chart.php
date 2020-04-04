@@ -124,20 +124,23 @@ Class Chart
 
     /*
      * @param $points
-     * eg. [[1,1], [2,2], [3,3]]
+     * eg. [[1,1,'lab1'], [2,2], [3,3]]
      */
     public function plotPoints($points)
     {
         $pointsX = [];
         $pointsY = [];
+        $texts = [];
         foreach ($points as $p) {
             $pointsX[] = $p[0];
             $pointsY[] = $p[1];
+            $texts[] = $p[2];
         }
         return $this->plotCustom([
             [
                 'x' => $pointsX,
                 'y' => $pointsY,
+                'text' => $texts,
                 'type' => 'pointcloud'
             ]
         ]);
