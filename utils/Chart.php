@@ -102,6 +102,40 @@ Class Chart
     }
 
     /*
+     * @param $lines
+     * eg. [ ['name': 'series1', 'line':[['a', 1],['b', 2],['c', 3]]], ['name': 'series2', 'line':[['a', 2],['b', 3],['c', 4]]] ]
+     */
+    public function plotMultiLineXY($lines)
+    {
+        $customAxis = 2;
+        $plot = [];
+        $layout = [];
+
+        foreach ($lines as $line) {
+            $item = [
+                'x' => array_column($line['line'], 0),
+                'y' => array_column($line['line'], 1),
+                'type' => 'scatter',
+                'name' => $line['name']
+            ];
+            if ($line['custom_axis']) {
+                $item['yaxis'] = 'y' . $customAxis;
+                $layout = [
+                    'yaxis' . $customAxis => [
+                        'title' => $line['name'],
+                        'overlaying' => 'y',
+                        'side' => $line['side'] ?: 'left',
+                    ]
+                ];
+                $customAxis++;
+            }
+            $plot[] = $item;
+        }
+
+        return $this->plotCustom($plot, $layout);
+    }
+
+    /*
      * @param $line
      * eg. [[1,1], [2,2], [3,3]]
      */
