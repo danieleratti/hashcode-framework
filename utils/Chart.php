@@ -119,13 +119,11 @@ Class Chart
                 'name' => $line['name']
             ];
             if ($line['custom_axis']) {
-                $item['yaxis'] = 'y' . $customAxis;
-                $layout = [
-                    'yaxis' . $customAxis => [
-                        'title' => $line['name'],
-                        'overlaying' => 'y',
-                        'side' => $line['side'] ?: 'left',
-                    ]
+                $item['yaxis'] = 'y' . $line['custom_axis'];
+                $layout['yaxis' . $line['custom_axis']] = [
+                    'title' => $line['name'],
+                    'overlaying' => 'y',
+                    'side' => $line['side'] ?: 'left',
                 ];
                 $customAxis++;
             }
