@@ -146,7 +146,7 @@ class Tile
     public $isManagerDesk;
     /** @var bool $isOccupied */
     public $isOccupied = false;
-    /** @var array $nears */
+    /** @var Tile[] $nears */
     public $nears = [];
     /** @var int $nearsCount */
     public $nearsCount = 0;
