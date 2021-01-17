@@ -22,7 +22,7 @@ $scannedBooks = [];
 $notScannedBooks = $books;
 /** @var Library[] $orderedSignuppedLibraries */
 $orderedSignuppedLibraries = [];
-/** @var Library[] $signuppedLibrabrpries */
+/** @var Library[] $signuppedLibraries */
 $signuppedLibraries = [];
 /** @var Library[] $notSignuppedLibraries */
 $notSignuppedLibraries = $libraries;
