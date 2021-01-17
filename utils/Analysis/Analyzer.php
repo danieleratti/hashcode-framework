@@ -83,6 +83,7 @@ class Analyzer
                     $maxValue = null;
                     $sum = 0;
                     $occurrences = [];
+                    $ascOrderedData = [];
                     foreach ($dataset->data as $data) {
                         $value = $type === 'number' ? $data->{$property} : count($data->{$property});
                         if ($minValue === null || $value < $minValue) {
@@ -93,13 +94,17 @@ class Analyzer
                         }
                         $sum += $value;
                         $occurrences[(string)$value]++;
+                        $ascOrderedData[] = $value;
                     }
+                    sort($ascOrderedData);
                     arsort($occurrences);
+                    $n = count($dataset->data);
                     $this->println("Minimo: {$minValue}");
                     $this->println("Massimo: {$maxValue}");
                     //$this->println("Somma: {$sum}");
-                    $this->println("Media: " . ($sum / count($dataset->data)));
-                    $this->println("Mediana: " . (($maxValue + $minValue) / 2));
+                    $this->println("Media: " . ($sum / $n));
+                    $middleValueIndex = floor(($n - 1) / 2);
+                    $this->println("Mediana: " . ($n % 2 ? $ascOrderedData[$middleValueIndex] : ($ascOrderedData[$middleValueIndex] + $ascOrderedData[$middleValueIndex + 1]) / 2));
                     $this->println("Moda e tendenza:");
                     $i = 0;
                     foreach ($occurrences as $k => $v) {
