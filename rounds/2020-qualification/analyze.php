@@ -1,9 +1,10 @@
 <?php
 
-$fileName = 'a';
+use Utils\Analysis\Analyzer;
+
+$fileName = 'b';
 
 include 'reader-mm.php';
-include_once '../../utils/Analysis/Analyzer.php';
 
 /**
  * @var int $countBooks
@@ -21,7 +22,7 @@ $scannedBooks = [];
 $notScannedBooks = $books;
 /** @var Library[] $orderedSignuppedLibraries */
 $orderedSignuppedLibraries = [];
-/** @var Library[] $signuppedLibraries */
+/** @var Library[] $signuppedLibrabrpries */
 $signuppedLibraries = [];
 /** @var Library[] $notSignuppedLibraries */
 $notSignuppedLibraries = $libraries;

@@ -1,5 +1,8 @@
 <?php
 
+namespace Utils\Analysis;
+
+use Exception;
 
 class Analyzer
 {
@@ -116,22 +119,5 @@ class Analyzer
         }
         $output = ob_get_clean();
         file_put_contents('analysis/' . $this->filename . '.html', $output);
-    }
-}
-
-class Dataset
-{
-    /** @var string $name */
-    public $name;
-    /** @var array $data */
-    public $data;
-    /** @var string[] $properties */
-    public $properties;
-
-    public function __construct(string $name, array $data, array $properties)
-    {
-        $this->name = $name;
-        $this->data = $data;
-        $this->properties = $properties;
     }
 }
