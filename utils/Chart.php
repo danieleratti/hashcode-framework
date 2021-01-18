@@ -185,7 +185,7 @@ Class Chart
                 </script>";
     }
 
-    public function getBoxPlotHtml($values, $divName, $names){
+    public function getBoxPlotHtml($values, $divName){
 
         $data = [];
         foreach ($values as $v => $value)
@@ -193,7 +193,7 @@ Class Chart
             $data[] = [
                 'y'=> $value,
                 'type' => 'box',
-                'name' => $names[$v]
+                'name' => $v,
             ];
         }
 

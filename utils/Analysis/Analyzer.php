@@ -45,9 +45,9 @@ class Analyzer
         $this->printDivider();
 
         // Datasets
-        $datasetsResults = (new Elaborator($this->data))->elaborate();
+        $elaborator = new Elaborator($this->data);
+        $datasetsResults = $elaborator->elaborate();
         foreach ($datasetsResults['datasets'] as $datasetName => $dataset) {
-            $boxPlotTraces = [];
             $this->println("SET {$datasetName}", 1, self::PRINT_UNDERLINED | self::PRINT_TITLE);
             $this->println(count($dataset['count']) . " elementi.", 2);
             if ($dataset['error']) {
@@ -79,20 +79,15 @@ class Analyzer
                     if ($i > 10) break;
                 }
 
-                $this->println("</div>");
-                $this->println("<div id={$property}></div>");
-                $this->println("</div>");
-                $chartHTML = $chart->getStatsPlot([[$minValue, 'Min value'], [$maxValue, 'Max Value'], [($sum / count($dataset->data)), 'Average']], $property);
-                $this->println($chartHTML);
-                $boxPlotTraces[] = $propertyArray;
-                $this->println();
             }
-            $divName = $property . 'test';
+            $divName =$datasetName;
             $this->println("<div id={$divName}></div>");
-            $chartBoxPlotHTML = $chart->getBoxPlotHtml($boxPlotTraces, $divName, $dataset->properties);
+            $chartBoxPlotHTML = $chart->getBoxPlotHtml($elaborator->boxPlotTraces[$datasetName], $divName);
             $this->println($chartBoxPlotHTML);
             $this->printDivider();
+
         }
+        $this->print("</body>");
         $output = ob_get_clean();
         file_put_contents('analysis/' . $this->filename . '.html', $output);
     }
@@ -110,6 +105,10 @@ class Analyzer
     private function initPage()
     {
         echo "<style type='text/css'>body {font-family: sans-serif;}</style>";
+        echo "<head>
+                <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+            </head><body>";
+
     }
 
     public function print($string, $flags = 0)

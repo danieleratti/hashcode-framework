@@ -10,14 +10,18 @@ use ReflectionClass;
 class Elaborator
 {
     public array $data;
+    public array $boxPlotTraces;
 
     public function __construct($data)
     {
         $this->data = $data;
+        $this->boxPlotTraces = [];
+
     }
 
     public function elaborate(): array
     {
+        $boxPlotTraces = [];
         $results = [
             'datasets' => [],
         ];
@@ -57,6 +61,7 @@ class Elaborator
                     $sum = 0;
                     $occurrences = [];
                     $orderedValues = [];
+                    $propertyArray = [];
                     foreach ($dataset->data as $data) {
                         switch ($type) {
                             case 'number':
@@ -72,6 +77,7 @@ class Elaborator
                                 $set['error'] = 'Tipo non atteso.';
                                 continue 2;
                         }
+                        $propertyArray[] = $value;
                         if ($minValue === null || $value < $minValue) {
                             $minValue = $value;
                         }
@@ -93,6 +99,7 @@ class Elaborator
                     foreach ($occurrences as $k => $v) {
                         $item['occurrences'][$k] = $v;
                     }
+                    $boxPlotTraces[$property] = $propertyArray;
                 } catch (Exception $e) {
                     $set['error'] = "$e";
                 }
@@ -100,9 +107,11 @@ class Elaborator
                 $set['properties'][$property] = $item;
             }
 
+            $this->boxPlotTraces[$dataset->name]=$boxPlotTraces;
             $results['datasets'][$dataset->name] = $set;
         }
 
         return $results;
     }
+
 }
