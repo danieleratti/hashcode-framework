@@ -154,6 +154,55 @@ Class Chart
         ]);
     }
 
+    public function getStatsPlot($stats, $divName){
+        $pointsX = [];
+        $pointsY = [];
+        $texts = [];
+        foreach ($stats as $stat)
+        {
+            $pointsX[] = 2;
+            $pointsY[] = $stat[0];
+            $texts[] = $stat[1];
+        }
+
+        $data = [[
+            'x' => $pointsX,
+            'y' => $pointsY,
+            'text' => $texts,
+            'type' => 'pointcloud']
+        ];
+        $layout = [[
+            'height'=> 800,
+            'width' =>300,
+            'margin'=> [
+                'l'=> 10, 'b' => 20, 't'=> 0, 'r'=> 0]
+        ]];
+
+        return "<script>
+                    var data = " . json_encode($data) . ";
+                    var layout = " . json_encode($layout) . ";
+                    Plotly.newPlot($divName, data, layout);
+                </script>";
+    }
+
+    public function getBoxPlotHtml($values, $divName, $names){
+
+        $data = [];
+        foreach ($values as $v => $value)
+        {
+            $data[] = [
+                'y'=> $value,
+                'type' => 'box',
+                'name' => $names[$v]
+            ];
+        }
+
+        return "<script>
+                    var data = " . json_encode($data) . ";
+                    Plotly.newPlot($divName, data);
+        </script>";
+    }
+
     /*
      * @param $points
      * eg. [[1,1,'lab1'], [2,2], [3,3]]

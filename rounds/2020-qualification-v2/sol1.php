@@ -2,8 +2,9 @@
 
 use Utils\Collection;
 use Utils\Log;
+use Utils\Analysis\Analyzer;
 
-$fileName = 'b';
+$fileName = 'e';
 
 include 'reader.php';
 include_once '../../utils/Analysis/Analyzer.php';
@@ -11,9 +12,10 @@ include_once '../../utils/Analysis/Analyzer.php';
 /** @var Books[] $books */
 /** @var Libraries[] $libraries */
 
+
 $analyzer = new Analyzer($fileName, [
-    'booksCount' => $books->count(),
-    'librariesCount' => $libraries->count()
+    'books_count' => count($books),
+    'libraries_count' => count($libraries),
 ]);
 
 $analyzer->addDataset('Books', $books->toArray(), ['award', 'inLibrariesCount']);

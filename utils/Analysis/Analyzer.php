@@ -3,6 +3,7 @@
 namespace Utils\Analysis;
 
 use Exception;
+use Utils\Chart;
 
 class Analyzer
 {
@@ -53,7 +54,12 @@ class Analyzer
 
     public function analyze()
     {
+        $chart = new Chart('stats');
         ob_start();
+        $this->println("<html>
+            <head>
+                <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+            </head><body>");
         $this->println("FILE DI INPUT {$this->filename}", 1, self::PRINT_BOLD);
 
         // Base data
@@ -64,6 +70,8 @@ class Analyzer
 
         // Datasets
         foreach ($this->data as $dIdx => $dataset) {
+            $boxPlotTraces = [];
+
             $this->println("SET {$dataset->name}", 1, self::PRINT_UNDERLINED);
             $this->println(count($dataset->data) . " elementi.", 2);
             if (!$dataset->data || count($dataset->data) === 0) {
@@ -80,14 +88,17 @@ class Analyzer
                     } elseif ($type == 'array' || strpos($type, '[]') !== false) {
                         $type = 'array';
                     }
+                    $this->print("<div><div>");
                     $this->println("Analizzo {$property} [{$type}].");
                     // Analisi
                     $minValue = null;
                     $maxValue = null;
                     $sum = 0;
                     $occurrences = [];
+                    $propertyArray = [];
                     foreach ($dataset->data as $data) {
                         $value = $type === 'number' ? $data->{$property} : count($data->{$property});
+                        $propertyArray[] = $value;
                         if ($minValue === null || $value < $minValue) {
                             $minValue = $value;
                         }
@@ -110,12 +121,24 @@ class Analyzer
                         $i++;
                         if ($i > 10) break;
                     }
-                    $this->println();
+                    $this->println("</div>");
+                    $this->println("<div id={$property}></div>");
+                    $this->println("</div>");
+                    $chartHTML = $chart->getStatsPlot([[$minValue, 'Min value'], [$maxValue, 'Max Value'], [($sum / count($dataset->data)), 'Average']], $property);
+                    $this->println($chartHTML);
+                    $boxPlotTraces[] = $propertyArray;
+
                 } catch (Exception $e) {
                     $this->println("Errore: $e", 2);
                 }
             }
-            $this->println();
+
+                $divName = $property . 'test';
+                $this->println("<div id={$divName}></div>");
+                $chartBoxPlotHTML = $chart->getBoxPlotHtml($boxPlotTraces, $divName, $dataset->properties);
+                $this->println($chartBoxPlotHTML);
+
+            $this->print("</body>");
         }
         $output = ob_get_clean();
         file_put_contents('analysis/' . $this->filename . '.html', $output);
