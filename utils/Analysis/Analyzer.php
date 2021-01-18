@@ -2,8 +2,8 @@
 
 namespace Utils\Analysis;
 
-use Exception;
 use Utils\Chart;
+use Utils\Collection;
 
 class Analyzer
 {
@@ -20,16 +20,97 @@ class Analyzer
         $this->baseData = $baseData;
     }
 
-    public function addDataset(string $name, array $data, array $properties)
+    /**
+     * @param string $name
+     * @param array|Collection $data
+     * @param array $properties
+     */
+    public function addDataset(string $name, $data, array $properties)
     {
         $this->data[] = new Dataset($name, $data, $properties);
     }
 
-    const PRINT_BOLD = 0x00001;
-    const PRINT_ITALIC = 0x00010;
-    const PRINT_UNDERLINED = 0x00100;
-    const PRINT_GREEN = 0x01000;
-    const PRINT_RED = 0x10000;
+    public function analyze()
+    {
+        $chart = new Chart('stats');
+        ob_start();
+        $this->initPage();
+        $this->println("FILE DI INPUT {$this->filename}", 1, self::PRINT_BOLD | self::PRINT_TITLE);
+
+        // Base data
+        foreach ($this->baseData as $name => $value) {
+            $this->println("$name: $value");
+        }
+        $this->println();
+        $this->printDivider();
+
+        // Datasets
+        $datasetsResults = (new Elaborator($this->data))->elaborate();
+        foreach ($datasetsResults['datasets'] as $datasetName => $dataset) {
+            $boxPlotTraces = [];
+            $this->println("SET {$datasetName}", 1, self::PRINT_UNDERLINED | self::PRINT_TITLE);
+            $this->println(count($dataset['count']) . " elementi.", 2);
+            if ($dataset['error']) {
+                $this->println($dataset['error'], 2, self::PRINT_RED);
+                continue;
+            }
+            foreach ($dataset['properties'] as $propertyName => $property) {
+                $this->println("Analizzo {$propertyName} [{$property['type']}].");
+                if ($property['error']) {
+                    $this->println($property['error'], 2, self::PRINT_RED);
+                    continue;
+                }
+                if($property['minimum'] == $property['maximum']) {
+                    $this->println('Questo parametro sembra trascurabile.', 1, self::PRINT_BLUE);
+                }
+                if(in_array($property['type'], ['array', 'collection']) && $property['minimum'] == 0) {
+                    $this->println('Sembrano esserci liste vuote.', 1, self::PRINT_BLUE);
+                }
+                $propertyArray = [];
+                $this->println("Minimo: {$property['minimum']}");
+                $this->println("Massimo: {$property['maximum']}");
+                $this->println("Media: {$property['average']}");
+                $this->println("Mediana: {$property['median']}");
+                $this->println("Moda e tendenza:");
+                $i = 0;
+                foreach ($property['occurrences'] as $k => $v) {
+                    $this->println("&nbsp;&nbsp;• $k ($v occorrenze)");
+                    $i++;
+                    if ($i > 10) break;
+                }
+
+                $this->println("</div>");
+                $this->println("<div id={$property}></div>");
+                $this->println("</div>");
+                $chartHTML = $chart->getStatsPlot([[$minValue, 'Min value'], [$maxValue, 'Max Value'], [($sum / count($dataset->data)), 'Average']], $property);
+                $this->println($chartHTML);
+                $boxPlotTraces[] = $propertyArray;
+                $this->println();
+            }
+            $divName = $property . 'test';
+            $this->println("<div id={$divName}></div>");
+            $chartBoxPlotHTML = $chart->getBoxPlotHtml($boxPlotTraces, $divName, $dataset->properties);
+            $this->println($chartBoxPlotHTML);
+            $this->printDivider();
+        }
+        $output = ob_get_clean();
+        file_put_contents('analysis/' . $this->filename . '.html', $output);
+    }
+
+    /* PRINT FUNCTIONS */
+
+    const PRINT_BOLD = 0x00000001;
+    const PRINT_ITALIC = 0x00000010;
+    const PRINT_UNDERLINED = 0x00000100;
+    const PRINT_GREEN = 0x00001000;
+    const PRINT_RED = 0x00010000;
+    const PRINT_BLUE = 0x00100000;
+    const PRINT_TITLE = 0x01000000;
+
+    private function initPage()
+    {
+        echo "<style type='text/css'>body {font-family: sans-serif;}</style>";
+    }
 
     public function print($string, $flags = 0)
     {
@@ -42,7 +123,11 @@ class Analyzer
         if ($flags & self::PRINT_GREEN)
             $string = "<span style='color: green'>$string</span>";
         if ($flags & self::PRINT_RED)
-            $string = "<<span style='color: red'>$string</span>";
+            $string = "<span style='color: red'>$string</span>";
+        if ($flags & self::PRINT_BLUE)
+            $string = "<span style='color: blue'>$string</span>";
+        if ($flags & self::PRINT_TITLE)
+            $string = "<span style='font-size: 18px;'>$string</span>";
         echo $string;
     }
 
@@ -52,95 +137,8 @@ class Analyzer
         $this->print(str_repeat("<br/>", $newLines));
     }
 
-    public function analyze()
+    public function printDivider()
     {
-        $chart = new Chart('stats');
-        ob_start();
-        $this->println("<html>
-            <head>
-                <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-            </head><body>");
-        $this->println("FILE DI INPUT {$this->filename}", 1, self::PRINT_BOLD);
-
-        // Base data
-        foreach ($this->baseData as $name => $value) {
-            $this->println("$name: $value");
-        }
-        $this->println();
-
-        // Datasets
-        foreach ($this->data as $dIdx => $dataset) {
-            $boxPlotTraces = [];
-
-            $this->println("SET {$dataset->name}", 1, self::PRINT_UNDERLINED);
-            $this->println(count($dataset->data) . " elementi.", 2);
-            if (!$dataset->data || count($dataset->data) === 0) {
-                $this->println("Set inesistente o non inizializzato.", 2);
-                continue;
-            }
-            foreach ($dataset->properties as $property) {
-                try {
-                    reset($dataset->data);
-                    $reflection = new \ReflectionClass(get_class($dataset->data[key($dataset->data)]));
-                    [, , $type] = explode(' ', $reflection->getProperty($property)->getDocComment());
-                    if (in_array($type, ['bool', 'int', 'double'])) {
-                        $type = 'number';
-                    } elseif ($type == 'array' || strpos($type, '[]') !== false) {
-                        $type = 'array';
-                    }
-                    $this->print("<div><div>");
-                    $this->println("Analizzo {$property} [{$type}].");
-                    // Analisi
-                    $minValue = null;
-                    $maxValue = null;
-                    $sum = 0;
-                    $occurrences = [];
-                    $propertyArray = [];
-                    foreach ($dataset->data as $data) {
-                        $value = $type === 'number' ? $data->{$property} : count($data->{$property});
-                        $propertyArray[] = $value;
-                        if ($minValue === null || $value < $minValue) {
-                            $minValue = $value;
-                        }
-                        if ($maxValue === null || $value > $maxValue) {
-                            $maxValue = $value;
-                        }
-                        $sum += $value;
-                        $occurrences[(string)$value]++;
-                    }
-                    arsort($occurrences);
-                    $this->println("Minimo: {$minValue}");
-                    $this->println("Massimo: {$maxValue}");
-                    //$this->println("Somma: {$sum}");
-                    $this->println("Media: " . ($sum / count($dataset->data)));
-                    $this->println("Mediana: " . (($maxValue + $minValue) / 2));
-                    $this->println("Moda e tendenza:");
-                    $i = 0;
-                    foreach ($occurrences as $k => $v) {
-                        $this->println("&nbsp;&nbsp;• $k ($v occorrenze)");
-                        $i++;
-                        if ($i > 10) break;
-                    }
-                    $this->println("</div>");
-                    $this->println("<div id={$property}></div>");
-                    $this->println("</div>");
-                    $chartHTML = $chart->getStatsPlot([[$minValue, 'Min value'], [$maxValue, 'Max Value'], [($sum / count($dataset->data)), 'Average']], $property);
-                    $this->println($chartHTML);
-                    $boxPlotTraces[] = $propertyArray;
-
-                } catch (Exception $e) {
-                    $this->println("Errore: $e", 2);
-                }
-            }
-
-                $divName = $property . 'test';
-                $this->println("<div id={$divName}></div>");
-                $chartBoxPlotHTML = $chart->getBoxPlotHtml($boxPlotTraces, $divName, $dataset->properties);
-                $this->println($chartBoxPlotHTML);
-
-            $this->print("</body>");
-        }
-        $output = ob_get_clean();
-        file_put_contents('analysis/' . $this->filename . '.html', $output);
+        $this->print("<hr/>");
     }
 }
