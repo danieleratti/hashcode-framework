@@ -4,25 +4,29 @@ use Utils\Collection;
 use Utils\Log;
 use Utils\Analysis\Analyzer;
 
-$fileName = 'e';
+$fileName = 'a';
 
 include 'reader.php';
 include_once '../../utils/Analysis/Analyzer.php';
 
-/** @var Books[] $books */
-/** @var Libraries[] $libraries */
+/** @var Book[] $books */
+/** @var Library[] $libraries */
 
+$SCORE = 0;
+$takenLibraries = collect();
+function takeLibrary(Library $library)
+{
+    global $SCORE, $libraries, $books, $takenLibraries;
+    $takenLibraries->put($library->id, $library);
+    $libraries->forget($library->id);
+    foreach($library->books as $book) {
+        $SCORE += $book->award;
+        // deindexing books from libraries
+        foreach($book->inLibraries as $_library) {
+            $_library->books->forget($book->id);
+        }
+        $books->forget($book->id);
+    }
+}
 
-
-$analyzer = new Analyzer($fileName, [
-    'books_count' => count($books),
-    'libraries_count' => count($libraries),
-]);
-/*$analyzer->addDataset('books', $books, ['award', 'inLibraries']);
-$analyzer->addDataset('libraries', $libraries, ['signUpDuration', 'shipsPerDay', 'books']);
-$analyzer->analyze();*/
-
-$analyzer->addDataset('Books', $books->toArray(), ['award', 'inLibrariesCount']);
-
-$analyzer->analyze();
 
