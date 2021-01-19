@@ -34,8 +34,6 @@ class Library
 
     /** @var Collection $books */
     public $books;
-    /** @var int $booksNumber */
-    public $booksNumber;
 
     public function __construct($id, $fileRow1, $fileRow2)
     {
@@ -53,7 +51,6 @@ class Library
             $book->inLibraries->put($id, $this);
         }
         $this->books = collect($this->books)->keyBy('id');
-        $this->booksNumber = (int)$booksCount;
     }
 }
 
