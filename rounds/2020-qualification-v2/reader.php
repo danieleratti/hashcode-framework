@@ -7,11 +7,14 @@ require_once '../../bootstrap.php';
 
 class Book
 {
+    /** @var int $id */
     public $id;
+    /** @var int $award */
     public $award;
 
     /** @var Collection $inLibraries */
     public $inLibraries;
+    /** @var int $inLibrariesCount */
     public $inLibrariesCount;
 
     public function __construct($id, $award)
@@ -24,12 +27,16 @@ class Book
 
 class Library
 {
+    /** @var int $id */
     public $id;
+    /** @var int $signUpDuration */
     public $signUpDuration;
+    /** @var int $shipsPerDay */
     public $shipsPerDay;
 
     /** @var Collection $books */
     public $books;
+    /** @var int $booksNumber */
     public $booksNumber;
 
     public function __construct($id, $fileRow1, $fileRow2)
