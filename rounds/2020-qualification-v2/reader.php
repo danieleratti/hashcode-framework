@@ -14,8 +14,6 @@ class Book
 
     /** @var Collection $inLibraries */
     public $inLibraries;
-    /** @var int $inLibrariesCount */
-    public $inLibrariesCount;
 
     public function __construct($id, $award)
     {
@@ -45,13 +43,15 @@ class Library
         $this->id = (int)$id;
         $this->books = [];
         list($booksCount, $this->signUpDuration, $this->shipsPerDay) = explode(' ', $fileRow1);
+        $this->signUpDuration = (int)$this->signUpDuration;
+        $this->shipsPerDay = (int)$this->shipsPerDay;
         foreach (explode(' ', $fileRow2) as $bookId) {
             /** @var Book $book */
+            $bookId = (int)$bookId;
             $book = $books[$bookId];
             $this->books[$bookId] = $book;
             $book->inLibraries->put($id, $this);
         }
-        $book->inLibrariesCount = (int)$book->inLibraries->count();
         $this->books = collect($this->books)->keyBy('id');
         $this->booksNumber = (int)$booksCount;
     }
@@ -82,3 +82,21 @@ for ($line = 0; $line < count($librariesRows); $line += 2) {
     $id++;
 }
 $libraries = collect($libraries)->keyBy('id');
+
+/*
+$books->map(function($v) {
+    $v->inLibrariesCount = (int)$v->inLibraries->count();
+    return $v;
+});
+*/
+
+// Faster than inLibrariesCount!
+//Stopwatch::tik('sortBy');
+//$books->sortBy(function ($v, $key) { return $v->inLibraries->count(); });
+//Stopwatch::tok('sortBy');
+//Stopwatch::print();
+
+$books = $books->filter(function ($b) {
+    return $b->inLibraries->count() > 0;
+});
+
