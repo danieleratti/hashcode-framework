@@ -2,6 +2,7 @@
 
 /**
  * Collections can be iterated as array in a foreach cycle
+ * https://laravel.com/docs/8.x/collections
  */
 
 require_once '../../bootstrap.php';

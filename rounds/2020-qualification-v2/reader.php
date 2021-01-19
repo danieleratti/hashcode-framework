@@ -63,6 +63,9 @@ $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
 list($countBooks, $countLibraries, $countDays) = explode(' ', $content[0]);
+$countBooks = (int)$countBooks;
+$countLibraries = (int)$countLibraries;
+$countDays = (int)$countDays;
 
 $books = [];
 foreach (explode(' ', $content[1]) as $id => $bookAward) {
