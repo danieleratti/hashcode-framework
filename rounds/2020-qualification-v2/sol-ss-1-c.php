@@ -10,27 +10,33 @@ include 'reader-ss.php';
 /** @var Collection $libraries */
 $libraries = assignScoreToLibraries($libraries);
 
+const DAYS = 100000;
+
 $signupRemainingDays = 0;
+/** @var Library $libraryUnderSignup */
 $libraryUnderSignup = null;
+/** @var Library[] $librariesUnderScan */
 $librariesUnderScan = [];
 $totalBook = 0;
 $totalAward = 0;
+$needRerun = false;
 
 $alreadyScannedBooks = [];
 $alreadyScannedBooksToClean = [];
 
-for ($i = 0; $i < 100000; $i++) {
+for ($i = 0; $i < DAYS; $i++) {
     if ($signupRemainingDays == 0) {
         if ($libraryUnderSignup) {
             $librariesUnderScan[] = $libraryUnderSignup;
         }
 
-        $libraryUnderSignup = $libraries->pop();
+        do {
+            $libraryUnderSignup = $libraries->pop();
+        } while ($libraryUnderSignup->signUpDuration >= (DAYS - $i));
         $signupRemainingDays = $libraryUnderSignup->signUpDuration;
     }
 
     /** @var Book $book */
-    /** @var Library $library */
     foreach ($librariesUnderScan as $index => $library) {
         for ($j = 0; $j < $library->shipsPerDay; $j++) {
             $book = $library->books->pop();
@@ -43,6 +49,7 @@ for ($i = 0; $i < 100000; $i++) {
             }
 
             if (count($library->books) == 0) {
+                $libraries->forget($library->id);
                 unset($librariesUnderScan[$index]);
                 break;
             }
@@ -50,7 +57,7 @@ for ($i = 0; $i < 100000; $i++) {
     }
 
 
-    if($needRerun) {
+    if ($needRerun) {
         foreach ($libraries as $library) {
             /** @var Library $library */
             $library = $library->books->filter(function ($b) use ($alreadyScannedBooksToClean) {
