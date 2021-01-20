@@ -60,7 +60,7 @@ for ($i = 0; $i < DAYS; $i++) {
     if ($needRerun) {
         foreach ($libraries as $library) {
             /** @var Library $library */
-            $library = $library->books->filter(function ($b) use ($alreadyScannedBooksToClean) {
+            $library->books = $library->books->filter(function ($b) use ($alreadyScannedBooksToClean) {
                 return !in_array($b->id, $alreadyScannedBooksToClean);
             });
         }
