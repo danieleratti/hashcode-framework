@@ -14,14 +14,15 @@ include 'reader.php';
 
 function takeFeasableBooks($lId)
 {
-    global $remainingDays, $libraries, $usedBooks;
+    global $remainingDays, $libraries;
     $library = $libraries[$lId];
-    $remainingBooks = $library->books->filter(function ($book)  use ($usedBooks) {
-        return !in_array($book->id, $usedBooks);
-    })->sortByDesc('award');
 
-    $doableBooksNumber = min(($remainingDays - $library->signUpDuration) * $library->shipsPerDay, $remainingBooks->count());
-    return $remainingBooks->take($doableBooksNumber);
+    $doableBooksNumber = min(($remainingDays - $library->signUpDuration) * $library->shipsPerDay, $library->books->count());
+    if ($doableBooksNumber > 0) {
+        return $library->books->take($doableBooksNumber);
+    } else {
+        return collect();
+    }
 }
 
 function takeBestLibrary()
@@ -48,14 +49,13 @@ function takeBestLibrary()
             return $rank['score'] > 0;
         });
 
-    if($ranking->count()) {
+    if ($ranking->count()) {
         return $ranking->first();
     }
 }
 
 $result = [];
 $points = 0;
-$usedBooks = [];
 $remainingDays = $countDays;
 $maxPoints = $books->sum('award');
 
@@ -67,13 +67,21 @@ while ($best = takeBestLibrary()) {
     $points += $best['award'];
 
     $remainingDays -= $best['signUpDuration'];
+    $removedEmptyLibs = 0;
     foreach ($best['feasableBooks'] as $book) {
-        $usedBooks[] = $book->id;
+        foreach ($book->inLibraries as $library) {
+            $library->books->forget($book->id);
+
+            if ($library->books->count() == 0) {
+                $libraries->forget($library->id);
+                $removedEmptyLibs++;
+            }
+        }
     }
 
-    echo "P: $points | GG: $remainingDays\n";
+    $remainingLibs = $libraries->count();
+    echo "P: $points | GG: $remainingDays | RemovedLibs: $removedEmptyLibs | RemainingLibs: $remainingLibs\n";
 }
 
-print_r($result);
 echo "\n\nPUNTI: $points / $maxPoints\n\n";
 
