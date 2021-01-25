@@ -53,6 +53,7 @@ class Library
             $book->inLibraries->put($id, $this);
         }
         $this->books = collect($this->books)->keyBy('id');
+        $this->books = $this->books->sortBy('award');
     }
 }
 
