@@ -30,4 +30,10 @@ class Log
                 echo $outputString . "\n";
         }
     }
+
+    public static function error($content)
+    {
+        Log::out("ERROR: " . $content, 0, 'red');
+        die();
+    }
 }
