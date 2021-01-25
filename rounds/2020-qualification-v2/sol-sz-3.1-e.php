@@ -43,6 +43,9 @@ for ($i = 0; $i < $countDays; $i++) {
                 $totalBook++;
                 $totalAward += $book->award;
                 $alreadyScannedBooksToClean[] = $book->id;
+            } else {
+                // If book is already scanned, get another one
+                $j--;
             }
 
             if (count($library->books) == 0) {
@@ -58,6 +61,7 @@ for ($i = 0; $i < $countDays; $i++) {
     Log::out('Day ' . ($i + 1));
     Log::out('Actual award: ' . $totalAward, 1);
     Log::out('Estimated award: ' . floor(($totalAward / ($i + 1)) * ($countDays)), 1);
+    Log::out('Libraries under scan: ' . count($librariesUnderScan), 1);
     Log::out('Books scanned: ' . count($alreadyScannedBooksToClean), 1);
 }
 
