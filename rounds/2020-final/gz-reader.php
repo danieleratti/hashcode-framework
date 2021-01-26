@@ -99,6 +99,10 @@ class Arm
     public $path;
     /** @var Task[] $tasks */
     public $tasks;
+    /** @var Task $task */
+    public $currentTask;
+    /** @var MountPoint $mountPoint */
+    public $mountPoint;
 
     public function __construct($id)
     {
