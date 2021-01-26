@@ -8,7 +8,7 @@ require_once '../../bootstrap.php';
 
 use Utils\FileManager;
 
-$fileName = $fileName ?: 'a';
+$fileName = $fileName ?: 'b';
 
 $W = 0;
 $H = 0;
@@ -78,10 +78,12 @@ class AssemblyPoint
 
 class MountPoint
 {
+    public $id;
     public $x, $y;
 
-    public function __construct($row)
+    public function __construct($id, $row)
     {
+        $this->id = $id;
         list($x, $y) = explode(" ", $row);
         $this->x = (int)$x;
         $this->y = (int)$y;
@@ -192,7 +194,8 @@ for ($i = 0; $i < $N_ARMS; $i++)
 $r = 1;
 
 for ($i = 0; $i < $N_MOUNT_POINTS; $i++)
-    $MOUNT_POINTS->add(new MountPoint($content[$r++]));
+    $MOUNT_POINTS->add(new MountPoint($i, $content[$r++]));
+$MOUNT_POINTS->keyBy('id');
 
 for ($i = 0; $i < $N_TASKS; $i++)
     $TASKS->add(new Task($content[$r++], $content[$r++]));
