@@ -7,6 +7,7 @@ error_reporting(E_ERROR);
 require_once '../../bootstrap.php';
 
 use Utils\FileManager;
+use Utils\Log;
 
 $fileName = $fileName ?: 'a';
 
@@ -19,6 +20,7 @@ $N_ARMS = 0;
 $N_STEPS = 0;
 
 //$MAP = []; // [x][y]=m (mounting point),a (assembly point)
+$XY_ASSEMBLY_POINTS = [];
 $ASSEMBLY_POINTS = collect();
 $MOUNT_POINTS = collect();
 $TASKS = collect();
@@ -46,11 +48,12 @@ class AssemblyPoint
 
     public static function get($x, $y, $status, $task)
     {
-        global $ASSEMBLY_POINTS;
-        if ($ap = $ASSEMBLY_POINTS->where('x', $x)->where('y', $y)->first()) {
+        global $ASSEMBLY_POINTS, $XY_ASSEMBLY_POINTS;
+        if ($ap = $XY_ASSEMBLY_POINTS[$x][$y]) {
             /** @var AssemblyPoint $ap */
         } else {
             $ap = new AssemblyPoint($x, $y);
+            $XY_ASSEMBLY_POINTS[$x][$y] = $ap;
             $ASSEMBLY_POINTS->add($ap);
         }
         switch ($status) {
@@ -156,6 +159,7 @@ class Task
 
 
 // Reading the inputs
+Log::out("Reading file");
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 list($W, $H, $N_ARMS, $N_MOUNT_POINTS, $N_TASKS, $N_STEPS) = explode(" ", $content[0]);
@@ -168,9 +172,11 @@ $N_STEPS = (int)$N_STEPS;
 
 $r = 1;
 
+Log::out("Adding mount points");
 for ($i = 0; $i < $N_MOUNT_POINTS; $i++)
     $MOUNT_POINTS->add(new MountPoint($content[$r++]));
 
+Log::out("Adding tasks");
 for ($i = 0; $i < $N_TASKS; $i++)
     $TASKS->add(new Task($content[$r++], $content[$r++]));
 $TASKS->keyBy('id');
@@ -178,4 +184,6 @@ $TASKS->keyBy('id');
 $N_MOUNT_POINTS = $MOUNT_POINTS->count();
 $N_TASKS = $TASKS->count();
 $N_ASSEMBLY_POINTS = $ASSEMBLY_POINTS->count();
+
+Log::out("Read finished");
 

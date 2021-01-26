@@ -30,7 +30,8 @@ foreach ($ASSEMBLY_POINTS as $ap) {
 }
 
 foreach($plot as $p) {
-    $visualStandard->setPixel($p['y'], $p['x'], $p['score']/$maxScore);
+    if($p['score'] >= $maxScore*0.5)
+        $visualStandard->setPixel($p['y'], $p['x'], $p['score']/$maxScore);
 }
 
 $visualStandard->save($fileName . '-heatmap');
