@@ -55,7 +55,7 @@ class Analyzer
                 continue;
             }
             foreach ($dataset['properties'] as $propertyName => $property) {
-                $this->println("Analizzo {$propertyName} [{$property['type']}].");
+                $this->println("<br>✱ Analizzo <b>{$propertyName}</b> [{$property['type']}].");
                 if ($property['error']) {
                     $this->println($property['error'], 2, self::PRINT_RED);
                     continue;
@@ -89,6 +89,8 @@ class Analyzer
         }
         $this->print("</body>");
         $output = ob_get_clean();
+        if(!is_dir('analysis'))
+            mkdir('analysis');
         file_put_contents('analysis/' . $this->filename . '.html', $output);
     }
 
