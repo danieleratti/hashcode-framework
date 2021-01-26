@@ -27,6 +27,8 @@ class Analyzer
      */
     public function addDataset(string $name, $data, array $properties)
     {
+        if ($data instanceof Collection)
+            $data = $data->toArray();
         $this->data[] = new Dataset($name, $data, $properties);
     }
 
@@ -60,10 +62,10 @@ class Analyzer
                     $this->println($property['error'], 2, self::PRINT_RED);
                     continue;
                 }
-                if($property['minimum'] == $property['maximum']) {
+                if ($property['minimum'] == $property['maximum']) {
                     $this->println('Questo parametro sembra trascurabile.', 1, self::PRINT_BLUE);
                 }
-                if(in_array($property['type'], ['array', 'collection']) && $property['minimum'] == 0) {
+                if (in_array($property['type'], ['array', 'collection']) && $property['minimum'] == 0) {
                     $this->println('Sembrano esserci liste vuote.', 1, self::PRINT_BLUE);
                 }
                 $propertyArray = [];
@@ -73,14 +75,18 @@ class Analyzer
                 $this->println("Mediana: {$property['median']}");
                 $this->println("Moda e tendenza:");
                 $i = 0;
-                foreach ($property['occurrences'] as $k => $v) {
-                    $this->println("&nbsp;&nbsp;• $k ($v occorrenze)");
-                    $i++;
-                    if ($i > 10) break;
+                if ($property['minimum'] != $property['maximum']) {
+                    foreach ($property['occurrences'] as $k => $v) {
+                        $this->println("&nbsp;&nbsp;• $k ($v occorrenze)");
+                        $i++;
+                        if ($i > 10) break;
+                    }
+                    $chart = new Chart("{$this->filename}-$propertyName");
+                    $chart->plotPoints(collect($property['occurrences'])->map(fn($v, $k) => [$k, $v]));
                 }
 
             }
-            $divName =$datasetName;
+            $divName = $datasetName;
             $this->println("<div id={$divName}></div>");
             $chartBoxPlotHTML = $chart->getBoxPlotHtml($elaborator->boxPlotTraces[$datasetName], $divName);
             $this->println($chartBoxPlotHTML);
