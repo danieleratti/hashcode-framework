@@ -22,6 +22,7 @@ $N_STEPS = 0;
 $ASSEMBLY_POINTS = collect();
 $MOUNT_POINTS = collect();
 $TASKS = collect();
+$ARMS = collect();
 
 class AssemblyPoint
 {
@@ -96,6 +97,8 @@ class Arm
     public $y;
     /** @var string $scorePerStep */
     public $path;
+    /** @var Task[] $tasks */
+    public $tasks;
 
     public function __construct($id)
     {
@@ -178,6 +181,9 @@ $N_ARMS = (int)$N_ARMS;
 $N_MOUNT_POINTS = (int)$N_MOUNT_POINTS;
 $N_TASKS = (int)$N_TASKS;
 $N_STEPS = (int)$N_STEPS;
+
+for ($i = 0; $i < $N_ARMS; $i++)
+    $ARMS->add(new Arm($i));
 
 $r = 1;
 
