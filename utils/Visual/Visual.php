@@ -7,6 +7,7 @@ use Utils\DirUtils;
 abstract class Visual
 {
     protected static $outputDir = 'images';
+    protected static $saveIncrN = [];
 
     protected $image;
 
@@ -15,8 +16,24 @@ abstract class Visual
         $this->image = imagecreatetruecolor($columns, $rows);
     }
 
+    public function saveIncr($name)
+    {
+        self::$saveIncrN[$name]++;
+        $this->save($name . '__' . str_pad(self::$saveIncrN[$name], 4, "0", STR_PAD_LEFT));
+    }
+
     public function save($name)
     {
+        if (strpos(self::$outputDir, "/") !== false) {
+            $path = explode("/", self::$outputDir);
+            foreach ($path as $k => $v) {
+                if ($k < count($path) - 1) {
+                    $cpath = implode("/", array_slice($path, 0, $k + 1));
+                    if (!is_dir($cpath))
+                        mkdir($cpath);
+                }
+            }
+        }
         $fileName = DirUtils::getScriptDir() . '/' . self::$outputDir . "/$name.png";
         $dirname = dirname($fileName);
         DirUtils::makeDirOrCreate($dirname);
@@ -49,7 +66,7 @@ abstract class Visual
     public function setBgPolygon($points, $color)
     {
         $_points = [];
-        foreach($points as $p) {
+        foreach ($points as $p) {
             $_points[] = $p[0];
             $_points[] = $p[1];
         }

@@ -21,6 +21,10 @@ class ArrayUtils
      */
     public static function array_keysort(&$data, $_key, $sort=SORT_DESC)
     {
+        if($sort == 'DESC')
+            $sort = SORT_DESC;
+        elseif($sort == 'ASC')
+            $sort = SORT_ASC;
         foreach ($data as $key => $row) {
             $sorter[$key]  = $row[$_key];
         }

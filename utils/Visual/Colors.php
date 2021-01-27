@@ -94,4 +94,27 @@ class Colors
     const red7 = 'd52808';
     const red8 = 'd12206';
     const red9 = 'c81603';
+
+    static function randomColor()
+    {
+        $colors = [
+            Colors::blue3,
+            Colors::blue9,
+            Colors::brown3,
+            Colors::brown9,
+            Colors::pink3,
+            Colors::pink9,
+            Colors::teal3,
+            Colors::teal9,
+            Colors::purple3,
+            Colors::purple9,
+            Colors::green3,
+            Colors::green9,
+            Colors::orange3,
+            Colors::orange9,
+            Colors::red3,
+            Colors::red9,
+        ];
+        return $colors[rand(0, count($colors) - 1)];
+    }
 }

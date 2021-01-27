@@ -6,7 +6,7 @@ use ReflectionClass;
 
 Class VisualStandard extends Visual
 {
-    private $colors;
+    protected $colors;
 
     public function __construct($rows, $columns)
     {
@@ -25,6 +25,15 @@ Class VisualStandard extends Visual
     public function setPixel($row, $col, $color)
     {
         imagesetpixel($this->image, $col, $row, $this->colors[$color]);
+    }
+
+    public function drawEllipse($row, $col, $size, $color)
+    {
+        imagefilledellipse($this->image, $col, $row, $size, $size, $this->colors[$color]);
+    }
+
+    public function drawLine($r1, $c1, $r2, $c2, $color) {
+        imageline($this->image, $c1, $r1, $c2, $r2, $this->colors[$color]);
     }
 
     public function setBg($color)

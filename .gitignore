@@ -1,6 +1,7 @@
 vendor
 benchmarks
 .idea
+.DS_Store
 
 rounds/**/output
 rounds/**/images
