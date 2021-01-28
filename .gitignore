@@ -2,6 +2,7 @@ vendor
 benchmarks
 .idea
 .DS_Store
+.google_pk
 
 rounds/**/output
 rounds/**/images

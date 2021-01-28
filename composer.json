@@ -14,7 +14,8 @@
     "graphp/graph": "^0.9.1",
     "graphp/algorithms": "^0.8.1",
     "graphp/graphviz": "^0.2.2",
-    "jan-swiecki/simple-annotations": "^0.3.1"
+    "jan-swiecki/simple-annotations": "^0.3.1",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-4": {
