@@ -8,6 +8,7 @@ require_once '../../bootstrap.php';
 
 use Utils\FileManager;
 
+/** @var string $fileName */
 $fileName = $fileName ?: 'a';
 
 /** @var Ingredient[] $ingredients */
@@ -25,10 +26,10 @@ class IngredientsManager
      * @param string $name
      * @return Ingredient
      */
-    public static function getForName($name)
+    public static function getForName(string $name): Ingredient
     {
         global $ingredients;
-        if(!isset($ingredients[$name])) {
+        if (!isset($ingredients[$name])) {
             $ingredients[$name] = new Ingredient($name);
         }
         return $ingredients[$name];
@@ -38,16 +39,15 @@ class IngredientsManager
 class Ingredient
 {
     /** @var string $name */
-    public $name;
-
+    public string $name;
     /** @var Pizza[] $inPizzas */
-    public $inPizzas;
+    public array $inPizzas;
 
     /**
      * Ingredient constructor.
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
@@ -60,7 +60,7 @@ class PizzasManager
      * @param string[] $ingredients
      * @return Pizza
      */
-    public static function create($id, $ingredients)
+    public static function create(int $id, array $ingredients): Pizza
     {
         global $pizzas;
         $pizza = new Pizza($id, $ingredients);
@@ -72,36 +72,44 @@ class PizzasManager
 class Pizza
 {
     /** @var int $id */
-    public $id;
+    public int $id;
     /** @var Ingredient[] $ingredients */
-    public $ingredients = [];
+    public array $ingredients = [];
 
     /**
      * Pizza constructor.
      * @param int $id
      * @param string[] $ingredients
      */
-    public function __construct($id, $ingredients)
+    public function __construct(int $id, array $ingredients)
     {
         $this->id = $id;
         foreach ($ingredients as $i) {
             $ingredient = IngredientsManager::getForName($i);
             $ingredient->inPizzas[$id] = $this;
-            $this->ingredients[] = $ingredient;
+            $this->ingredients[$ingredient->name] = $ingredient;
         }
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasIngredient(string $name): bool
+    {
+        return isset($this->ingredients[$name]);
     }
 }
 
 class TeamsManager
 {
-    private static $_nextId = 0;
+    private static int $_nextId = 0;
 
     /**
-     * @param int $id
      * @param int $size
      * @return Team
      */
-    public static function create($size)
+    public static function create(int $size): Team
     {
         global $teams, $teamsBySize;
         $id = static::$_nextId++;
@@ -115,13 +123,18 @@ class TeamsManager
 class Team
 {
     /** @var int $id */
-    public $id;
+    public int $id;
     /** @var int $size */
-    public $size;
+    public int $size;
     /** @var Pizza[] $pizzas */
-    public $pizzas = [];
+    public array $pizzas = [];
 
-    public function __construct($id, $size)
+    /**
+     * Team constructor.
+     * @param int $id
+     * @param int $size
+     */
+    public function __construct(int $id, int $size)
     {
         $this->id = $id;
         $this->size = $size;
