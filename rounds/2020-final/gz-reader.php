@@ -205,3 +205,82 @@ $N_MOUNT_POINTS = $MOUNT_POINTS->count();
 $N_TASKS = $TASKS->count();
 $N_ASSEMBLY_POINTS = $ASSEMBLY_POINTS->count();
 
+$mappaDiProva = [
+    [0, 1, 0, 0],
+    [0, 0, 0, 0],
+    [1, 1, 1, 0],
+    [0, 0, 0, 0],
+];
+
+print_r(findPath($mappaDiProva, 4, 4, [0, 0], [3, 0]));
+
+function findPath($map, $maxR, $maxC, $start, $end)
+{
+    $edges = [
+        [
+            'cord' => $start,
+            'path' => ''
+        ]
+    ];
+
+    $checked[$start[0]][$start[1]] = true;
+    $solutions = [];
+
+    $isFreeEdge = function ($pos) use (&$checked, $map, $maxR, $maxC) {
+        if (
+            $pos[0] < 0 ||
+            $pos[0] >= $maxR ||
+            $pos[1] < 0 ||
+            $pos[1] >= $maxC ||
+            $map[$pos[0]][$pos[1]] == 1 ||
+            $checked[$pos[0]][$pos[1]] == true
+        )
+            return false;
+        return true;
+    };
+
+    while (count($solutions) === 0 && count($edges) > 0) {
+        $nextEdges = [];
+        foreach ($edges as $edge) {
+            $edgeCord = $edge['cord'];
+            $nearPoints = [
+                [
+                    'deltaPath' => 'U',
+                    'cord' => [$edgeCord[0] - 1, $edgeCord[1]]
+                ],
+                [
+                    'deltaPath' => 'D',
+                    'cord' => [$edgeCord[0] + 1, $edgeCord[1]]
+                ],
+                [
+                    'deltaPath' => 'L',
+                    'cord' => [$edgeCord[0], $edgeCord[1] - 1]
+                ],
+                [
+                    'deltaPath' => 'R',
+                    'cord' => [$edgeCord[0], $edgeCord[1] + 1]
+                ],
+            ];
+
+            foreach ($nearPoints as $nearPoint) {
+                $cord = $nearPoint['cord'];
+                if (!$isFreeEdge($cord))
+                    continue;
+
+                $checked[$cord[0]][$cord[1]] = true;
+                $newEdge = [
+                    'cord' => $cord,
+                    'path' => $edge['path'] . $nearPoint['deltaPath'],
+                ];
+
+                $nextEdges[] = $newEdge;
+                if ($cord[0] === $end[0] && $cord[1] === $end[1])
+                    $solutions[] = $newEdge['path'];
+            }
+        }
+
+        $edges = $nextEdges;
+    }
+
+    return $solutions;
+}
