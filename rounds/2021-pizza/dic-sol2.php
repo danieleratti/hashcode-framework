@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'd';
+$fileName = 'e';
 
 include 'dic-reader.php';
 
@@ -52,6 +52,10 @@ function findBestComb($maxPizzas, $pickedPizzas = []): array
 
     }
 
+    if($bestPizza == null) {
+        return $pickedPizzas;
+    }
+
     $pickedPizzas[] = $bestPizza;
     $pizzas->forget($bestPizza->id);
 
@@ -97,6 +101,6 @@ for ($i = 0; $i < $twoPeopleTeams; $i++) {
     Log::out('Best comb found for 2 people team – Missing: ' . ($twoPeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
 }
 
-createOutput($combinations, 'testSara');
+createOutput($combinations, $fileName);
 
 die();

@@ -1,6 +1,7 @@
 <?php
 
 use Utils\FileManager;
+use Utils\Log;
 
 require_once '../../bootstrap.php';
 
@@ -66,6 +67,7 @@ class Combination
 
 function createOutput($orders, $filename)
 {
+    Log::out('Scrivo output...');
     $outFile = 'dic-sol-' . $filename . '_' . time();
     file_put_contents($outFile, count($orders) . PHP_EOL);
     foreach ($orders as $order) {
@@ -75,6 +77,7 @@ function createOutput($orders, $filename)
             }, $order->pizzas)), FILE_APPEND);
         file_put_contents($outFile, PHP_EOL, FILE_APPEND);
     }
+    Log::out('Output generato. Enjoy!');
 }
 
 
