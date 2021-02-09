@@ -7,7 +7,7 @@ class Autoupload
 
     private static function getPK()
     {
-        $f = file_get_contents(".google_pk");
+        $f = trim(file_get_contents(".google_pk"));
         if (strlen($f) <= 10)
             Log::error("Missing .google_pk file with private key. Take it from authorization header in https://hashcode-judge.appspot.com/api/judge/v1/rounds");
         if (strpos($f, "Bearer") !== false)

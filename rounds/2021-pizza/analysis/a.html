@@ -1,3 +1,9 @@
 <style type='text/css'>body {font-family: sans-serif;}</style><head>
                 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-            </head><body><span style='font-size: 18px;'><b>FILE DI INPUT a</b></span><br/>pizzas_count: 5<br/>teams_count: 4<br/>t2: 1<br/>t3: 2<br/>t4: 1<br/><br/><hr/></body>
+            </head><body><span style='font-size: 18px;'><b>FILE DI INPUT a</b></span><br/>pizzas_count: 5<br/>ingredients_count: 7<br/>two_people_teams: 1<br/>three_people_teams: 2<br/>four_people_teams: 1<br/><br/><hr/><span style='font-size: 18px;'><u>SET pizzas</u></span><br/>5 elementi.<br/><br/><br>✱ Analizzo <b>ingredients</b> [array].<br/>Minimo: 2<br/>Massimo: 3<br/>Media: 2.8<br/>Mediana: 3<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 3 (4 occorrenze)<br/>&nbsp;&nbsp;• 2 (1 occorrenze)<br/><div id=pizzas></div><br/><script>
+                    var data = [{"y":[3,3,3,3,2],"type":"box","name":"ingredients"}];
+                    Plotly.newPlot(pizzas, data);
+        </script><br/><hr/><span style='font-size: 18px;'><u>SET ingredients</u></span><br/>7 elementi.<br/><br/><br>✱ Analizzo <b>inPizzas</b> [array].<br/>Minimo: 1<br/>Massimo: 3<br/>Media: 2<br/>Mediana: 2<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 2 (3 occorrenze)<br/>&nbsp;&nbsp;• 1 (2 occorrenze)<br/>&nbsp;&nbsp;• 3 (2 occorrenze)<br/><div id=ingredients></div><br/><script>
+                    var data = [{"y":[3,3,3,3,2],"type":"box","name":"ingredients"},{"y":[1,2,1,3,2,3,2],"type":"box","name":"inPizzas"}];
+                    Plotly.newPlot(ingredients, data);
+        </script><br/><hr/></body>
