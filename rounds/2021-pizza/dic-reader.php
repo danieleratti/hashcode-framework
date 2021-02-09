@@ -56,12 +56,10 @@ class Combination
         $this->pizzas = $pizzas;
 
         foreach ($pizzas as $pizza) {
-            /** @var Pizza $pizza */
-            $intersection = array_intersect($pizza->getIngredientNames(), $this->uniqueIngredients);
-            $toAdd = array_diff($pizza->getIngredientNames(), $intersection);
-            $this->uniqueIngredients = array_merge($this->uniqueIngredients, $toAdd);
+            $this->uniqueIngredients = array_merge($this->uniqueIngredients, $pizza->getIngredientNames());
         }
 
+        $this->uniqueIngredients = array_unique($this->uniqueIngredients);
         $this->score = pow(count($this->uniqueIngredients), 2);
     }
 }
