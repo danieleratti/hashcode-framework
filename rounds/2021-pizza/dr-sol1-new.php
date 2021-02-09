@@ -49,7 +49,7 @@ function shipPizzas($pizzaIds)
         unset($PIZZAS_HASH[$pizza->hash][$pizza->id]);
         $PIZZAS->forget($pizza->id);
     }
-    Log::out("Got $score with pizzas[" . implode(",", $pizzaIds) . "]! (TotalScore=$SCORE // RemainingTeams=" . $TEAMS[2] . "," . $TEAMS[3] . "," . $TEAMS[4] . " // RemainingPizzas=".$PIZZAS->count().")");
+    Log::out("Got $score with pizzas[" . implode(",", $pizzaIds) . "]! (TotalScore=$SCORE // RemainingTeams=" . $TEAMS[2] . "," . $TEAMS[4] . "," . $TEAMS[4] . " // RemainingPizzas=".$PIZZAS->count().")");
     return true;
 }
 
@@ -101,20 +101,16 @@ function getCombination($pizzas)
     foreach ($calc as $k => $v)
         $combination[$k] = $v;
     //$combination['myscore'] = $combination['score'] / (1 + pow($combination['lostIngredients'], 2));
-    $combination['myscore'] = $combination['score'] / (1 + pow($combination['lostIngredients'], 1.5));
-    $combination['pizzas'] = $pizzas;
     //$combination['myscore'] = $combination['score'];
-    //$combination['myscore'] = $combination['score'] - pow($combination['lostIngredients'], 1.5);
-    //$combination['myscore'] = $combination['score'] / (1+pow($combination['lostIngredients'], 1.5));
+    $combination['myscore'] = $combination['score'] - pow($combination['lostIngredients'], 2);
     return $combination;
 }
 
-function getBestCombination($teamSize = 2, $pizzas=null)
+function getBestCombination($teamSize = 2)
 {
     global $PIZZAS;
-    if(!$pizzas)
-        $pizzas = [$PIZZAS->first()];
-    for ($i = count($pizzas); $i < $teamSize; $i++) {
+    $pizzas = [$PIZZAS->first()];
+    for ($i = 1; $i < $teamSize; $i++) {
         $pizzas = addBestPizzaToCombination($pizzas);
     }
     return getCombination($pizzas);
@@ -139,7 +135,7 @@ function addBestPizzaToCombination($pizzas)
         } else {
             $noNewScore++;
         }
-        if($noNewScore > 20000)
+        if($noNewScore > 1000)
             break;
     }
     return array_merge($pizzas, [$bestPizza]);
@@ -156,18 +152,8 @@ while($remainingTeams > 0) {
     $comb = [];
     $bestComb = null;
     if ($TEAMS[2] > 0 && $PIZZAS->count() >= 2) $comb[2] = getBestCombination(2);
-    if ($TEAMS[3] > 0 && $PIZZAS->count() >= 3) {
-        if($comb[2])
-            $comb[3] = getBestCombination(3, $comb[2]['pizzas']);
-        else
-            $comb[3] = getBestCombination(3);
-    }
-    if ($TEAMS[4] > 0 && $PIZZAS->count() >= 4) {
-        if($comb[3])
-            $comb[4] = getBestCombination(4, $comb[3]['pizzas']);
-        else
-            $comb[4] = getBestCombination(3);
-    }
+    if ($TEAMS[3] > 0 && $PIZZAS->count() >= 3) $comb[3] = getBestCombination(3);
+    if ($TEAMS[4] > 0 && $PIZZAS->count() >= 4) $comb[4] = getBestCombination(4);
     foreach ($comb as $c)
         if (!$bestComb || $c['myscore'] > $bestComb['myscore'])
             $bestComb = $c;
