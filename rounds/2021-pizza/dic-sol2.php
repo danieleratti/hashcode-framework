@@ -7,13 +7,9 @@ $fileName = 'b';
 
 include 'dic-reader.php';
 
-class Combination
-{
-    public $score = 0;
-    public $pizzas = [];
-    public $uniqueIngredients = [];
-}
-
+/** @var int $fourPeopleTeams */
+/** @var int $threePeopleTeams */
+/** @var int $twoPeopleTeams */
 /** @var Collection $pizzas */
 $pizzas = $pizzas->sort(function ($a, $b) {
     return count($a->ingredients) < count($b->ingredients);
@@ -30,22 +26,21 @@ function findBestComb($maxPizzas, $pickedPizzas = []): array
 
     Log::out('findBestComb – maxPizzas: ' . $maxPizzas . ' – pickedPizzas: ' . count($pickedPizzas), 1);
 
+    $bestPizza = null;
+    $bestScore = 0;
 
     foreach ($pizzas as $pizza) {
-        $bestPizza = null;
-        $bestScore = 0;
-
-        $score=0;
         $takenIngred = [];
+
         // looks for conflicts
         foreach ($pickedPizzas as $pickedPizza) {
-            $intersection = array_intersect($pizza->getIngredientNames(), $pickedPizza->getIngredientNames());
+            //$intersection = array_intersect($pizza->getIngredientNames(), $pickedPizza->getIngredientNames());
             //$score = count($pickedPizza->ingredients) + count($pizza->ingredients) - count($intersection);
-            $takenIngred = array_merge($takenIngred, $pickedPizza->ingredients);
+            $takenIngred = array_merge($takenIngred, $pickedPizza->getIngredientNames());
 
         }
-        $common= array_intersect($takenIngred, $pizza->ingredients);
-        $takenIngred = array_merge($takenIngred, $pizza->ingredients);
+        $common= array_intersect($takenIngred, $pizza->getIngredientNames());
+        $takenIngred = array_merge($takenIngred, $pizza->getIngredientNames());
         $score= count($takenIngred) - count($common);
         if($score>$bestScore){
             $bestScore = $score;
@@ -56,14 +51,49 @@ function findBestComb($maxPizzas, $pickedPizzas = []): array
 
     $pickedPizzas[] = $bestPizza;
     $pizzas->forget($bestPizza->id);
+
     $bestComb = findBestComb($maxPizzas, $pickedPizzas);
     return $bestComb;
 }
 
-Log::out('Start looking for best comb');
 
-$bestComb = findBestComb(4);
+$combinations = [];
 
-Log::out('Best comb found');
+for($i = 0; $i < $fourPeopleTeams; $i++) {
+    if($pizzas->count() == 0){
+        Log::out('Sono finite le pizze disponibili');
+        break;
+    }
+
+    $bestPizzas = findBestComb(4);
+    if($i===59)
+        Log::out('test');
+    $combinations[] = new Combination($bestPizzas);
+    Log::out('Best comb found for 4 people team – Missing: ' . ($fourPeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
+}
+
+for($i = 0; $i < $threePeopleTeams; $i++) {
+    if($pizzas->count() == 0){
+        Log::out('Sono finite le pizze disponibili');
+        break;
+    }
+
+    $bestPizzas = findBestComb(3);
+    $combinations[] = new Combination($bestPizzas);
+    Log::out('Best comb found for 3 people team – Missing: ' . ($threePeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
+}
+
+for($i = 0; $i < $twoPeopleTeams; $i++) {
+    if($pizzas->count() == 0){
+        Log::out('Sono finite le pizze disponibili');
+        break;
+    }
+
+    $bestPizzas = findBestComb(2);
+    $combinations[] = new Combination($bestPizzas);
+    Log::out('Best comb found for 2 people team – Missing: ' . ($twoPeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
+}
+
+createOutput($combinations, 'testSara');
 
 die();
