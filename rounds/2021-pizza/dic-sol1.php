@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'd';
+$fileName = 'b';
 
 include 'dic-reader.php';
 
@@ -91,5 +91,7 @@ for($i = 0; $i < $twoPeopleTeams; $i++) {
 }
 
 Log::out('Finished');
+
+createOutput($combinations, $fileName);
 
 die();
