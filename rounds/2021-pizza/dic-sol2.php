@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'b';
+$fileName = 'd';
 
 include 'dic-reader.php';
 
@@ -15,10 +15,12 @@ $pizzas = $pizzas->sort(function ($a, $b) {
     return count($a->ingredients) < count($b->ingredients);
 });
 
+
+$pizzaChunk = 5000;
 // recursive
 function findBestComb($maxPizzas, $pickedPizzas = []): array
 {
-    global $pizzas;
+    global $pizzas, $pizzaChunk;
 
     if (count($pickedPizzas) == $maxPizzas) {
         return $pickedPizzas;
@@ -29,7 +31,7 @@ function findBestComb($maxPizzas, $pickedPizzas = []): array
     $bestPizza = null;
     $bestScore = 0;
 
-    foreach ($pizzas as $pizza) {
+    foreach ($pizzas->slice(0,$pizzaChunk) as $pizza) {
         $takenIngred = [];
 
         // looks for conflicts
@@ -41,7 +43,7 @@ function findBestComb($maxPizzas, $pickedPizzas = []): array
         }
         $common= array_intersect($takenIngred, $pizza->getIngredientNames());
         $takenIngred = array_merge($takenIngred, $pizza->getIngredientNames());
-        $score= count($takenIngred) - count($common);
+        $score= (count($takenIngred) - count($common))/count($common);
         if($score>$bestScore){
             $bestScore = $score;
             $bestPizza = $pizza;
