@@ -36,7 +36,7 @@ class Pizza
 
     public function getIngredientNames()
     {
-        array_map(function ($ingredient) {
+        return array_map(function ($ingredient) {
             return $ingredient->name;
         }, $this->ingredients);
     }
@@ -56,8 +56,9 @@ class Combination
         $this->pizzas = $pizzas;
 
         foreach ($pizzas as $pizza) {
-            $intersection = array_intersect($pizza->ingredients, $this->uniqueIngredients);
-            $toAdd = array_diff($pizza->ingredients, $intersection);
+            /** @var Pizza $pizza */
+            $intersection = array_intersect($pizza->getIngredientNames(), $this->uniqueIngredients);
+            $toAdd = array_diff($pizza->getIngredientNames(), $intersection);
             $this->uniqueIngredients = array_merge($this->uniqueIngredients, $toAdd);
         }
 
@@ -67,7 +68,7 @@ class Combination
 
 function createOutput($orders, $filename)
 {
-    $outFile = 'output/dic-sol-' . $filename . '_' . time();
+    $outFile = 'dic-sol-' . $filename . '_' . time();
     file_put_contents($outFile, count($orders) . PHP_EOL);
     foreach ($orders as $order) {
         /** @var Combination $order */
