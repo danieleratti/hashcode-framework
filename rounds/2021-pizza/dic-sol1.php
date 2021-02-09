@@ -3,7 +3,7 @@
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'b';
+$fileName = 'e';
 
 include 'dic-reader.php';
 
@@ -21,11 +21,9 @@ function findBestComb($maxPizzas, $pickedPizzas = [], $tollerance = 0): array
 {
     global $pizzas;
 
-    if (count($pickedPizzas) == $maxPizzas || count($pizzas) == 0) {
+    if (count($pickedPizzas) == $maxPizzas || $pizzas->count() == 0) {
         return $pickedPizzas;
     }
-
-    Log::out('findBestComb – maxPizzas: ' . $maxPizzas . ' – pickedPizzas: ' . count($pickedPizzas), 1);
 
     $pizzaFound = false;
 
@@ -43,7 +41,6 @@ function findBestComb($maxPizzas, $pickedPizzas = [], $tollerance = 0): array
         }
 
         if (!$hasConflicts) {
-            Log::out('picking pizza with no conflicts', 2);
             $pickedPizzas[] = $pizza;
             $pizzas->forget($pizza->id);
             $pizzaFound = true;
@@ -77,7 +74,7 @@ for($i = 0; $i < $threePeopleTeams; $i++) {
 
     $bestPizzas = findBestComb(3);
     $combinations[] = new Combination($bestPizzas);
-    Log::out('Best comb found for 4 people team – Missing: ' . ($threePeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
+    Log::out('Best comb found for 3 people team – Missing: ' . ($threePeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
 }
 
 for($i = 0; $i < $twoPeopleTeams; $i++) {
@@ -87,7 +84,7 @@ for($i = 0; $i < $twoPeopleTeams; $i++) {
 
     $bestPizzas = findBestComb(2);
     $combinations[] = new Combination($bestPizzas);
-    Log::out('Best comb found for 4 people team – Missing: ' . ($twoPeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
+    Log::out('Best comb found for 2 people team – Missing: ' . ($twoPeopleTeams - $i) . ' – Pizzas remaining: ' . count($pizzas));
 }
 
 Log::out('Finished');
