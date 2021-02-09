@@ -7,26 +7,6 @@ $fileName = 'd';
 
 include 'dic-reader.php';
 
-class Combination
-{
-    public $score = 0;
-    public $pizzas = [];
-    public $uniqueIngredients = [];
-
-    public function __construct($pizzas)
-    {
-        $this->pizzas = $pizzas;
-
-        foreach($pizzas as $pizza) {
-            $intersection = array_intersect($pizza->ingredients, $this->uniqueIngredients);
-            $toAdd = array_diff($pizza->ingredients, $intersection);
-            $this->uniqueIngredients = array_merge($this->uniqueIngredients, $toAdd);
-        }
-
-        $this->score = pow(count($this->uniqueIngredients), 2);
-    }
-}
-
 /** @var int $fourPeopleTeams */
 /** @var int $threePeopleTeams */
 /** @var int $twoPeopleTeams */

@@ -34,12 +34,50 @@ class Pizza
         $this->ingredients = [];
     }
 
-    public function getIngredientNames() {
-        array_map(function($ingredient) {
+    public function getIngredientNames()
+    {
+        array_map(function ($ingredient) {
             return $ingredient->name;
         }, $this->ingredients);
     }
 }
+
+class Combination
+{
+    /** @var int */
+    public $score = 0;
+    /** @var Pizza[] */
+    public $pizzas = [];
+    /** @var Ingredient[] */
+    public $uniqueIngredients = [];
+
+    public function __construct($pizzas)
+    {
+        $this->pizzas = $pizzas;
+
+        foreach ($pizzas as $pizza) {
+            $intersection = array_intersect($pizza->ingredients, $this->uniqueIngredients);
+            $toAdd = array_diff($pizza->ingredients, $intersection);
+            $this->uniqueIngredients = array_merge($this->uniqueIngredients, $toAdd);
+        }
+
+        $this->score = pow(count($this->uniqueIngredients), 2);
+    }
+}
+
+function createOutput($orders, $filename)
+{
+    $outFile = 'output/dic-sol-' . $filename . '_' . time();
+    file_put_contents($outFile, count($orders) . PHP_EOL);
+    foreach ($orders as $order) {
+        /** @var Combination $order */
+        file_put_contents($outFile, count($order->pizzas) . ' ' . implode(' ', array_map(function ($x) {
+                return $x->id;
+            }, $order->pizzas)), FILE_APPEND);
+        file_put_contents($outFile, PHP_EOL, FILE_APPEND);
+    }
+}
+
 
 // Reading the inputs
 $fileManager = new FileManager($fileName);
