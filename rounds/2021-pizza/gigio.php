@@ -68,14 +68,19 @@ $teams = [
 
 $output = [];
 
+function getUniquePizzasIngredients($pizzas)
+{
+    return array_unique(array_merge(...array_map(function ($pizza) {
+        return $pizza->ingredients;
+    }, $pizzas)));
+}
+
 /** @return Pizza */
-function findBestPizza($actualPizzasIds)
+function findBestPizza($actualPizzas)
 {
     global $availablePizzas, $allPizzas;
 
-    $alreadyUsedIngredients = array_unique(array_merge(...array_map(function ($id) use ($allPizzas) {
-        return $allPizzas->get($id)->ingredients;
-    }, $actualPizzasIds)));
+    $alreadyUsedIngredients = getUniquePizzasIngredients($actualPizzas);
 
     $points = collect();
     foreach ($availablePizzas as $availablePizza) {
@@ -84,6 +89,7 @@ function findBestPizza($actualPizzasIds)
             'points' => count(array_diff($availablePizza->ingredients, $alreadyUsedIngredients))
         ]);
     }
+
     $best = $points->sortByDesc('points')->first();
     return $allPizzas[$best['id']];
 }
@@ -94,28 +100,60 @@ function forgetPizza(Pizza $pizza)
     $availablePizzas->forget($pizza->id);
 }
 
-$output = [];
 $maxOutputRows = $T2 + $T3 + $T4;
+$output = collect();
+
+echo "PIZZE: $M\n";
+echo "$T2 | $T3 | $T4\n";
 
 foreach ($teams as $team) {
     $members = $team['members'];
     $count = $team['count'];
 
-    if ($availablePizzas->count() < $members || count($output) >= $maxOutputRows)
-        break;
+    for ($t = 0; $t < $count; $t++) {
+        if ($availablePizzas->count() < $members || $output->count() >= $maxOutputRows) {
+            break;
+        }
 
-    $deliver = [];
-    for ($i = 0; $i < $members; $i++) {
-        $pizza = findBestPizza($deliver);
-        $deliver[] = $pizza->id;
-        forgetPizza($pizza);
+        $deliver = [];
+        for ($i = 0; $i < $members; $i++) {
+            $pizza = findBestPizza($deliver);
+            $deliver[] = $pizza;
+            forgetPizza($pizza);
+        }
+
+        $deliverIds = array_map(function ($pizza) {
+            return $pizza->id;
+        }, $deliver);
+
+        $uniqueIngr = getUniquePizzasIngredients($deliver);
+        $points = pow(count($uniqueIngr), 2);
+
+        $output->add([
+            'members' => $members,
+            'points' => $points,
+            'pizzas' => $deliver,
+            'uniqueIngr' => $uniqueIngr,
+        ]);
+        $remainingPizzas = count($availablePizzas);
+
+        echo "$members: $points (" . count($output) . "/$maxOutputRows) ($remainingPizzas)\n";
     }
 
-    $outRow = "$members " . implode(' ', $deliver);
-
-    $output[] = $outRow;
+    if ($availablePizzas->count() < $members || $output->count() >= $maxOutputRows) {
+        break;
+    }
 }
 
+echo "\n\nTOTALE: " . $output->sum('points') . "\n";
+
+$outRows = $output->map(function ($row) {
+    $ids = array_map(function ($pizza) {
+        return $pizza->id;
+    }, $row['pizzas']);
+    return $row['members'] . ' ' . implode(' ', $ids);
+})->toArray();
+
 $fileManager->output(
-    count($output) . "\n" . implode("\n", $output)
+    count($outRows) . "\n" . implode("\n", $outRows)
 );
