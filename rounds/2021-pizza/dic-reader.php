@@ -33,6 +33,12 @@ class Pizza
         $this->id = $id;
         $this->ingredients = [];
     }
+
+    public function getIngredientNames() {
+        array_map(function($ingredient) {
+            return $ingredient->name;
+        }, $this->ingredients);
+    }
 }
 
 // Reading the inputs
