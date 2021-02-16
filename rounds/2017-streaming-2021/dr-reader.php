@@ -14,8 +14,11 @@ $fileName = $fileName ?: 'a';
 // Classes
 class Video
 {
+    /** @var int $id */
     public $id;
+    /** @var int $size */
     public $size;
+    /** @var Request[] $requests */
     public $requests = [];
 
     public function __construct($id, $size)
@@ -29,9 +32,13 @@ class Video
 
 class Cache
 {
+    /** @var int $id */
     public $id;
+    /** @var int $size */
     public $size;
+    /** @var int[] $endpointLatencies */
     public $endpointLatencies = []; // [$endpointId] => $latencyToEndpoint
+    /** @var Video[] $videos */
     public $videos;
 
     public function __construct($id, $size)
@@ -46,9 +53,13 @@ class Cache
 
 class Endpoint
 {
+    /** @var int $id */
     public $id;
+    /** @var int $dcLatency */
     public $dcLatency;
+    /** @var int[] $cacheLatencies */
     public $cacheLatencies = []; // [$cacheId] => $latencyToCache
+    /** @var Request[] $requests */
     public $requests = [];
 
     public function __construct($id, $dcLatency, $cacheLatencies)
@@ -65,10 +76,15 @@ class Endpoint
 
 class Request
 {
+    /** @var int $lastId */
     public static $lastId = 0;
+    /** @var int $id */
     public $id;
+    /** @var int $quantity */
     public $quantity;
+    /** @var int $videoId */
     public $videoId;
+    /** @var int $endpointId */
     public $endpointId;
 
     public function __construct($quantity, $videoId, $endpointId)
@@ -100,13 +116,13 @@ Log::out("Reading file");
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-list($N_VIDEOS, $N_ENDPOINTS, $N_REQUESTS, $N_CACHES, $SIZE_CACHES) = explode(" ", $content[0]);
+[$N_VIDEOS, $N_ENDPOINTS, $N_REQUESTS, $N_CACHES, $SIZE_CACHES] = explode(" ", $content[0]);
 $N_VIDEOS = (int)$N_VIDEOS;
 $N_ENDPOINTS = (int)$N_ENDPOINTS;
 $N_REQUESTS = (int)$N_REQUESTS;
 $N_CACHES = (int)$N_CACHES;
 $SIZE_CACHES = (int)$SIZE_CACHES;
-for($i=0;$i<$N_CACHES;$i++)
+for ($i = 0; $i < $N_CACHES; $i++)
     new Cache($i, $SIZE_CACHES);
 foreach (explode(" ", $content[1]) as $videoId => $videoSize) {
     new Video($videoId, $videoSize);
@@ -115,11 +131,11 @@ $r = 2;
 $_endpointId = 0;
 while ($r < count($content)) {
     if ($_endpointId < $N_ENDPOINTS) {
-        list($dcLatency, $nCachesConnected) = explode(" ", $content[$r]);
+        [$dcLatency, $nCachesConnected] = explode(" ", $content[$r]);
         $r++;
         $cacheLatencies = [];
         for ($ci = 0; $ci < $nCachesConnected; $ci++) {
-            list($cacheId, $cacheLatency) = explode(" ", $content[$r]);
+            [$cacheId, $cacheLatency] = explode(" ", $content[$r]);
             $cacheId = (int)$cacheId;
             $cacheLatency = (int)$cacheLatency;
             $r++;
@@ -129,7 +145,7 @@ while ($r < count($content)) {
         $_endpointId++;
     } else {
         // Request Descriptions
-        list($videoId, $endpointId, $quantity) = explode(" ", $content[$r]);
+        [$videoId, $endpointId, $quantity] = explode(" ", $content[$r]);
         $videoId = (int)$videoId;
         $endpointId = (int)$endpointId;
         $quantity = (int)$quantity;
