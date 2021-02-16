@@ -69,6 +69,24 @@ class ArrayUtils
     }
 
     /*
+     * ArrayUtils::getAllCombinationsFlatLimited(["a", "b"], 2)
+     * [[a], [a, b], [b]]
+     */
+    public static function getAllCombinationsFlatLimited($arr, $limit)
+    {
+        $_comb = self::getAllCombinations($arr);
+        $comb = [];
+        foreach($_comb as $_c) {
+            $c = [];
+            foreach($_c as $v)
+                $c[] = $v;
+            if(count($c) <= $limit)
+                $comb[] = $c;
+        }
+        return $comb;
+    }
+
+    /*
      * ArrayUtils::getSumForAllCombinationsValues([1, 2])
      * {"1":[1],"3":{"1":2,"0":1},"2":{"1":2}}
      */
