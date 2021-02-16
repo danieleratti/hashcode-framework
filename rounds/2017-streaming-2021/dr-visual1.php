@@ -29,7 +29,7 @@ $analyzer = new Analyzer($fileName, [
 $analyzer->addDataset('videos', $VIDEOS, ['size', 'requests']);
 $analyzer->addDataset('endpoints', $ENDPOINTS, ['dcLatency', 'cacheLatencies', 'requests']);
 $analyzer->addDataset('requests', $REQUESTS, ['quantity', 'videoId', 'endpointId']);
-$analyzer->addDataset('caches', $REQUESTS, ['size', 'videos', 'endpointLatencies']);
+$analyzer->addDataset('caches', $CACHES, ['size', 'videos', 'endpointLatencies']);
 
 $analyzer->analyze();
 
