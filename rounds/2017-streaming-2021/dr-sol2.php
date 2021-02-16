@@ -4,7 +4,7 @@ use Utils\ArrayUtils;
 use Utils\Collection;
 use Utils\Log;
 
-$fileName = 'c';
+$fileName = 'e';
 
 include 'dr-reader.php';
 
@@ -39,7 +39,7 @@ $CACHES->keyBy('id');
 $caches2videos = [];
 
 /** configs */
-define('nMaxCachesPerVideo', 1);
+define('nMaxCachesPerVideo', 1); // 2 in B and 1 in the other ones!
 
 /** functions */
 function getScore()
@@ -199,8 +199,19 @@ while (count($VIDEOS) > 0) {
     // ciclo tutti i video impattati dall'utilizzo delle N caches (ovvero quei video le cui caches selezionate, comparivano nei loro bestScore )
     foreach ($bestVideoCaches as $cache) {
         foreach ($caches2videos[$cache->id] as $video) {
+            /** @var Video $video */
             // ricalcolo il bestScore per quel video
-            calculateBestScore($video);
+            $recalc = false;
+            foreach($video->bestCaches as $bestCache)
+            {
+                if($bestCache->size < $video->size)
+                {
+                    $recalc = true;
+                    break;
+                }
+            }
+            if($recalc)
+                calculateBestScore($video);
         }
     }
     // rifaccio la sortBy score DESC totale

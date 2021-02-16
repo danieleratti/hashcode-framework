@@ -21,10 +21,18 @@ class Video
     /** @var Request[] $requests */
     public $requests = [];
 
+    /** @var Cache[] $inCaches */
+    public $inCaches = [];
+
     /** @var int $totalRequestsCount */
     public $totalRequestsCount = 0;
     /** @var Cache[] $cachesFillRates */
     public $cachesFillRates = [];   // [$cacheId] => $cacheFillsRate
+
+    /** @var int $bestScore */
+    public $bestScore;
+    /** @var array $bestCaches */
+    public $bestCaches;
 
     public function __construct($id, $size)
     {
