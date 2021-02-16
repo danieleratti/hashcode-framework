@@ -32,12 +32,14 @@ class Cache
     public $id;
     public $size;
     public $endpointLatencies = []; // [$endpointId] => $latencyToEndpoint
+    public $videos;
 
     public function __construct($id, $size)
     {
         global $CACHES;
         $this->id = $id;
-        $this->size = (int)$size;
+        $this->size = (int)$size; // remaining size
+        $this->videos = [];
         $CACHES[$this->id] = $this;
     }
 }
