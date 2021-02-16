@@ -21,12 +21,34 @@ class Video
     /** @var Request[] $requests */
     public $requests = [];
 
+    /** @var int $totalRequestsCount */
+    public $totalRequestsCount = 0;
+    /** @var Cache[] $cachesFillRates */
+    public $cachesFillRates = [];   // [$cacheId] => $cacheFillsRate
+
     public function __construct($id, $size)
     {
         global $VIDEOS;
         $this->id = $id;
         $this->size = (int)$size;
         $VIDEOS[$this->id] = $this;
+    }
+
+    public function recalculateCacheFillRates()
+    {
+        global $ENDPOINTS;
+        $this->cachesFillRates = [];
+        $this->totalRequestsCount = 0;
+        foreach ($this->requests as $requestId => $request) {
+            foreach ($ENDPOINTS[$request->endpointId]->cacheLatencies as $cacheId => $cache) {
+                $this->cachesFillRates[$cacheId] += $request->quantity;
+            }
+            $this->totalRequestsCount += $request->quantity;
+        }
+        foreach ($this->cachesFillRates as $cacheId => $cachesFillRate) {
+            $this->cachesFillRates[$cacheId] = $cachesFillRate / $this->totalRequestsCount;
+        }
+        arsort($this->cachesFillRates);
     }
 }
 
