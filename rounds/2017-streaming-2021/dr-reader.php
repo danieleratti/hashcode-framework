@@ -26,6 +26,10 @@ class Video
 
     /** @var int $totalRequestsCount */
     public $totalRequestsCount = 0;
+    /** @var int $cacheFullfillsCount */
+    public $cacheFullfillsCount = 0;
+    /** @var double $avgCachesFillRate */
+    public $avgCachesFillRate = 0;
     /** @var Cache[] $cachesFillRates */
     public $cachesFillRates = [];   // [$cacheId] => $cacheFillsRate
 
@@ -44,18 +48,28 @@ class Video
 
     public function recalculateCacheFillRates()
     {
-        global $ENDPOINTS;
+        global $ENDPOINTS, $CACHES;
         $this->cachesFillRates = [];
         $this->totalRequestsCount = 0;
+        $this->cacheFullfillsCount = 0;
         foreach ($this->requests as $requestId => $request) {
-            foreach ($ENDPOINTS[$request->endpointId]->cacheLatencies as $cacheId => $cache) {
-                $this->cachesFillRates[$cacheId] += $request->quantity;
+            foreach ($ENDPOINTS[$request->endpointId]->cacheLatencies as $cacheId => $cacheLatency) {
+                /** @var Cache $cache */
+                $cache = $CACHES[$cacheId];
+                if ($cache->availableSize >= $this->size && !isset($cache->videos[$this->id])) {
+                    $this->cachesFillRates[$cacheId] += $request->quantity;
+                }
             }
             $this->totalRequestsCount += $request->quantity;
         }
+        $this->cachesFillRates = array_filter($this->cachesFillRates, function ($fillRate) {
+            return $fillRate > 0;
+        });
         foreach ($this->cachesFillRates as $cacheId => $cachesFillRate) {
             $this->cachesFillRates[$cacheId] = $cachesFillRate / $this->totalRequestsCount;
+            if ($this->cachesFillRates[$cacheId] === 1) $this->cacheFullfillsCount++;
         }
+        $this->avgCachesFillRate = $this->cachesFillRates ? (array_sum($this->cachesFillRates) / count($this->cachesFillRates)) : 0;
         arsort($this->cachesFillRates);
     }
 }
@@ -68,14 +82,18 @@ class Cache
     public $size;
     /** @var int[] $endpointLatencies */
     public $endpointLatencies = []; // [$endpointId] => $latencyToEndpoint
+
     /** @var Video[] $videos */
     public $videos;
+    /** @var int $availableSize */
+    public $availableSize;
 
     public function __construct($id, $size)
     {
         global $CACHES;
         $this->id = $id;
-        $this->size = (int)$size; // remaining size
+        $this->size = (int)$size;
+        $this->availableSize = $this->size;
         $this->videos = [];
         $CACHES[$this->id] = $this;
     }
