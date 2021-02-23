@@ -33,8 +33,14 @@ class Vehicle
         $this->freeAt = 0;
     }
 
-    public function distanceFromRide($ride) {
+    public function distanceFromRide($ride)
+    {
         return abs($this->currentR - $ride->rStart) + abs($this->currentC - $ride->cStart);
+    }
+
+    public function distanceFromFinishedRide($ride)
+    {
+        return $this->distanceFromRide($ride) + $ride->distance;
     }
 }
 
