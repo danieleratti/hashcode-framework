@@ -16,9 +16,13 @@ $fileName = @$fileName ?: 'a';
 class Vehicle
 {
     private static $lastId = 0;
+    /** @var int $id */
     public $id;
+    /** @var int $currentR */
     public $currentR;
+    /** @var int $currentC */
     public $currentC;
+    /** @var int $freeAt */
     public $freeAt;
 
     public function __construct()
@@ -33,13 +37,21 @@ class Vehicle
 class Ride
 {
     private static $lastId = 0;
+    /** @var int $id */
     public $id;
+    /** @var int $rStart */
     public $rStart;
+    /** @var int $cStart */
     public $cStart;
+    /** @var int $rFinish */
     public $rFinish;
+    /** @var int $cFinish */
     public $cFinish;
+    /** @var int $earliestStart */
     public $earliestStart;
+    /** @var int $latestFinish */
     public $latestFinish;
+    /** @var int $distance */
     public $distance;
 
     public function __construct($rStart, $cStart, $rFinish, $cFinish, $earliestStart, $latestFinish)
