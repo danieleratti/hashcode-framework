@@ -9,7 +9,7 @@ require_once '../../bootstrap.php';
 use Utils\FileManager;
 use Utils\Log;
 
-$fileName = @fileName ?: 'a';
+$fileName = @$fileName ?: 'a';
 
 // Classes
 class Foo
