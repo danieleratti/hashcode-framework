@@ -53,6 +53,8 @@ class Ride
     public $latestFinish;
     /** @var int $distance */
     public $distance;
+    /** @var int $timespan */
+    public $timespan;
 
     public function __construct($rStart, $cStart, $rFinish, $cFinish, $earliestStart, $latestFinish)
     {
@@ -64,6 +66,7 @@ class Ride
         $this->earliestStart = $earliestStart;
         $this->latestFinish = $latestFinish;
         $this->distance = abs($rFinish - $rStart) + abs($cFinish - $cStart);
+        $this->timespan = $latestFinish - $earliestStart;
     }
 }
 
@@ -84,7 +87,7 @@ $rides = (int)$rides;
 $bonus = (int)$bonus;
 $steps = (int)$steps;
 
-for($i=0;$i<$vehicles;$i++)
+for ($i = 0; $i < $vehicles; $i++)
     $VEHICLES[] = new Vehicle();
 
 foreach ($content as $k => $v) if ($k >= 1) {
