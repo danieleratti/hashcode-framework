@@ -97,7 +97,7 @@ foreach ($VEHICLES as $vehicleId => $vehicle) {
 
         // Log::out('Faccio ride migliore, r: ' . $vehicle->currentR . ' - c: ' . $vehicle->currentC . ' – rides: ' . count($result[$vehicle->id]), 1);
 
-        $RIDES->forget($longestRide->id);
+        $RIDES->forget($bestRide->id);
         // Log::out('Rimuovo ride migliore, rimanenti: ' . count($RIDES), 1);
     }
 
