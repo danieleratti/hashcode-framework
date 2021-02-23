@@ -33,7 +33,8 @@ class Vehicle
         $this->freeAt = 0;
     }
 
-    public function distanceFromRide($ride) {
+    public function distanceFromRide($ride)
+    {
         return abs($this->currentR - $ride->rStart) + abs($this->currentC - $ride->cStart);
     }
 }
@@ -83,15 +84,15 @@ Log::out("Reading file");
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-[$rows, $columns, $vehicles, $rides, $bonus, $steps] = explode(" ", $content[0]);
+[$rows, $columns, $vehiclesCount, $ridesCount, $bonus, $steps] = explode(" ", $content[0]);
 $rows = (int)$rows;
 $columns = (int)$columns;
-$vehicles = (int)$vehicles;
-$rides = (int)$rides;
+$vehiclesCount = (int)$vehiclesCount;
+$ridesCount = (int)$ridesCount;
 $bonus = (int)$bonus;
 $steps = (int)$steps;
 
-for ($i = 0; $i < $vehicles; $i++) {
+for ($i = 0; $i < $vehiclesCount; $i++) {
     $v = new Vehicle();
     $VEHICLES[$v->id] = $v;
 }
