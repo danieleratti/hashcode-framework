@@ -44,6 +44,15 @@ class Vehicle
 
     /**
      * @param Ride $ride
+     * @return int distance from the ride ending point (used for reverse algo)
+     */
+    public function distanceFromRideEnd(Ride $ride)
+    {
+        return abs($this->currentR - $ride->rFinish) + abs($this->currentC - $ride->cFinish);
+    }
+
+    /**
+     * @param Ride $ride
      * @return int distance from the ride starting point PLUS the eventual time to wait due to the earliestStart!
      */
     public function distanceFromStartingRide(Ride $ride)
