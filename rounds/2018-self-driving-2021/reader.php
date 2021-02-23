@@ -33,14 +33,34 @@ class Vehicle
         $this->freeAt = 0;
     }
 
-    public function distanceFromRide($ride)
+    /**
+     * @param Ride $ride
+     * @return int distance from the ride starting point
+     */
+    public function distanceFromRide(Ride $ride)
     {
         return abs($this->currentR - $ride->rStart) + abs($this->currentC - $ride->cStart);
     }
 
-    public function distanceFromFinishedRide($ride)
+    /**
+     * @param Ride $ride
+     * @return int distance from the ride starting point PLUS the eventual time to wait due to the earliestStart!
+     */
+    public function distanceFromStartingRide(Ride $ride)
     {
-        return $this->distanceFromRide($ride) + $ride->distance;
+        $distance = $this->distanceFromRide($ride);
+        if ($this->freeAt + $distance < $ride->earliestStart)
+            $distance += $ride->earliestStart - ($this->freeAt + $distance);
+        return $distance;
+    }
+
+    /**
+     * @param Ride $ride
+     * @return int total distance (time) needed to the finish of the ride
+     */
+    public function distanceFromFinishingRide(Ride $ride)
+    {
+        return $this->distanceFromStartingRide($ride) + $ride->distance;
     }
 }
 
