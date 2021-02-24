@@ -4,6 +4,7 @@ namespace Utils;
 
 class Autoupload
 {
+    private static $scriptContent = null;
 
     private static function getPK()
     {
@@ -67,6 +68,13 @@ class Autoupload
         }
         curl_close($ch);
         $jresponse = json_decode($response, true);
+
+        if (@$jresponse['error']['code'] == 401) {
+            print_r($jresponse);
+            Log::out("Missing or invalid OAuth Token. Please set .google_pk file! Retrying in 30s", 0, "red");
+            sleep(30);
+            return self::req($method, $url, $body, $additionalHeaders);
+        }
         return $jresponse;
     }
 
@@ -183,12 +191,35 @@ class Autoupload
         return self::req('POST', $uploadUrl, $body, $headers)['file'][0];
     }
 
-    public static function submission($dataset, $filename, $content)
+    public static function submission($dataset, $filename = null, $content = null)
     {
+        if (!self::$scriptContent)
+            self::init();
         $datasets = self::getDatasets();
         $ds = $datasets[$dataset];
-        $source = self::remoteUpload($filename . '.php', file_get_contents($_SERVER["SCRIPT_NAME"]));
-        $sub = self::remoteUpload($filename . '.txt', $content);
+
+        if ($filename) {
+            if (strpos($filename, ".") === false)
+                $filename .= ".php";
+        } else {
+            $filename = $_SERVER["SCRIPT_NAME"];
+        }
+
+        $source = self::remoteUpload($filename, self::$scriptContent);
+        $sub = self::remoteUpload($filename, $content);
         return self::req('POST', "api/judge/v1/submissions?dataSet=$ds&submissionBlobKey=$sub&sourcesBlobKey=$source", '', null);
+    }
+
+    public static function init()
+    {
+        global $CERBERUS_PARAMS;
+        self::$scriptContent = file_get_contents($_SERVER["SCRIPT_NAME"]);
+        if ($CERBERUS_PARAMS) {
+            $_params = json_decode($CERBERUS_PARAMS, true);
+            foreach ($_params as $k => $v)
+                $params[] = "'$k' => '$v'";
+            $params = "[" . implode(", ", $params) . "]";
+            self::$scriptContent = str_replace("Cerberus::runClient", "Cerberus::runClient(" . $params . "); // Cerberus::runClient", self::$scriptContent);
+        }
     }
 }

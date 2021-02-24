@@ -18,6 +18,8 @@ class Cerberus
      */
     public static function runClient($params)
     {
+        global $CERBERUS_PARAMS;
+
         $argv = $_SERVER['argv'];
 
         foreach ($params as $param => $value) {
@@ -36,12 +38,15 @@ class Cerberus
                     if (isset($params[$param])) {
                         global $$param;
                         $$param = $value;
+                        $params[$param] = $value;
                     }
                 }
             } else {
                 die('Unknown input action');
             }
         }
+
+        $CERBERUS_PARAMS = json_encode($params);
     }
 
     public static function runServer()
@@ -142,8 +147,10 @@ class Cerberus
         }
 
         foreach ($paramsColl->toArray() as $launcher) {
-            $launcher = collect($launcher)->collapse()->toArray();
-            self::runScript($scriptName, $launcher);
+            $launcher_collapsed = collect($launcher)->collapse()->toArray();
+            if(count($launcher_collapsed) == 0)
+                $launcher_collapsed = $launcher;
+            self::runScript($scriptName, $launcher_collapsed);
         }
         usleep(500 * 1000);
     }
