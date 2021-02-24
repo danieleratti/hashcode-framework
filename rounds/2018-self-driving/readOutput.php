@@ -1,7 +1,7 @@
 <?php
 
-$fileName = 'e';
-$outputName = 'sol4_e_high_bonus.txt';
+$fileName = 'b';
+$outputName = 'dr-sol1_b_should_be_easy_176752.txt';
 
 include 'reader.php';
 
