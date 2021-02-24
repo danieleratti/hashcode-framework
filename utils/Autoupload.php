@@ -207,7 +207,9 @@ class Autoupload
 
         $source = self::remoteUpload($filename, self::$scriptContent);
         $sub = self::remoteUpload($filename, $content);
-        return self::req('POST', "api/judge/v1/submissions?dataSet=$ds&submissionBlobKey=$sub&sourcesBlobKey=$source", '', null);
+        $ret = self::req('POST', "api/judge/v1/submissions?dataSet=$ds&submissionBlobKey=$sub&sourcesBlobKey=$source", '', null);
+        Log::out("Upload completed!", 0, "green");
+        return $ret;
     }
 
     public static function init()
