@@ -15,9 +15,11 @@ $fileName = @$fileName ?: 'a';
 class Foo
 {
     private static $lastId = 0;
+    /** @var int $id */
     public $id;
     public function __construct()
     {
+        $this->id = self::$lastId++;
     }
 }
 

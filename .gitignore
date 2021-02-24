@@ -2,7 +2,7 @@ vendor
 benchmarks
 .idea
 .DS_Store
-rounds/2021-pizza/.google_pk
+.google_pk
 
 rounds/**/output
 rounds/**/images
