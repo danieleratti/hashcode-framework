@@ -93,6 +93,8 @@ class Car
     {
         global $T, $B, $rides;
 
+        echo "Car {$this->id} is taking ride {$ride->id} (TBefore={$this->freeAt})\n";
+
         $t = $this->freeAt + getDistance($this->r, $this->c, $ride->rStart, $ride->cStart);
         $t = max($ride->tStart, $t);
 
@@ -105,17 +107,19 @@ class Car
         $this->c = $ride->cEnd;
 
         if ($this->freeAt > $T)
-            die('tempo fine ride > T');
+            die("FATAL: tempo fine ride > T\n");
 
         $rides->forget($ride->id);
         $this->rides[] = $ride->id;
         if ($this->freeAt > $ride->tEnd) {
-            echo "ATTENZIONE! 0 punti per questa ride";
+            echo "ATTENZIONE! 0 punti per questa ride\n";
             return 0;
         }
 
         $score = $ride->distance + ($t == $ride->tStart ? $B : 0);
         $this->score += $score;
+
+        echo "Tafter={$this->freeAt} // Score={$this->score}\n";
         return $score;
     }
 

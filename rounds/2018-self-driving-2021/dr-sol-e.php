@@ -60,8 +60,45 @@ function getScore($vehicle, $ride)
     $score['score'] = $ride->distance + $bonusTaken;
 
     //$score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // version B @ 176.877 points
-    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // TUNE THIS
 
+    /* // 21393769
+    $urgencyBonus = 0;
+    if($bonusTaken > 0) {
+        if($ride->earliestStart - $vehicle->freeAt < 7000)
+            $urgencyBonus += $bonusTaken*3;
+    }
+    $score['myscore'] = ($score['score'] + $urgencyBonus) / pow($startingDistance + $ride->distance, 2); // TUNE THIS
+    */
+
+    /* // 21394602
+    $urgencyBonus = 0;
+    if($bonusTaken > 0) {
+        if($ride->earliestStart - $vehicle->freeAt < 2000)
+            $urgencyBonus += $bonusTaken*2;
+        elseif($ride->earliestStart - $vehicle->freeAt < 1000)
+            $urgencyBonus += $bonusTaken*3;
+        elseif($ride->earliestStart - $vehicle->freeAt < 500)
+            $urgencyBonus += $bonusTaken*4;
+        elseif($ride->earliestStart - $vehicle->freeAt < 10)
+            $urgencyBonus += $bonusTaken*100;
+    }
+    $score['myscore'] = ($score['score'] + $urgencyBonus) / pow($startingDistance + $ride->distance, 2); // TUNE THIS
+    */
+
+    /* // 21405319 */
+    $urgencyBonus = 0;
+    if($bonusTaken > 0) {
+        if($ride->earliestStart - $vehicle->freeAt < 2000)
+            $urgencyBonus += $bonusTaken*0.3;
+        elseif($ride->earliestStart - $vehicle->freeAt < 1000)
+            $urgencyBonus += $bonusTaken*0.5;
+        elseif($ride->earliestStart - $vehicle->freeAt < 500)
+            $urgencyBonus += $bonusTaken*0.75;
+        elseif($ride->earliestStart - $vehicle->freeAt < 100)
+            $urgencyBonus += $bonusTaken*100;
+    }
+    $score['myscore'] = ($score['score'] + $urgencyBonus) / pow($startingDistance + $ride->distance, 2); // TUNE THIS
+    /**/
     return $score;
 }
 
@@ -159,6 +196,7 @@ Log::out("Heating bigPixels...");
 foreach ($RIDES as $ride) {
     $bigPixel = getBigPixel($ride->rStart, $ride->cStart);
     $bigPixel2rides[$bigPixel[0]][$bigPixel[1]][$ride->id] = $ride;
+    $ride->earliestEnd = $ride->earliestStart + $ride->distance;
 }
 
 Log::out("Algo...");
@@ -166,9 +204,9 @@ while (count($VEHICLES) > 0) {
     /** @var Vehicle $vehicle */
     $vehicle = $VEHICLES->sortBy('freeAt')->first();
     Log::out("Running vehicle {$vehicle->id} with T={$vehicle->freeAt}/$steps");
-    $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC);
-    if (!$bestNearRide)
-        $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, 10); // TUNE THIS
+    //$bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC);
+    //if (!$bestNearRide)
+    $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, 10); // TUNE THIS
     if (!$bestNearRide)
         $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, -1);
     if (!$bestNearRide) {

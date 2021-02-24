@@ -60,7 +60,13 @@ function getScore($vehicle, $ride)
     $score['score'] = $ride->distance + $bonusTaken;
 
     //$score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // version B @ 176.877 points
-    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // TUNE THIS
+
+    $urgencyBonus = 0;
+    if($bonusTaken > 0) {
+        if($ride->earliestStart - $vehicle->freeAt < 50000)
+            $urgencyBonus += $bonusTaken*20;
+    }
+    $score['myscore'] = ($score['score'] + $urgencyBonus) / ($startingDistance); // TUNE THIS
 
     return $score;
 }

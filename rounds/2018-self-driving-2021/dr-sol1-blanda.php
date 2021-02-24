@@ -5,7 +5,7 @@ use Utils\Collection;
 use Utils\FileManager;
 use Utils\Log;
 
-$fileName = 'e';
+$fileName = 'd';
 
 include 'reader.php';
 
@@ -166,8 +166,8 @@ while (count($VEHICLES) > 0) {
     /** @var Vehicle $vehicle */
     $vehicle = $VEHICLES->sortBy('freeAt')->first();
     Log::out("Running vehicle {$vehicle->id} with T={$vehicle->freeAt}/$steps");
-    $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC);
-    if (!$bestNearRide)
+    //$bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC);
+    //if (!$bestNearRide)
         $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, 10); // TUNE THIS
     if (!$bestNearRide)
         $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, -1);

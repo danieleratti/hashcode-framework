@@ -5,7 +5,7 @@ use Utils\Collection;
 use Utils\FileManager;
 use Utils\Log;
 
-$fileName = 'e';
+$fileName = 'd';
 
 include 'reader.php';
 
@@ -60,7 +60,27 @@ function getScore($vehicle, $ride)
     $score['score'] = $ride->distance + $bonusTaken;
 
     //$score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // version B @ 176.877 points
-    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // TUNE THIS
+
+    /* // 10356727
+    $finishDistanceFromCenter = abs($ride->rFinish - 2789) + abs($ride->cFinish - 1088);
+    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance * $finishDistanceFromCenter); // TUNE THIS
+    */
+
+    /* // 9346006
+    $finishDistanceFromCenter = abs($ride->rFinish - 2789) + abs($ride->cFinish - 1088);
+    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance + $finishDistanceFromCenter); // TUNE THIS
+    */
+
+    /* // 10708681 */
+    $finishDistanceFromCenter = abs($ride->rFinish - 2789) + abs($ride->cFinish - 1088);
+    if($finishDistanceFromCenter < 800)
+        $finishDistanceFromCenter = 1;
+    elseif($finishDistanceFromCenter < 1200)
+        $finishDistanceFromCenter = 1.5;
+    else
+        $finishDistanceFromCenter = 2;
+    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance * $finishDistanceFromCenter); // TUNE THIS
+    /**/
 
     return $score;
 }
@@ -155,6 +175,16 @@ function getBestScoredNeighborRide(Vehicle $vehicle, $r, $c, $bigPixelNeighbors 
         // eseguo la ride
 */
 
+/*
+Log::out("Filtering by finishes");
+$RIDES = $RIDES->filter(function($ride) {
+    return false;
+});
+
+echo $RIDES->count();
+die();
+*/
+
 Log::out("Heating bigPixels...");
 foreach ($RIDES as $ride) {
     $bigPixel = getBigPixel($ride->rStart, $ride->cStart);
@@ -166,9 +196,9 @@ while (count($VEHICLES) > 0) {
     /** @var Vehicle $vehicle */
     $vehicle = $VEHICLES->sortBy('freeAt')->first();
     Log::out("Running vehicle {$vehicle->id} with T={$vehicle->freeAt}/$steps");
-    $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC);
-    if (!$bestNearRide)
-        $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, 10); // TUNE THIS
+    //$bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC);
+    //if (!$bestNearRide)
+    $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, 10); // TUNE THIS
     if (!$bestNearRide)
         $bestNearRide = getBestScoredNeighborRide($vehicle, $vehicle->currentR, $vehicle->currentC, -1);
     if (!$bestNearRide) {
