@@ -5,7 +5,7 @@ use Utils\Collection;
 use Utils\FileManager;
 use Utils\Log;
 
-$fileName = 'e';
+$fileName = 'd';
 
 include 'reader.php';
 
@@ -61,44 +61,27 @@ function getScore($vehicle, $ride)
 
     //$score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance); // version B @ 176.877 points
 
-    /* // 21393769
-    $urgencyBonus = 0;
-    if($bonusTaken > 0) {
-        if($ride->earliestStart - $vehicle->freeAt < 7000)
-            $urgencyBonus += $bonusTaken*3;
-    }
-    $score['myscore'] = ($score['score'] + $urgencyBonus) / pow($startingDistance + $ride->distance, 2); // TUNE THIS
+    /* // 10356727
+    $finishDistanceFromCenter = abs($ride->rFinish - 2789) + abs($ride->cFinish - 1088);
+    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance * $finishDistanceFromCenter); // TUNE THIS
     */
 
-    /* // 21394602
-    $urgencyBonus = 0;
-    if($bonusTaken > 0) {
-        if($ride->earliestStart - $vehicle->freeAt < 2000)
-            $urgencyBonus += $bonusTaken*2;
-        elseif($ride->earliestStart - $vehicle->freeAt < 1000)
-            $urgencyBonus += $bonusTaken*3;
-        elseif($ride->earliestStart - $vehicle->freeAt < 500)
-            $urgencyBonus += $bonusTaken*4;
-        elseif($ride->earliestStart - $vehicle->freeAt < 10)
-            $urgencyBonus += $bonusTaken*100;
-    }
-    $score['myscore'] = ($score['score'] + $urgencyBonus) / pow($startingDistance + $ride->distance, 2); // TUNE THIS
+    /* // 9346006
+    $finishDistanceFromCenter = abs($ride->rFinish - 2789) + abs($ride->cFinish - 1088);
+    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance + $finishDistanceFromCenter); // TUNE THIS
     */
 
-    /* // 21405319 */
-    $urgencyBonus = 0;
-    if($bonusTaken > 0) {
-        if($ride->earliestStart - $vehicle->freeAt < 2000)
-            $urgencyBonus += $bonusTaken*0.3;
-        elseif($ride->earliestStart - $vehicle->freeAt < 1000)
-            $urgencyBonus += $bonusTaken*0.5;
-        elseif($ride->earliestStart - $vehicle->freeAt < 500)
-            $urgencyBonus += $bonusTaken*0.75;
-        elseif($ride->earliestStart - $vehicle->freeAt < 100)
-            $urgencyBonus += $bonusTaken*100;
-    }
-    $score['myscore'] = ($score['score'] + $urgencyBonus) / pow($startingDistance + $ride->distance, 2); // TUNE THIS
+    /* // 10708681 */
+    $finishDistanceFromCenter = abs($ride->rFinish - 2789) + abs($ride->cFinish - 1088);
+    if($finishDistanceFromCenter < 800)
+        $finishDistanceFromCenter = 1;
+    elseif($finishDistanceFromCenter < 1200)
+        $finishDistanceFromCenter = 1.5;
+    else
+        $finishDistanceFromCenter = 2;
+    $score['myscore'] = ($ride->distance + pow($bonusTaken, 2.0)) / ($startingDistance * $finishDistanceFromCenter); // TUNE THIS
     /**/
+
     return $score;
 }
 
@@ -192,11 +175,20 @@ function getBestScoredNeighborRide(Vehicle $vehicle, $r, $c, $bigPixelNeighbors 
         // eseguo la ride
 */
 
+/*
+Log::out("Filtering by finishes");
+$RIDES = $RIDES->filter(function($ride) {
+    return false;
+});
+
+echo $RIDES->count();
+die();
+*/
+
 Log::out("Heating bigPixels...");
 foreach ($RIDES as $ride) {
     $bigPixel = getBigPixel($ride->rStart, $ride->cStart);
     $bigPixel2rides[$bigPixel[0]][$bigPixel[1]][$ride->id] = $ride;
-    $ride->earliestEnd = $ride->earliestStart + $ride->distance;
 }
 
 Log::out("Algo...");
