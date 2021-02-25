@@ -65,6 +65,8 @@ class Car
     //public $currentStreet;
     /** @var int $pathDuration */
     public $pathDuration;
+    /** @var int $nStreets */
+    public $nStreets;
 
     public function __construct($streets)
     {
@@ -75,13 +77,14 @@ class Car
         $this->pathDuration = 0;
         $isFirst = true;
         foreach ($streets as $street) {
-            if($isFirst) {
+            if ($isFirst) {
                 // Ignore the first street because the car is already at the street end
-                continue;
                 $isFirst = false;
+                continue;
             }
             $this->pathDuration += $street->duration;
         }
+        $this->nStreets = count($streets);
     }
 }
 
@@ -107,11 +110,11 @@ $N_STREETS = (int)$N_STREETS;
 $N_INTERSECTIONS = (int)$N_INTERSECTIONS;
 $DURATION = (int)$DURATION;
 $streetIdxStart = 1;
-$streetIdxEnd = $streetIdxStart + $N_STREETS;
-$carsIdxStart = $streetIdxEnd + 1;
-$carsIdxEnd = $carsIdxStart + $N_CARS;
+$streetIdxEnd = $streetIdxStart + $N_STREETS - 1;
+$carsIdxStart = $streetIdxEnd;
+$carsIdxEnd = $carsIdxStart + $N_CARS - 1;
 
-for($i=0;$i<$N_INTERSECTIONS;$i++)
+for ($i = 0; $i < $N_INTERSECTIONS; $i++)
     $INTERSECTIONS[$i] = new Intersection();
 
 for ($streetIdx = $streetIdxStart; $streetIdx <= $streetIdxEnd; $streetIdx++) {
@@ -122,12 +125,18 @@ for ($streetIdx = $streetIdxStart; $streetIdx <= $streetIdxEnd; $streetIdx++) {
 for ($carsIdx = $carsIdxStart; $carsIdx <= $carsIdxEnd; $carsIdx++) {
     $c = explode(" ", $content[$carsIdx]);
     $streets = [];
-    foreach($c as $k => $v) {
-        if($k > 0) {
+    foreach ($c as $k => $v) {
+        if ($k > 0) {
             $streets[] = $STREETS[$v];
         }
     }
     $CARS[] = new Car($streets);
+}
+
+foreach ($STREETS as $street) {
+    /** @var Street $street */
+    $street->start->streetsOut[] = $street;
+    $street->end->streetsIn[] = $street;
 }
 
 Log::out("Read finished");
