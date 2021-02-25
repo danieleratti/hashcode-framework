@@ -2,6 +2,7 @@
 
 use Utils\Analysis\Analyzer;
 use Utils\Collection;
+use Utils\Graph;
 
 $fileName = 'f';
 
@@ -28,3 +29,11 @@ $analyzer->addDataset('intersections', $INTERSECTIONS, ['streetsIn', 'streetsOut
 $analyzer->addDataset('cars', $CARS, ['streets']);
 $analyzer->analyze();
 
+/*
+$graph = new Graph($fileName);
+
+$vertexes = collect($INTERSECTIONS)->map(function (Intersection $i) { return ['id' => $i->id, 'color' => 'red', 'shape' => 'box']; })->toArray();
+$edges = array_values(collect($STREETS)->map(function (Street $s) { return ['from' => $s->start->id, 'to' => $s->end->id]; })->toArray());
+
+$graph->plotGraph($vertexes, $edges);
+*/
