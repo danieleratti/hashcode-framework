@@ -14,8 +14,7 @@ $param1 = null;
 Cerberus::runClient(['fileName' => 'a' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
-include 'dr-reader.php';
-
+include 'giozem-reader.php';
 
 /* VARIABLES */
 /** @var FileManager $fileManager */
@@ -34,6 +33,11 @@ $SCORE = 0;
 /* ALGO */
 Log::out("Run with fileName $fileName");
 $SCORE = $param1;
+
+// Filtro le car che non hanno streets
+$CARS = array_filter($CARS, function ($c) {
+    return count($c->streets) > 0;
+});
 
 
 /* OUTPUT */
