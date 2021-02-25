@@ -1,7 +1,7 @@
 <?php
 
 $fileName = 'b';
-$outputName = 'dr-sol1_b_should_be_easy_176752.txt';
+$outputName = 'mm-sol1_b_should_be_easy_176877.txt';
 
 include 'reader.php';
 

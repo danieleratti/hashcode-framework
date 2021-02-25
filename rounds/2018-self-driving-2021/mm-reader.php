@@ -25,6 +25,9 @@ class Vehicle
     /** @var int $freeAt */
     public $freeAt;
 
+    /** @var Ride[] $assignedRides */
+    public $assignedRides;
+
     public function __construct()
     {
         $this->id = self::$lastId++;
