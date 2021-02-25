@@ -34,7 +34,9 @@ class FileManager
     {
         $baseInputName = $this->getInputName();
         $scriptName = DirUtils::getScriptName();
-        $this->write(DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . ($extra ? ('_' . $extra) : '') . '.txt', $content);
+        $filePath = DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . ($extra ? ('_' . $extra) : '') . '.txt';
+        $this->write($filePath, $content);
+        return $filePath;
     }
 
     public function getInputName()

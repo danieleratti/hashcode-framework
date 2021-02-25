@@ -30,6 +30,7 @@ $SCORE = $param1;
 
 
 /* OUTPUT */
+Log::out('Output...');
 $output = "xxx";
-$fileManager->output($output, $fileName . '__' . $SCORE);
-//Autoupload::submission($fileName, null, $output);
+$outputPath = $fileManager->output($output, $fileName . '__' . $SCORE);
+Autoupload::submission($fileName, null, $output, $outputPath);

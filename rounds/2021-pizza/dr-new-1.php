@@ -16,7 +16,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $k1 = null;
-Cerberus::runClient(['fileName' => 'a', 'k1' => 1]);
+Cerberus::runClient(['fileName' => 'b', 'k1' => 1]);
 Autoupload::init();
 
 include 'dr-reader.php';
@@ -189,7 +189,9 @@ while($remainingTeams > 0) {
 }
 
 $output = getOutput();
-$fileManager->output($output, "k1_$k1--score_$SCORE");
+//$fileManager->output($output, "k1_$k1--score_$SCORE");
 //Log::out("Uploading SCORE=$SCORE ($fileName)...");
 //Autoupload::submission($fileName, null, $output);
 //Log::out("Uploaded SCORE=$SCORE ($fileName)...");
+$outputPath = $fileManager->output($output, "k1_$k1--score_$SCORE");
+Autoupload::submission($fileName, null, $output, $outputPath);
