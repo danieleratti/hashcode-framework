@@ -81,7 +81,6 @@ $INTERSECTIONS = [];
 $STREETS = [];
 $CARS = [];
 $BONUS = 0;
-$streetName2id = [];
 
 // Reading the inputs
 Log::out("Reading file");

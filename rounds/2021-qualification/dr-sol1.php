@@ -19,9 +19,26 @@ include 'dr-reader.php';
 
 /* VARIABLES */
 /** @var FileManager $fileManager */
-/** @var Collection|Foo[] $foo */
+/** @var Collection|Car[] $CARS */
+/** @var Collection|Street[] $STREETS */
+/** @var Collection|Intersection[] $INTERSECTIONS */
+/** @var int $DURATION */
+/** @var int $N_INTERSECTIONS */
+/** @var int $N_STREETS */
+/** @var int $N_CARS */
+/** @var int $BONUS */
 
 $SCORE = 0;
+
+/* COLLECTIONS */
+$CARS = collect($CARS);
+$CARS->keyBy('id');
+
+$STREETS = collect($STREETS);
+$STREETS->keyBy('name');
+
+$INTERSECTIONS = collect($INTERSECTIONS);
+$INTERSECTIONS->keyBy('id');
 
 
 /* ALGO */
