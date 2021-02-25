@@ -65,6 +65,8 @@ class Car
     //public $currentStreet;
     /** @var int $pathDuration */
     public $pathDuration;
+    /** @var int $nStreets */
+    public $nStreets;
 
     public function __construct($streets)
     {
@@ -75,13 +77,14 @@ class Car
         $this->pathDuration = 0;
         $isFirst = true;
         foreach ($streets as $street) {
-            if($isFirst) {
+            if ($isFirst) {
                 // Ignore the first street because the car is already at the street end
-                continue;
                 $isFirst = false;
+                continue;
             }
             $this->pathDuration += $street->duration;
         }
+        $this->nStreets = count($streets);
     }
 }
 
@@ -130,7 +133,7 @@ for ($carsIdx = $carsIdxStart; $carsIdx <= $carsIdxEnd; $carsIdx++) {
     $CARS[] = new Car($streets);
 }
 
-foreach($STREETS as $street) {
+foreach ($STREETS as $street) {
     /** @var Street $street */
     $street->start->streetsOut[] = $street;
     $street->end->streetsIn[] = $street;
