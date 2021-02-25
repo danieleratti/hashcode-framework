@@ -14,7 +14,7 @@ $param1 = null;
 Cerberus::runClient(['fileName' => 'a' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
-include 'dr-reader.php';
+include 'dr-reader-2.php';
 
 /* VARIABLES */
 /** @var FileManager $fileManager */
