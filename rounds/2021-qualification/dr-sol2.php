@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'a' /*, 'param1' => 1.0*/]);
+Cerberus::runClient(['fileName' => 'b' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
 include 'dr-reader-2.php';
@@ -64,10 +64,12 @@ foreach($INTERSECTIONS as $intersection) {
     $cycleDuration = min($DURATION, 10);
     foreach($streetsInPriorities as $name => $priority) {
         if($priority > 0) {
-            $streetsInDuration[$name] = round($priority / $totalPriorities * $cycleDuration);
+            $streetsInDuration[$name] = ceil($priority / $totalPriorities * $cycleDuration);
         }
     }
-    $OUTPUT[$intersection->id] = $streetsInDuration;
+    if(count($streetsInDuration) > 0) {
+        $OUTPUT[$intersection->id] = $streetsInDuration;
+    }
 }
 
 /* OUTPUT */
