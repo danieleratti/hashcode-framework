@@ -20,15 +20,6 @@ class Cerberus
     {
         global $CERBERUS_PARAMS;
 
-        if($params[0] && is_array($params[0])) {
-            $_params = [];
-            foreach($params as $a => $b) {
-                foreach($b as $k => $v)
-                    $_params[$k] = $v;
-            }
-            $params = $_params;
-        }
-
         $argv = $_SERVER['argv'];
 
         foreach ($params as $param => $value) {
@@ -44,13 +35,6 @@ class Cerberus
                 die(json_encode(array_keys($params)));
             } else if ($input['action'] == 'run') {
                 foreach ($input['params'] as $param => $value) {
-                    if(is_array($value)) {
-                        foreach($value as $key2 => $val2) {
-                            global $$key2;
-                            $$key2 = $val2;
-                            $params[$key2] = $val2;
-                        }
-                    }
                     if (isset($params[$param])) {
                         global $$param;
                         $$param = $value;
@@ -138,8 +122,6 @@ class Cerberus
         self::$db['lastLaunchScript'] = $scriptName;
         self::writeDb();
 
-        $paramsColl = collect();
-
         $cmd = "php " . $scriptName . ".php cerberus '" . json_encode(["action" => "info"]) . "'";
         $ret = shell_exec($cmd);
         $params = json_decode($ret, true);
@@ -151,22 +133,26 @@ class Cerberus
 
         Log::out('Launching ' . $scriptName . '...');
 
-        foreach ($params as $param) {
-            $values = [];
-            $value = readline('Param ' . $param . '? ');
-            foreach (explode(",", $value) as $v)
-                $values[] = [$param => $v];
-            if ($paramsColl->count() == 0)
-                $paramsColl = collect($values);
-            else
-                $paramsColl = $paramsColl->crossJoin($values);
-        }
+        $lvl = 0;
+        $possibilities = [];
 
-        foreach ($paramsColl->toArray() as $launcher) {
-            $launcher_collapsed = collect($launcher)->collapse()->toArray();
-            if(count($launcher_collapsed) == 0)
-                $launcher_collapsed = $launcher;
-            self::runScript($scriptName, $launcher_collapsed);
+        foreach ($params as $param) {
+            $value = readline('Param ' . $param . '? ');
+
+            foreach (explode(",", $value) as $v) {
+                if($lvl == 0)
+                    $possibilities[$lvl][] = [$param => $v];
+                else {
+                    foreach($possibilities[$lvl-1] as $oldP) {
+                        $oldP[$param] = $v;
+                        $possibilities[$lvl][] = $oldP;
+                    }
+                }
+            }
+            $lvl++;
+        }
+        foreach ($possibilities[$lvl-1] as $possibility) {
+            self::runScript($scriptName, $possibility);
         }
         usleep(500 * 1000);
     }
