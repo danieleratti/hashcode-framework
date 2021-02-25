@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'a' /*, 'param1' => 1.0*/]);
+Cerberus::runClient(['fileName' => 'b' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
 include 'dr-reader-2.php';
@@ -44,56 +44,46 @@ $INTERSECTIONS->keyBy('id');
 Log::out("Run with fileName $fileName");
 $SCORE = 0;
 
-// tolgo le car senza percorsi
-// calcolo le priorità per ogni auto ( 1 / ( duration +* nStreets) ) [+ avanti: quanto una strada è trafficata]
-// intersezioni con solo un ingresso -> sempre verdi
+$CARS = $CARS->where('nStreets', '>', 0);
 
-/*
-// ciclo $T da 0 a $DURATION
-    // ciclo le intersezioni
-        // calcolo le queues input in quell'intersezione e decido la priority sommata delle auto in coda
-        // scelgo la coda con priorità più alta e accendo il semaforo
-
-    StateManager::carActions();
-    // ciclo le car
-        // eseguo la next thing se possibile (ovvero non rosso) e ricalcolo la priority (???)
-*/
+$OUTPUT = [];
 
 foreach($CARS as $car) {
     $car->calcPriority();
-    //$car->nextStep();
 }
 
-for($T=0;$T<$DURATION;$T++) {
-    foreach($CARS as $car) {
-        $car->nextStep();
+foreach($INTERSECTIONS as $intersection) {
+    $streetsInDuration = [];
+    $totalPriorities = 0;
+    $streetsInPriorities = [];
+    foreach($intersection->streetsIn as $streetIn) {
+        $priority = $streetIn->priority;
+        $streetsInPriorities[$streetIn->name] = $priority;
+        $totalPriorities += $priority;
     }
-
-    foreach($INTERSECTIONS as $intersection) {
-        /** @var Intersection $intersection */
-        $bestPriority = 0;
-        $bestStreet = null;
-        foreach($intersection->streetsIn as $streetIn) {
-            $priority = $streetIn->getPriority();
-            if($priority > $bestPriority) {
-                $bestPriority = $priority;
-                $bestStreet = $streetIn;
-            }
-        }
-        if($bestStreet) {
-            if ($bestStreet->name != $intersection->greenStreet->name) {
-                $intersection->setGreen($bestStreet);
-            }
+    $cycleDuration = min($DURATION, 10);
+    foreach($streetsInPriorities as $name => $priority) {
+        if($priority > 0) {
+            $streetsInDuration[$name] = ceil($priority / $totalPriorities * $cycleDuration);
         }
     }
-
-    foreach($INTERSECTIONS as $intersection) {
-        $intersection->nextStep();
+    if(count($streetsInDuration) > 0) {
+        $OUTPUT[$intersection->id] = $streetsInDuration;
     }
 }
 
 /* OUTPUT */
 Log::out('Output...');
-$output = "xxx";
-//$fileManager->outputV2($output, 'score_' . $SCORE);
-//Autoupload::submission($fileName, null, $output);
+$output = [];
+$output[] = count($OUTPUT);
+foreach($OUTPUT as $id => $o) {
+    $output[] = $id;
+    $output[] = count($o);
+    foreach($o as $k => $v) {
+        $v = (int)$v;
+        $output[] = "$k $v";
+    }
+}
+$output = implode("\n", $output);
+$fileManager->outputV2($output, 'time_' . time());
+Autoupload::submission($fileName, null, $output);

@@ -27,6 +27,8 @@ class Street
     public $end;
     /** @var Car[] $queue */
     public $queue = [];
+    /** @var int $priority */
+    public $priority = 0;
 
     public function __construct($name, $duration, $start, $end)
     {
@@ -100,8 +102,8 @@ class Car
     public $pathDuration;
     /** @var int $nStreets */
     public $nStreets;
-    /** @var int $priority */
-    public $priority;
+    /** @var float $priority */
+    public $priority=0;
 
     /** @var Street $currentStreet */
     public $currentStreet;
@@ -134,47 +136,13 @@ class Car
 
     public function calcPriority()
     {
-        $this->priority = 123;
-    }
-
-    public function nextStep()
-    {
-        if ($this->currentStreetDuration > 0) {
-            $this->currentStreetDuration--;
-        } else {
-            if (!$this->currentStreetEnqueued) {
-                $this->enqueue();
+        global $BONUS;
+        $this->priority = $BONUS / ($this->pathDuration + pow($this->nStreets, 2));
+        foreach($this->streets as $k => $street) {
+            if($k > 0) {
+                $street->priority += $this->priority;
             }
         }
-    }
-
-    public function enqueue()
-    {
-        if ($this->currentStreetIdx == count($this->streets)-1) { //era l'ultima strada
-            $this->deinitialize();
-            return;
-        }
-        $this->currentStreet->enqueueCar($this);
-        $this->currentStreetEnqueued = true;
-    }
-
-    public function nextStreet()
-    {
-        $this->currentStreetIdx++;
-        $this->currentStreet = $this->streets[$this->currentStreetIdx];
-        $this->currentStreetDuration = $this->currentStreet->duration;
-        $this->currentStreetEnqueued = false;
-    }
-
-    public function deinitialize()
-    {
-        global $CARS;
-        global $SCORE;
-        global $T;
-        global $BONUS;
-        global $DURATION;
-        $SCORE += $BONUS + ($DURATION - $T);
-        $CARS->forget($this->id);
     }
 }
 
