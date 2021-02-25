@@ -39,6 +39,18 @@ class FileManager
         return $filePath;
     }
 
+    public function outputV2($content, $extra = '')
+    {
+        $baseInputName = $this->getInputName();
+        $scriptName = DirUtils::getScriptName();
+        $basePath = DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $baseInputName . '/' . $scriptName . ($extra ? ('_' . $extra) : '');
+        $outputPath = $basePath . '.txt';
+        $sourcePath = $basePath . '.php.txt'; // in order to exclude from searches
+        $this->write($outputPath, $content);
+        if (Autoupload::$scriptContent)
+            $this->write($sourcePath, Autoupload::$scriptContent);
+    }
+
     public function getInputName()
     {
         return basename($this->inputName, '.in');

@@ -4,7 +4,7 @@ namespace Utils;
 
 class Autoupload
 {
-    private static $scriptContent = null;
+    public static $scriptContent = null;
 
     private static function getPK()
     {
@@ -191,7 +191,7 @@ class Autoupload
         return self::req('POST', $uploadUrl, $body, $headers)['file'][0];
     }
 
-    public static function submission($dataset, $filename = null, $content = null, $sourceOutputPath = null)
+    public static function submission($dataset, $filename = null, $content = null)
     {
         if (!self::$scriptContent)
             self::init();
@@ -204,10 +204,6 @@ class Autoupload
         } else {
             $filename = $_SERVER["SCRIPT_NAME"];
         }
-
-        $fh = fopen($sourceOutputPath . "_source.php", "w");
-        fwrite($fh, self::$scriptContent);
-        fclose($fh);
 
         $source = self::remoteUpload($filename, self::$scriptContent);
         $sub = self::remoteUpload($filename, $content);

@@ -189,9 +189,5 @@ while($remainingTeams > 0) {
 }
 
 $output = getOutput();
-//$fileManager->output($output, "k1_$k1--score_$SCORE");
-//Log::out("Uploading SCORE=$SCORE ($fileName)...");
-//Autoupload::submission($fileName, null, $output);
-//Log::out("Uploaded SCORE=$SCORE ($fileName)...");
-$outputPath = $fileManager->output($output, "k1_$k1--score_$SCORE");
-Autoupload::submission($fileName, null, $output, $outputPath);
+$fileManager->outputV2($output, "k1_$k1--score_$SCORE");
+Autoupload::submission($fileName, null, $output);
