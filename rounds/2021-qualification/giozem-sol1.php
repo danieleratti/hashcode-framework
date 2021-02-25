@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'a' /*, 'param1' => 1.0*/]);
+Cerberus::runClient(['fileName' => 'b' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
 include 'giozem-reader.php';
@@ -39,9 +39,42 @@ $CARS = array_filter($CARS, function ($c) {
     return count($c->streets) > 0;
 });
 
+foreach ($CARS as $car) {
+    foreach ($car->streets as $street) {
+        if (!isset($street->end->semaphoreToTime[$street->name])) {
+            $street->end->semaphoreToTime[$street->name] = 0;
+        }
+
+        $street->end->semaphoreToTime[$street->name] += 1 / $car->pathDuration;
+    }
+}
+
+foreach ($INTERSECTIONS as $i) {
+    $tot = array_reduce($i->semaphoreToTime, function ($carry, $perc) {
+        return $carry + $perc;
+    }, 0);
+
+    foreach ($i->semaphoreToTime as $s => $time) {
+        $i->semaphoreToTime[$s] = ceil($time / $tot * 10);
+    }
+    $i->semaphoreToTime = array_filter($i->semaphoreToTime, function ($s) {
+        return $s > 0;
+    });
+}
+
 
 /* OUTPUT */
 Log::out('Output...');
-$output = "xxx";
-//$fileManager->outputV2($output, 'score_' . $SCORE);
-//Autoupload::submission($fileName, null, $output);
+$INTERSECTIONS = array_filter($INTERSECTIONS, function ($i) {
+    return count($i->semaphoreToTime) > 0;
+});
+$output = count($INTERSECTIONS) . PHP_EOL;
+foreach ($INTERSECTIONS as $intersection) {
+    $output .= $intersection->id . PHP_EOL;
+    $output .= count($intersection->semaphoreToTime) . PHP_EOL;
+    foreach ($intersection->semaphoreToTime as $semaphoreId => $time) {
+        $output .= $semaphoreId . " " . $time . PHP_EOL;
+    }
+}
+$fileManager->outputV2($output, 'score_' . $SCORE);
+Autoupload::submission($fileName, null, $output);
