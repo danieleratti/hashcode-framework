@@ -40,7 +40,10 @@ $CARS = array_filter($CARS, function ($c) {
 });
 
 foreach ($CARS as $car) {
-    foreach ($car->streets as $street) {
+    foreach ($car->streets as $k => $street) {
+        if ($k == count($car->streets) - 1) {
+            continue;
+        }
         if (!isset($street->end->semaphoreToTime[$street->name])) {
             $street->end->semaphoreToTime[$street->name] = 0;
         }
