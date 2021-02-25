@@ -9,11 +9,11 @@ use Utils\Log;
 require_once '../../bootstrap.php';
 
 /* CONFIG */
-$fileName = null;
-$param1 = null;
-Cerberus::runClient(['fileName' => 'b' /*, 'param1' => 1.0*/]);
+$fileName = 'a';
+$EXP = 1;
+$MAXCYCLEDURATION = 10;
+Cerberus::runClient(['fileName' => 'c', 'EXP' => 1.0 , 'MAXCYCLEDURATION' => 5]);
 Autoupload::init();
-
 include 'dr-reader-2.php';
 
 /* VARIABLES */
@@ -61,7 +61,7 @@ foreach($INTERSECTIONS as $intersection) {
         $streetsInPriorities[$streetIn->name] = $priority;
         $totalPriorities += $priority;
     }
-    $cycleDuration = min($DURATION, 10);
+    $cycleDuration = min($DURATION, $MAXCYCLEDURATION);
     foreach($streetsInPriorities as $name => $priority) {
         if($priority > 0) {
             $streetsInDuration[$name] = ceil($priority / $totalPriorities * $cycleDuration);
@@ -87,3 +87,4 @@ foreach($OUTPUT as $id => $o) {
 $output = implode("\n", $output);
 $fileManager->outputV2($output, 'time_' . time());
 Autoupload::submission($fileName, null, $output);
+Log::out("Fine $fileName $EXP $MAXCYCLEDURATION");

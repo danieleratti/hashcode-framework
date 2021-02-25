@@ -20,6 +20,15 @@ class Cerberus
     {
         global $CERBERUS_PARAMS;
 
+        if($params[0] && is_array($params[0])) {
+            $_params = [];
+            foreach($params as $a => $b) {
+                foreach($b as $k => $v)
+                    $_params[$k] = $v;
+            }
+            $params = $_params;
+        }
+
         $argv = $_SERVER['argv'];
 
         foreach ($params as $param => $value) {
@@ -35,6 +44,13 @@ class Cerberus
                 die(json_encode(array_keys($params)));
             } else if ($input['action'] == 'run') {
                 foreach ($input['params'] as $param => $value) {
+                    if(is_array($value)) {
+                        foreach($value as $key2 => $val2) {
+                            global $$key2;
+                            $$key2 = $val2;
+                            $params[$key2] = $val2;
+                        }
+                    }
                     if (isset($params[$param])) {
                         global $$param;
                         $$param = $value;

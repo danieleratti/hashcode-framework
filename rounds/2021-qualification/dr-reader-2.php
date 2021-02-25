@@ -136,12 +136,14 @@ class Car
 
     public function calcPriority()
     {
-        global $BONUS;
-        $this->priority = $BONUS / ($this->pathDuration + pow($this->nStreets, 2));
+        global $BONUS, $EXP;
+        //$this->priority = $BONUS / ($this->pathDuration + pow($this->nStreets, 2));
+        //$this->priority = 1 / pow($this->pathDuration * pow($this->nStreets, 0.25), $EXP);
+        $this->priority = 1 / pow($this->nStreets, $EXP);
         foreach($this->streets as $k => $street) {
-            if($k > 0) {
-                $street->priority += $this->priority;
-            }
+            //if($k > 0) {
+            $street->priority += $this->priority;
+            //}
         }
     }
 }
