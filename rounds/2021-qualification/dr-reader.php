@@ -16,7 +16,7 @@ class Street
 {
     private static $lastId = 0;
     /** @var int $id */
-    public $id;
+    //public $id;
     /** @var string $name */
     public $name;
     /** @var int $duration */
@@ -28,7 +28,7 @@ class Street
 
     public function __construct($name, $duration, $start, $end)
     {
-        $this->id = self::$lastId++;
+        //$this->id = self::$lastId++;
         $this->name = $name;
         $this->duration = (int)$duration;
         $this->start = $start;
@@ -77,9 +77,11 @@ $DURATION = 0;
 $N_INTERSECTIONS = 0;
 $N_STREETS = 0;
 $N_CARS = 0;
+$INTERSECTIONS = [];
 $STREETS = [];
 $CARS = [];
 $BONUS = 0;
+$streetName2id = [];
 
 // Reading the inputs
 Log::out("Reading file");
@@ -92,15 +94,23 @@ $streetIdxEnd = $streetIdxStart + $N_STREETS;
 $carsIdxStart = $streetIdxEnd + 1;
 $carsIdxEnd = $carsIdxStart + $N_CARS;
 
+for($i=0;$i<$N_INTERSECTIONS;$i++)
+    $INTERSECTIONS[$i] = new Intersection();
+
 for ($streetIdx = $streetIdxStart; $streetIdx <= $streetIdxEnd; $streetIdx++) {
-    //$foo[] = explode(" ", $v);
+    list($start, $end, $name, $duration) = explode(" ", $content[$streetIdx]);
+    $STREETS[$name] = new Street($name, $duration, $INTERSECTIONS[(int)$start], $INTERSECTIONS[(int)$end]);
 }
 
-for ($carsIdx = $carsIdxStart; $carsIdx <= $carsIdxEnd; $streetIdx++) {
-    //$foo[] = explode(" ", $v);
+for ($carsIdx = $carsIdxStart; $carsIdx <= $carsIdxEnd; $carsIdx++) {
+    $c = explode(" ", $content[$carsIdx]);
+    $streets = [];
+    foreach($c as $k => $v) {
+        if($k > 0) {
+            $streets[] = $STREETS[$v];
+        }
+    }
+    $CARS[] = new Car($streets);
 }
-
-$foo = collect($foo);
-$foo->keyBy('id');
 
 Log::out("Read finished");
