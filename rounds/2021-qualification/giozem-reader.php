@@ -47,6 +47,10 @@ class Intersection
     public $streetsOut;
     /** @var array $semaphoreToTime */
     public $semaphoreToTime;
+    /** @var array $streetToCongestion */
+    public $streetToCongestion;
+    /** @var array $streetToScore */
+    public $streetToScore;
 
     public function __construct()
     {

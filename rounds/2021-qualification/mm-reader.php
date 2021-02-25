@@ -25,10 +25,10 @@ class Street
     public $start;
     /** @var Intersection $end */
     public $end;
+    /** int $usage */
+    public $usage = 0;
     /** @var Car[] $queue */
     public $queue = [];
-    /** @var int $priority */
-    public $priority = 0;
 
     public function __construct($name, $duration, $start, $end)
     {
@@ -60,29 +60,51 @@ class Intersection
     /** @var int $id */
     public $id;
     /** @var Street[] $streetsIn */
-    public $streetsIn;
+    public $streetsIn = [];
     /** @var Street[] $streetsOut */
-    public $streetsOut;
-    /** @var Street $greenStreet */
-    public $greenStreet;
+    public $streetsOut = [];
+
+    /** @var bool $fixedGreen */
+    public $fixedGreen = false;
+    /** @var int[] $semaphoreTime */
+    public $semaphoreTime = [];
+    /** @var Street[] $greenScheduling */
+    public $greenScheduling = [];
 
     public function __construct()
     {
         $this->id = self::$lastId++;
     }
 
-    public function setGreen(Street $streetIn)
+    public function addStreetIn(Street $streetIn)
     {
-        // TODO OUTPUT
-        // TODO settare rosse le altre
-        $this->greenStreet = $streetIn;
+        $this->streetsIn[$streetIn->name] = $streetIn;
+        $this->semaphoreTime[$streetIn->name] = 1;
     }
 
-    public function nextStep()
+    public function addStreetOut(Street $streetOut)
     {
-        if ($this->greenStreet) {
-            $car = array_pop($this->greenStreet->queue);
+        $this->streetsOut[$streetOut->name] = $streetOut;
+    }
+
+    public function updateScheduling()
+    {
+        $this->greenScheduling = [];
+        foreach ($this->semaphoreTime as $streetName => $st) {
+            for ($i = 0; $i < $st; $i++) {
+                $this->greenScheduling[] = $this->streetsIn[$streetName];
+            }
+        }
+    }
+
+    public function nextStep(int $t)
+    {
+        $currentStreet = $this->greenScheduling[$t % count($this->greenScheduling)];
+        if ($currentStreet) {
+            $car = array_pop($currentStreet->queue);
             $car->nextStreet();
+        } else {
+            Log::out('Non c\'è una strada verde');
         }
     }
 }
@@ -102,8 +124,8 @@ class Car
     public $pathDuration;
     /** @var int $nStreets */
     public $nStreets;
-    /** @var float $priority */
-    public $priority=0;
+    /** @var int $priority */
+    public $priority;
 
     /** @var Street $currentStreet */
     public $currentStreet;
@@ -124,27 +146,46 @@ class Car
         $this->pathDuration = 0;
         $isFirst = true;
         foreach ($streets as $street) {
+            /** @var Street $street */
             if ($isFirst) {
                 // Ignore the first street because the car is already at the street end
                 $isFirst = false;
                 continue;
             }
             $this->pathDuration += $street->duration;
+            $street->usage++;
         }
         $this->nStreets = count($streets);
     }
 
-    public function calcPriority()
+    public function nextStep()
     {
-        global $BONUS, $EXP;
-        //$this->priority = $BONUS / ($this->pathDuration + pow($this->nStreets, 2));
-        //$this->priority = 1 / pow($this->pathDuration * pow($this->nStreets, 0.25), $EXP);
-        $this->priority = 1 / pow($this->nStreets, $EXP);
-        foreach($this->streets as $k => $street) {
-            //if($k > 0) {
-            $street->priority += $this->priority;
-            //}
+        if ($this->currentStreetDuration > 0) {
+            $this->currentStreetDuration--;
+        } else {
+            if (!$this->currentStreetEnqueued) {
+                return $this->enqueue();
+            }
         }
+        return false;
+    }
+
+    public function enqueue()
+    {
+        if ($this->currentStreetIdx == count($this->streets) - 1) { //era l'ultima strada
+            return true;
+        }
+        $this->currentStreet->enqueueCar($this);
+        $this->currentStreetEnqueued = true;
+        return false;
+    }
+
+    public function nextStreet()
+    {
+        $this->currentStreetIdx++;
+        $this->currentStreet = $this->streets[$this->currentStreetIdx];
+        $this->currentStreetDuration = $this->currentStreet->duration;
+        $this->currentStreetEnqueued = false;
     }
 }
 
@@ -163,7 +204,7 @@ Log::out("Reading file");
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-list($DURATION, $N_INTERSECTIONS, $N_STREETS, $N_CARS, $BONUS) = explode(" ", $content[0]);
+[$DURATION, $N_INTERSECTIONS, $N_STREETS, $N_CARS, $BONUS] = explode(" ", $content[0]);
 $BONUS = (int)$BONUS;
 $N_CARS = (int)$N_CARS;
 $N_STREETS = (int)$N_STREETS;
@@ -178,7 +219,7 @@ for ($i = 0; $i < $N_INTERSECTIONS; $i++)
     $INTERSECTIONS[$i] = new Intersection();
 
 for ($streetIdx = $streetIdxStart; $streetIdx <= $streetIdxEnd; $streetIdx++) {
-    list($start, $end, $name, $duration) = explode(" ", $content[$streetIdx]);
+    [$start, $end, $name, $duration] = explode(" ", $content[$streetIdx]);
     $STREETS[$name] = new Street($name, $duration, $INTERSECTIONS[(int)$start], $INTERSECTIONS[(int)$end]);
 }
 
@@ -193,10 +234,10 @@ for ($carsIdx = $carsIdxStart; $carsIdx <= $carsIdxEnd; $carsIdx++) {
     $CARS[] = new Car($streets);
 }
 
-foreach ($STREETS as $street) {
+foreach ($STREETS as $streetName => $street) {
     /** @var Street $street */
-    $street->start->streetsOut[] = $street;
-    $street->end->streetsIn[] = $street;
+    $street->start->addStreetOut($street);
+    $street->end->addStreetIn($street);
 }
 
 Log::out("Read finished");
