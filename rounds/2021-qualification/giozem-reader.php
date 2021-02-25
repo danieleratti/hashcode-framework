@@ -45,10 +45,13 @@ class Intersection
     public $streetsIn;
     /** @var Street[] $streetsOut */
     public $streetsOut;
+    /** @var array $semaphoreToTime */
+    public $semaphoreToTime;
 
     public function __construct()
     {
         $this->id = self::$lastId++;
+        $this->semaphoreToTime = [];
     }
 }
 
