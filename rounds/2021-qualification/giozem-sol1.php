@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'b' /*, 'param1' => 1.0*/]);
+Cerberus::runClient(['fileName' => 'b', 'param1' => 1.0]);
 Autoupload::init();
 
 include 'giozem-reader.php';
@@ -55,7 +55,7 @@ foreach ($INTERSECTIONS as $i) {
     }, 0);
 
     foreach ($i->semaphoreToTime as $s => $time) {
-        $i->semaphoreToTime[$s] = ceil($time / $tot * 10);
+        $i->semaphoreToTime[$s] = ceil($time / $tot * $param1);
     }
     $i->semaphoreToTime = array_filter($i->semaphoreToTime, function ($s) {
         return $s > 0;
