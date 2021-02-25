@@ -25,6 +25,8 @@ class Street
     public $start;
     /** @var Intersection $end */
     public $end;
+    /** @var int $numCars */
+    public $numCars;
 
     public function __construct($name, $duration, $start, $end)
     {
@@ -33,6 +35,7 @@ class Street
         $this->duration = (int)$duration;
         $this->start = $start;
         $this->end = $end;
+        $this->numCars = 0;
     }
 }
 
@@ -144,6 +147,12 @@ foreach ($STREETS as $street) {
     /** @var Street $street */
     $street->start->streetsOut[] = $street;
     $street->end->streetsIn[] = $street;
+}
+
+foreach ($CARS as $car) {
+    foreach ($car->streets as $street) {
+        $street->numCars++;
+    }
 }
 
 Log::out("Read finished");

@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'b', 'param1' => 1.0]);
+Cerberus::runClient(['fileName' => 'c', 'param1' => 1.0]);
 Autoupload::init();
 
 include 'giozem-reader.php';
@@ -40,40 +40,37 @@ $CARS = array_filter($CARS, function ($c) {
 });
 
 foreach ($CARS as $car) {
-    foreach ($car->streets as $street) {
-        if (!isset($street->end->streetToCongestion[$street->name])) {
-            $street->end->streetToCongestion[$street->name] = 0;
-        }
-
-        $street->end->streetToCongestion[$street->name]++;
+    if($car->startingStreet->end->streetToScore[$car->startingStreet->name] == 0) {
+        $car->startingStreet->end->streetToScore[$car->startingStreet->name] = 0;
     }
+
+    $car->startingStreet->end->streetToScore[$car->startingStreet->name]++;
 }
 
 foreach ($INTERSECTIONS as $i) {
-    $tot = array_reduce($i->streetToCongestion, function ($carry, $perc) {
+    $tot = array_reduce($i->streetToScore, function ($carry, $perc) {
         return $carry + $perc;
     }, 0);
 
-    foreach ($i->streetToCongestion as $s => $time) {
-        $i->streetToCongestion[$s] = ceil($time / $tot * 10 * $param1);
+    foreach ($i->streetToScore as $s => $time) {
+        $i->streetToScore[$s] = ceil($time / $tot * 10);
     }
 
-    $i->streetToCongestion = array_filter($i->streetToCongestion, function ($s) {
+    $i->streetToScore = array_filter($i->streetToScore, function ($s) {
         return $s > 0;
     });
 }
 
-
 /* OUTPUT */
 Log::out('Output...');
 $INTERSECTIONS = array_filter($INTERSECTIONS, function ($i) {
-    return count($i->streetToCongestion) > 0;
+    return count($i->streetToScore) > 0;
 });
 $output = count($INTERSECTIONS) . PHP_EOL;
 foreach ($INTERSECTIONS as $intersection) {
     $output .= $intersection->id . PHP_EOL;
-    $output .= count($intersection->streetToCongestion) . PHP_EOL;
-    foreach ($intersection->streetToCongestion as $semaphoreId => $time) {
+    $output .= count($intersection->streetToScore) . PHP_EOL;
+    foreach ($intersection->streetToScore as $semaphoreId => $time) {
         $output .= $semaphoreId . " " . $time . PHP_EOL;
     }
 }
