@@ -9,11 +9,13 @@ use Utils\Log;
 require_once '../../bootstrap.php';
 
 /* CONFIG */
-$fileName = 'a';
+$fileName = 'b';
 $EXP = 1;
-$MAXCYCLEDURATION = 10;
-$OVERHEADQUEUE = 0;
-Cerberus::runClient(['fileName' => 'e', 'EXP' => 1.0 , 'MAXCYCLEDURATION' => 5, 'OVERHEADQUEUE' => 0]);
+$MAXCYCLEDURATION = 1.9;
+$OVERHEADQUEUE = 5;
+$BESTPERC = 1.0;
+$MAXSTREETS = 100;
+Cerberus::runClient(['fileName' => 'b' , /*'EXP' => 1.0 , 'MAXCYCLEDURATION' => 1.9,*/ 'OVERHEADQUEUE' => 5, 'MAXSTREETS' => 100]);
 Autoupload::init();
 include 'dr-reader-2.php';
 
@@ -49,8 +51,19 @@ $CARS = $CARS->where('nStreets', '>', 0);
 
 $OUTPUT = [];
 
+$initialStreets = [];
 foreach($CARS as $car) {
-    $car->calcPriority();
+    $initialStreets[$car->startingStreet->name]++;
+}
+
+rsort($initialStreets);
+
+foreach($CARS as $car) {
+    $car->calcPriority(false);
+}
+
+foreach($CARS->sortByDesc('priority')->take(count($CARS)*$BESTPERC) as $car) {
+    $car->calcPriority(true);
 }
 
 foreach($INTERSECTIONS as $intersection) {
@@ -63,8 +76,9 @@ foreach($INTERSECTIONS as $intersection) {
         $totalPriorities += $priority;
     }
     $cycleDuration = min($DURATION, $MAXCYCLEDURATION);
+    arsort($streetsInPriorities);
     foreach($streetsInPriorities as $name => $priority) {
-        if($priority > 0) {
+        if($priority > 0 && count($streetsInDuration) <= $MAXSTREETS) {
             $streetsInDuration[$name] = ceil($priority / $totalPriorities * $cycleDuration);
         }
     }
@@ -80,12 +94,16 @@ $output[] = count($OUTPUT);
 foreach($OUTPUT as $id => $o) {
     $output[] = $id;
     $output[] = count($o);
-    foreach($o as $k => $v) {
-        $v = (int)$v;
-        $output[] = "$k $v";
+    foreach($initialStreets as $s => $nil) {
+        foreach ($o as $k => $v) {
+            if($k == $s) {
+                $v = (int)$v;
+                $output[] = "$k $v";
+            }
+        }
     }
 }
 $output = implode("\n", $output);
 $fileManager->outputV2($output, 'time_' . time());
 Autoupload::submission($fileName, null, $output);
-Log::out("Fine $fileName $EXP $MAXCYCLEDURATION");
+Log::out("Fine $fileName $EXP $MAXCYCLEDURATION $OVERHEADQUEUE $BESTPERC");

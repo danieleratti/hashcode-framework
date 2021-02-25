@@ -116,6 +116,7 @@ class Car
 
     public function __construct($streets)
     {
+        global $OVERHEADQUEUE;
         $this->id = self::$lastId++;
         $this->streets = $streets;
         $this->startingStreet = $streets[0];
@@ -129,21 +130,26 @@ class Car
                 $isFirst = false;
                 continue;
             }
-            $this->pathDuration += $street->duration;
+            $this->pathDuration += $street->duration + $OVERHEADQUEUE;
         }
         $this->nStreets = count($streets);
     }
 
-    public function calcPriority()
+    public function calcPriority($confirm=false)
     {
         global $BONUS, $EXP;
         //$this->priority = $BONUS / ($this->pathDuration + pow($this->nStreets, 2));
         //$this->priority = 1 / pow($this->pathDuration * pow($this->nStreets, 0.25), $EXP);
-        $this->priority = 1 / pow($this->nStreets, $EXP);
-        foreach($this->streets as $k => $street) {
-            //if($k > 0) {
-            $street->priority += $this->priority;
-            //}
+        //$this->priority = 1 / pow($this->nStreets, $EXP);
+        //$this->priority = 1 / pow($this->pathDuration, $EXP);
+        //$this->priority = $BONUS / pow($this->pathDuration, $EXP);
+        $this->priority = 1;
+        if($confirm) {
+            foreach ($this->streets as $k => $street) {
+                if ($k < count($this->streets) - 1) {
+                    $street->priority += $this->priority;
+                }
+            }
         }
     }
 }

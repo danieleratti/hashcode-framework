@@ -1,5 +1,6 @@
 <?php
 
+use Utils\ArrayUtils;
 use Utils\Autoupload;
 use Utils\Cerberus;
 use Utils\Collection;
@@ -13,7 +14,7 @@ $fileName = 'a';
 $EXP = 1;
 $MAXCYCLEDURATION = 10;
 $OVERHEADQUEUE = 0;
-Cerberus::runClient(['fileName' => 'e', 'EXP' => 1.0 , 'MAXCYCLEDURATION' => 5, 'OVERHEADQUEUE' => 0]);
+Cerberus::runClient(['fileName' => 'e']);
 Autoupload::init();
 include 'dr-reader-2.php';
 
@@ -40,6 +41,13 @@ $STREETS->keyBy('name');
 $INTERSECTIONS = collect($INTERSECTIONS);
 $INTERSECTIONS->keyBy('id');
 
+$intersections = [];
+foreach($INTERSECTIONS as $i) {
+    /** @var Intersection $i */
+    $intersections[] = ['intersection' => $i, 'count' => count($i->streetsIn)];
+}
+
+ArrayUtils::array_keysort($intersections, 'count', 'DESC');
 
 /* ALGO */
 Log::out("Run with fileName $fileName");

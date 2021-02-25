@@ -11,9 +11,10 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = 'a';
 $EXP = 1;
-$MAXCYCLEDURATION = 10;
-$OVERHEADQUEUE = 0;
-Cerberus::runClient(['fileName' => 'e', 'EXP' => 1.0 , 'MAXCYCLEDURATION' => 5, 'OVERHEADQUEUE' => 0]);
+$MAXCYCLEDURATION = 1.9;
+$OVERHEADQUEUE = 5;
+$BESTPERC = 1.0;
+Cerberus::runClient(['fileName' => 'e' , /*'EXP' => 1.0 , 'MAXCYCLEDURATION' => 1.9,*/ 'OVERHEADQUEUE' => 5, 'BESTPERC' => 1.0]);
 Autoupload::init();
 include 'dr-reader-2.php';
 
@@ -50,7 +51,11 @@ $CARS = $CARS->where('nStreets', '>', 0);
 $OUTPUT = [];
 
 foreach($CARS as $car) {
-    $car->calcPriority();
+    $car->calcPriority(false);
+}
+
+foreach($CARS->sortByDesc('priority')->take(count($CARS)*$BESTPERC) as $car) {
+    $car->calcPriority(true);
 }
 
 foreach($INTERSECTIONS as $intersection) {
@@ -88,4 +93,4 @@ foreach($OUTPUT as $id => $o) {
 $output = implode("\n", $output);
 $fileManager->outputV2($output, 'time_' . time());
 Autoupload::submission($fileName, null, $output);
-Log::out("Fine $fileName $EXP $MAXCYCLEDURATION");
+Log::out("Fine $fileName $EXP $MAXCYCLEDURATION $OVERHEADQUEUE $BESTPERC");
