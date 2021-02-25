@@ -88,6 +88,11 @@ $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
 list($DURATION, $N_INTERSECTIONS, $N_STREETS, $N_CARS, $BONUS) = explode(" ", $content[0]);
+$BONUS = (int)$BONUS;
+$N_CARS = (int)$N_CARS;
+$N_STREETS = (int)$N_STREETS;
+$N_INTERSECTIONS = (int)$N_INTERSECTIONS;
+$DURATION = (int)$DURATION;
 $streetIdxStart = 1;
 $streetIdxEnd = $streetIdxStart + $N_STREETS;
 $carsIdxStart = $streetIdxEnd + 1;
