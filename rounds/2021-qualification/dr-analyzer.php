@@ -3,27 +3,28 @@
 use Utils\Analysis\Analyzer;
 use Utils\Collection;
 
-$fileName = 'a';
+$fileName = 'f';
 
 include 'dr-reader.php';
 
-/** @var Collection|Vehicle[] $VEHICLES */
-/** @var Collection|Ride[] $RIDES */
-/** @var int $rows */
-/** @var int $columns */
-/** @var int $vehicles */
-/** @var int $rides */
-/** @var int $bonus */
-/** @var int $steps */
+/** @var Collection|Street[] $STREETS */
+/** @var Collection|Intersection[] $INTERSECTIONS */
+/** @var Collection|Car[] $CARS */
+/** @var int $DURATION */
+/** @var int $N_INTERSECTIONS */
+/** @var int $N_STREETS */
+/** @var int $N_CARS */
+/** @var int $BONUS */
 
 $analyzer = new Analyzer($fileName, [
-    'rows' => $rows,
-    'columns' => $columns,
-    'rides' => $rides,
-    'vehicles' => $vehicles,
-    'bonus' => $bonus,
-    'steps' => $steps,
+    'duration' => $DURATION,
+    'intersectionsCount' => $N_INTERSECTIONS,
+    'streetsCount' => $N_STREETS,
+    'carsCount' => $N_CARS,
+    'bonus' => $BONUS,
 ]);
-$analyzer->addDataset('rides', $RIDES, ['distance', 'earliestStart', 'latestFinish', 'timespan']);
+$analyzer->addDataset('streets', $STREETS, ['duration']);
+$analyzer->addDataset('intersections', $INTERSECTIONS, ['streetsIn', 'streetsOut']);
+$analyzer->addDataset('cars', $CARS, ['streets']);
 $analyzer->analyze();
 

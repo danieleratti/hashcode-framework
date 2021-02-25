@@ -1,0 +1,12 @@
+<style type='text/css'>body {font-family: sans-serif;}</style><head>
+                <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+            </head><body><span style='font-size: 18px;'><b>FILE DI INPUT a</b></span><br/>duration: 6<br/>intersectionsCount: 4<br/>streetsCount: 5<br/>carsCount: 2<br/>bonus: 1000<br/><br/><hr/><span style='font-size: 18px;'><u>SET streets</u></span><br/>5 elementi.<br/><br/><br>✱ Analizzo <b>duration</b> [number].<br/>Minimo: 0<br/>Massimo: 3<br/>Media: 1.4<br/>Mediana: 1<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 1 (2 occorrenze)<br/>&nbsp;&nbsp;• 0 (1 occorrenze)<br/>&nbsp;&nbsp;• 2 (1 occorrenze)<br/>&nbsp;&nbsp;• 3 (1 occorrenze)<br/><div id=streets></div><br/><script>
+                    var data = [{"y":[1,0,1,2,3],"type":"box","name":"duration"}];
+                    Plotly.newPlot(streets, data);
+        </script><br/><hr/><span style='font-size: 18px;'><u>SET intersections</u></span><br/>4 elementi.<br/><br/><br>✱ Analizzo <b>streetsIn</b> [array].<br/><span style='color: blue'>Questo parametro sembra trascurabile.</span><br/><span style='color: blue'>Sembrano esserci liste vuote.</span><br/>Minimo: 0<br/>Massimo: 0<br/>Media: 0<br/>Mediana: 0<br/>Moda e tendenza:<br/><br>✱ Analizzo <b>streetsOut</b> [array].<br/><span style='color: blue'>Questo parametro sembra trascurabile.</span><br/><span style='color: blue'>Sembrano esserci liste vuote.</span><br/>Minimo: 0<br/>Massimo: 0<br/>Media: 0<br/>Mediana: 0<br/>Moda e tendenza:<br/><div id=intersections></div><br/><script>
+                    var data = [{"y":[1,0,1,2,3],"type":"box","name":"duration"},{"y":[0,0,0,0],"type":"box","name":"streetsIn"},{"y":[0,0,0,0],"type":"box","name":"streetsOut"}];
+                    Plotly.newPlot(intersections, data);
+        </script><br/><hr/><span style='font-size: 18px;'><u>SET cars</u></span><br/>3 elementi.<br/><br/><br>✱ Analizzo <b>streets</b> [array].<br/><span style='color: blue'>Sembrano esserci liste vuote.</span><br/>Minimo: 0<br/>Massimo: 3<br/>Media: 1<br/>Mediana: 0<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 0 (2 occorrenze)<br/>&nbsp;&nbsp;• 3 (1 occorrenze)<br/><div id=cars></div><br/><script>
+                    var data = [{"y":[1,0,1,2,3],"type":"box","name":"duration"},{"y":[0,0,0,0],"type":"box","name":"streetsIn"},{"y":[0,0,0,0],"type":"box","name":"streetsOut"},{"y":[3,0,0],"type":"box","name":"streets"}];
+                    Plotly.newPlot(cars, data);
+        </script><br/><hr/></body>
