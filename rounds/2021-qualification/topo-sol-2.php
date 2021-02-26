@@ -231,6 +231,8 @@ foreach ($CARS as $car) {
     }
 }
 
+$cycleMaxDuration = min($DURATION, $cycleMaxDuration);
+
 $semaphores = getSemaphores($initialStreetsWaitingTime);
 $configScore = getScore($semaphores, $bestCarsPerc, $cycleMaxDuration);
 Log::out("SCORE = {$configScore['score']}");
