@@ -13,7 +13,8 @@ require_once '../../bootstrap.php';
 $fileName = 'd';
 $bestCarsPerc = 1.0;
 $cycleMaxDuration = 5;
-Cerberus::runClient(['fileName' => 'd', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 5]);
+$OVERHEADQUEUE = 5;
+Cerberus::runClient(['fileName' => 'f', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 5, 'OVERHEADQUEUE' => 5]);
 Autoupload::init();
 include 'topo-reader.php';
 
@@ -233,13 +234,13 @@ foreach ($CARS as $car) {
 
 $cycleMaxDuration = min($DURATION, $cycleMaxDuration);
 
-$semaphores = getSemaphores($initialStreetsWaitingTime);
-$configScore = getScore($semaphores, $bestCarsPerc, $cycleMaxDuration);
+$semaphores = getSemaphores($initialStreetsWaitingTime, $bestCarsPerc, $cycleMaxDuration);
+$configScore = getScore($semaphores);
 Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']}");
 $fileManager->outputV2(getOutput($semaphores), '_1st_score_' . $configScore['score']);
 
-$semaphores = getSemaphores($configScore['avgStreetsWaitingTime']);
-$configScore = getScore($semaphores, $bestCarsPerc, $cycleMaxDuration);
+$semaphores = getSemaphores($configScore['avgStreetsWaitingTime'], $bestCarsPerc, $cycleMaxDuration);
+$configScore = getScore($semaphores);
 Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']}");
 $fileManager->outputV2(getOutput($semaphores), '_2nd_score_' . $configScore['score']);
 
