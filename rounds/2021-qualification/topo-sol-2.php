@@ -1,5 +1,6 @@
 <?php
 
+use Utils\ArrayUtils;
 use Utils\Autoupload;
 use Utils\Cerberus;
 use Utils\Collection;
@@ -10,12 +11,9 @@ require_once '../../bootstrap.php';
 
 /* CONFIG */
 $fileName = 'd';
-$EXP = 1;
-$MAXCYCLEDURATION = 1.9;
-$OVERHEADQUEUE = 5;
-$BESTPERC = 1.0;
-$MAXSTREETS = 100;
-Cerberus::runClient(['fileName' => 'f', /*'EXP' => 1.0 , 'MAXCYCLEDURATION' => 1.9,*/ 'OVERHEADQUEUE' => 5, 'MAXSTREETS' => 100]);
+$bestCarsPerc = 1.0;
+$cycleMaxDuration = 5;
+Cerberus::runClient(['fileName' => 'b', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 5]);
 Autoupload::init();
 include 'topo-reader.php';
 
@@ -41,6 +39,7 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
     $streets = []; // [0] => [$carId1, $carId2, $carId3], [1] => [$carId4, $carId5], ['mutex'] => [$carId6, $carId7]
     $_config = [];
     $avgIntersectionsQueues = [];
+    $avgStreetsWaitingTime = [];
 
     foreach ($config as $mutexId => $mutex) {
         foreach ($mutex as $streetName => $num) {
@@ -61,8 +60,6 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
         if ($T % 100 == 0) {
             Log::out("getScore T = $T/$DURATION");
         }
-        //Log::out("T=$T [start]", 0, "red");
-        //Log::out(json_encode($streets));
 
         $carsToNext = [];
         foreach ($streets as $streetName => $streetSteps) {
@@ -139,8 +136,13 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
         foreach ($streets as $streetName => $streetSteps) {
             if (count($streetSteps['mutex']) > 0) {
                 $avgIntersectionsQueues[$STREETS[$streetName]->end->id][$streetName] += count($streetSteps['mutex']) * 1000 / $DURATION;
+                $avgStreetsWaitingTime[$streetName] += count($streetSteps['mutex']) * 1000 * 1000 / $DURATION;
             }
         }
+    }
+
+    foreach ($avgStreetsWaitingTime as $k => $v) {
+        $avgStreetsWaitingTime[$k] /= 1000 * 1000;
     }
 
     return [
@@ -148,167 +150,102 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
         'bonus' => $bonusScore,
         'early' => $earlyScore,
         'avgIntersectionsQueues' => $avgIntersectionsQueues,
+        'avgStreetsWaitingTime' => $avgStreetsWaitingTime,
     ];
 }
 
-function rebalanceConfig($config, $avgIntersectionsQueues)
+function getSemaphores($streetsWaitingTime, $bestCarsPerc = 1.0, $cycleMaxDuration = 5)
 {
-    Log::out("Rebalancing...");
-    foreach ($config as $intersectId => $streetsWeights) {
-        if (count($streetsWeights) > 1) {
-            $streetsQueues = $avgIntersectionsQueues[$intersectId];
-            if (count($streetsWeights) != count($streetsQueues)) {
-                /*print_r($streetsWeights);
-                print_r($streetsQueues);
-                Log::error("Count streetsQueues != streetsWeights");*/
-                foreach($streetsWeights as $k => $v) {
-                    if(!@$streetsQueues[$k])
-                        $streetsQueues[$k] = 0.0001;
-                }
+    global $CARS, $DURATION, $BONUS, $STREETS, $INTERSECTIONS;
+    $cars = [];
+    foreach ($CARS as $car) {
+        $maxPoints = $BONUS;
+        $lostPoints = 0;
+        foreach ($car->streets as $idx => $street) {
+            if ($idx < count($car->streets) - 1) {
+                $lostPoints += $streetsWaitingTime[$street->name];
             }
+        }
+        $maxPoints += $DURATION - $car->pathDuration - $lostPoints;
+        $cars[] = ['car' => $car, 'maxPoints' => $maxPoints];
+    }
+    ArrayUtils::array_keysort($cars, 'maxPoints', 'DESC');
 
-            /*
-             * SWArray
-                (
-                    [dab-b] => 9
-                    [ehb-b] => 2
-                )
-                SQArray
-                (
-                    [ehb-b] => 8.0321285140562
-                    [dab-b] => 19.076305220884
-                )
-             */
-            // OPZIONE 1: faccio in modo che SQ diventi come SW
-            // OPZIONE 2: faccio in modo che si appiattisca
-
-            $swTot = array_sum($streetsWeights);
-            $sqTot = array_sum($streetsQueues);
-            $sw = [];
-            $sq = [];
-            $sNoQ = [];
-            $st = [];
-            $weightOnQueuesPerTarget = [];
-            foreach ($streetsWeights as $k => $v) {
-                $sw[$k] = $streetsWeights[$k] / $swTot;
-                $sq[$k] = $streetsQueues[$k] / $sqTot;
-                $sNoQ[$k] = 1 - $sq[$k];
-
-                $st[$k] = 1 / count($streetsWeights);
-                //$st[$k] = $sw[$k]; // quello dato da me inizialmente!
-
-                $weightOnQueuesPerTarget[$k] = $sw[$k] / $sNoQ[$k] * $st[$k];
+    $semaphores = [];
+    $streetsPoints = [];
+    for ($i = 0; $i < count($cars) * $bestCarsPerc; $i++) {
+        $car = $cars[$i];
+        foreach ($car['car']->streets as $idx => $street) {
+            if ($idx < count($car['car']->streets) - 1) {
+                $streetsPoints[$street->name] += max(0, $car['maxPoints']);
             }
-            $weightOnQueuesPerTargetTot = array_sum($weightOnQueuesPerTarget);
-            foreach ($weightOnQueuesPerTarget as $k => $v) {
-                $weightOnQueuesPerTarget[$k] = $v / $weightOnQueuesPerTargetTot; //normalize
-            }
-            /*
-            print_r($sw);
-            print_r($sq);
-            print_r($sNoQ);
-            print_r($st);
-            print_r($weightOnQueuesPerTarget);*/
-
-            asort($weightOnQueuesPerTarget);
-            $config[$intersectId] = getSubConfigFromStreetWeights($weightOnQueuesPerTarget);
-            //$config[$intersectId] = getSubConfigFromStreetWeights($sw); //test random
-
         }
     }
-    return $config;
-}
 
-function getSubConfigFromStreetWeights($weightOnQueuesPerTarget)
-{
-    global $DURATION;
-    $macro = 1;
-    $subconfig = [];
-    $firstStreetName = array_key_first($weightOnQueuesPerTarget);
-    $firstStreetWeight = $weightOnQueuesPerTarget[$firstStreetName];
-    arsort($weightOnQueuesPerTarget);
-    foreach($weightOnQueuesPerTarget as $streetName => $w) {
-        $subconfig[$streetName] = round($w / $firstStreetWeight * $macro) ?: 1;
+    arsort($streetsPoints);
+
+    foreach ($INTERSECTIONS as $intersection) {
+        $totalPriorities = 0;
+        $streetsInDuration = [];
+        foreach ($intersection->streetsIn as $streetIn) {
+            if ($streetsPoints[$streetIn->name] > 0) {
+                $totalPriorities += $streetsPoints[$streetIn->name];
+            }
+        }
+        foreach ($intersection->streetsIn as $streetIn) {
+            if ($streetsPoints[$streetIn->name] > 0) {
+                $streetsInDuration[$streetIn->name] = ceil($streetsPoints[$streetIn->name] / $totalPriorities * $cycleMaxDuration);
+            }
+        }
+        if(count($streetsInDuration) > 0) {
+            arsort($streetsInDuration);
+            $semaphores[$intersection->id] = $streetsInDuration;
+        }
     }
-    return $subconfig;
+
+    return $semaphores;
 }
 
-//$x = getScore([1 => ['rue-d-athenes' => 2, 'rue-d-amsterdam' => 1], 0 => ['rue-de-londres' => 2], 2 => ['rue-de-moscou' => 1]]);
+function getOutput($semaphores)
+{
+    $output = [];
+    $output[] = count($semaphores);
+    foreach($semaphores as $id => $o) {
+        $output[] = $id;
+        $output[] = count($o);
+        foreach($o as $k => $v) {
+            $v = (int)$v;
+            $output[] = "$k $v";
+        }
+    }
+    $output = implode("\n", $output);
+    return $output;
+}
 
-$config = [];
-$f = explode("\n", file_get_contents("output/$fileName.txt/test.txt"));
-$intersectionId = null;
-$toRead = null;
-foreach ($f as $k => $v) {
-    if ($k) {
-        if ($toRead === 0)
-            $intersectionId = null;
-        if ($intersectionId === null) {
-            $intersectionId = (int)$v;
-            $toRead = null;
-        } elseif ($toRead === null) {
-            $toRead = (int)$v;
-        } else {
-            $toRead--;
-            list($streetName, $count) = explode(" ", $v);
-            $count = (int)$count;
-            $config[$intersectionId][$streetName] = $count;
+$initialStreetsWaitingTime = [];
+foreach ($CARS as $car) {
+    foreach ($car->streets as $idx => $street) {
+        if ($idx < count($car->streets) - 1) {
+            $initialStreetsWaitingTime[$street->name] += 1 / $DURATION;
         }
     }
 }
-$configScore = getScore($config);
-Log::out("SCORE = " . $configScore['score']);
 
-$config = rebalanceConfig($config, $configScore['avgIntersectionsQueues']);
-$configScore = getScore($config);
-Log::out("SCORE = " . $configScore['score']);
+$semaphores = getSemaphores($initialStreetsWaitingTime);
+$configScore = getScore($semaphores, $bestCarsPerc, $cycleMaxDuration);
+Log::out("SCORE = {$configScore['score']}");
+$fileManager->outputV2(getOutput($semaphores), '_1st_score_' . $configScore['score']);
 
-
-die();
-
-$SCORE = 0;
-
-$config = []; // $config[$intersectId] = [0 => [ 'street1' => 1, 'street2' => 2, 'street3' => 3 ]];
+$semaphores = getSemaphores($configScore['avgStreetsWaitingTime']);
+$configScore = getScore($semaphores, $bestCarsPerc, $cycleMaxDuration);
+Log::out("SCORE = {$configScore['score']}");
+$fileManager->outputV2(getOutput($semaphores), '_2nd_score_' . $configScore['score']);
 
 
-die();
 
-
-/* COLLECTIONS */
+/* OUTPUT */
 /*
-$CARS = collect($CARS);
-$CARS->keyBy('id');
-
-$STREETS = collect($STREETS);
-$STREETS->keyBy('name');
-
-$INTERSECTIONS = collect($INTERSECTIONS);
-$INTERSECTIONS->keyBy('id');
-*/
-
-/* ALGO */
-Log::out("Run with fileName $fileName");
-$SCORE = 0;
-
-
-
-/* OUTPUT * /
 Log::out('Output...');
-$output = [];
-$output[] = count($OUTPUT);
-foreach($OUTPUT as $id => $o) {
-    $output[] = $id;
-    $output[] = count($o);
-    foreach($initialStreets as $s => $nil) {
-        foreach ($o as $k => $v) {
-            if($k == $s) {
-                $v = (int)$v;
-                $output[] = "$k $v";
-            }
-        }
-    }
-}
-$output = implode("\n", $output);
 $fileManager->outputV2($output, 'time_' . time());
 Autoupload::submission($fileName, null, $output);
 Log::out("Fine $fileName $EXP $MAXCYCLEDURATION $OVERHEADQUEUE $BESTPERC");
