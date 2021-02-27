@@ -1,0 +1,12 @@
+<style type='text/css'>body {font-family: sans-serif;}</style><head>
+                <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+            </head><body><span style='font-size: 18px;'><b>FILE DI INPUT a</b></span><br/>duration: 6<br/>intersectionsCount: 4<br/>streetsCount: 5<br/>carsCount: 2<br/>bonus: 1000<br/><br/><hr/><span style='font-size: 18px;'><u>SET streets</u></span><br/>5 elementi.<br/><br/><br>✱ Analizzo <b>duration</b> [number].<br/>Minimo: 1<br/>Massimo: 3<br/>Media: 1.6<br/>Mediana: 1<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 1 (3 occorrenze)<br/>&nbsp;&nbsp;• 2 (1 occorrenze)<br/>&nbsp;&nbsp;• 3 (1 occorrenze)<br/><div id=streets></div><br/><script>
+                    var data = [{"y":[1,1,1,2,3],"type":"box","name":"duration"}];
+                    Plotly.newPlot(streets, data);
+        </script><br/><hr/><span style='font-size: 18px;'><u>SET intersections</u></span><br/>4 elementi.<br/><br/><br>✱ Analizzo <b>streetsIn</b> [array].<br/>Minimo: 1<br/>Massimo: 2<br/>Media: 1.25<br/>Mediana: 1<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 1 (3 occorrenze)<br/>&nbsp;&nbsp;• 2 (1 occorrenze)<br/><br>✱ Analizzo <b>streetsOut</b> [array].<br/>Minimo: 1<br/>Massimo: 2<br/>Media: 1.25<br/>Mediana: 1<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 1 (3 occorrenze)<br/>&nbsp;&nbsp;• 2 (1 occorrenze)<br/><div id=intersections></div><br/><script>
+                    var data = [{"y":[1,1,1,2,3],"type":"box","name":"duration"},{"y":[1,2,1,1],"type":"box","name":"streetsIn"},{"y":[1,1,2,1],"type":"box","name":"streetsOut"}];
+                    Plotly.newPlot(intersections, data);
+        </script><br/><hr/><span style='font-size: 18px;'><u>SET cars</u></span><br/>2 elementi.<br/><br/><br>✱ Analizzo <b>streets</b> [array].<br/>Minimo: 3<br/>Massimo: 4<br/>Media: 3.5<br/>Mediana: 3.5<br/>Moda e tendenza:<br/>&nbsp;&nbsp;• 3 (1 occorrenze)<br/>&nbsp;&nbsp;• 4 (1 occorrenze)<br/><div id=cars></div><br/><script>
+                    var data = [{"y":[1,1,1,2,3],"type":"box","name":"duration"},{"y":[1,2,1,1],"type":"box","name":"streetsIn"},{"y":[1,1,2,1],"type":"box","name":"streetsOut"},{"y":[3,4],"type":"box","name":"streets"}];
+                    Plotly.newPlot(cars, data);
+        </script><br/><hr/></body>
