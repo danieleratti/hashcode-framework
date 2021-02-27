@@ -109,6 +109,8 @@ class Car
     public $currentStreetDuration = 0;
     /** @var int currentStreetEnqueued */
     public $currentStreetEnqueued = false;
+    /** @var int streetID2IDX */
+    public $streetName2IDX = [];
 
     public function __construct($streets)
     {
@@ -122,6 +124,7 @@ class Car
         $isFirst = true;
         foreach ($streets as $k => $street) {
             /** @var Street $street */
+            $this->streetName2IDX[$street->name] = $k;
             if($k < count($streets)-1) {
                 $street->stoppingCars[] = $this; // tutte tranne l'ultima
                 $street->nSemaphorePassingCars++; // in the last street, the car doesn't stop at the semaphore

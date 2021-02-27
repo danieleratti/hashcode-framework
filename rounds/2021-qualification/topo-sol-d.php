@@ -14,7 +14,7 @@ $fileName = 'a';
 $bestCarsPerc = 1.0;
 $cycleMaxDuration = 5;
 $OVERHEADQUEUE = 0;
-Cerberus::runClient(['fileName' => 'd', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 5]);
+Cerberus::runClient(['fileName' => 'f', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 5]);
 Autoupload::init();
 include 'topo-reader.php';
 
@@ -36,11 +36,15 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
     $score = 0;
     $bonusScore = 0;
     $earlyScore = 0;
-    $cars2streetIdx = []; // [0] => 0
-    $streets = []; // [0] => [$carId1, $carId2, $carId3], [1] => [$carId4, $carId5], ['mutex'] => [$carId6, $carId7]
+    $tToCarAtSemaphore = []; // [StepT] => [ car1 => StreetName1, car2 => StreetName2 ]
+    $streetSemaphoreQueue = []; // [StreetName] => [car1, car2, car3]
     $_config = [];
     $avgIntersectionsQueues = [];
     $avgStreetsWaitingTime = [];
+
+    foreach ($STREETS as $street) {
+        $streetSemaphoreQueue[$street->name] = [];
+    }
 
     foreach ($config as $mutexId => $mutex) {
         foreach ($mutex as $streetName => $num) {
@@ -50,11 +54,9 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
         }
     }
 
+    // heating
     foreach ($CARS as $car) {
-        $cars2streetIdx[$car->id] = 0;
-        if (!@$streets[$car->startingStreet->name]['mutex'])
-            $streets[$car->startingStreet->name]['mutex'] = [];
-        array_unshift($streets[$car->startingStreet->name]['mutex'], $car->id);
+        $tToCarAtSemaphore[0][$car->id] = $car->startingStreet->name;
     }
 
     for ($T = 0; $T < $DURATION; $T++) {
@@ -62,86 +64,49 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
             Log::out("getScore T = $T/$DURATION");
         }
 
-        $carsToNext = [];
-        foreach ($streets as $streetName => $streetSteps) {
-            $intersectionId = $STREETS[$streetName]->end->id;
-            if (count($_config[$intersectionId]) > 0) {
-                $intersectionStreet = $_config[$intersectionId][$T % count($_config[$intersectionId])];
-                if ($intersectionStreet == $streetName) {
-                    // if is there queue
-                    if (count($streets[$streetName]['mutex'])) {
-                        // go ahead (only 1)
-                        $carId = array_pop($streets[$streetName]['mutex']);
-                        $carsToNext[] = $carId;
-                    }
-                }
-            }
+        foreach ($tToCarAtSemaphore[$T] as $carId => $streetName) {
+            //if(!@$streetSemaphoreQueue[$streetName])
+            //    $streetSemaphoreQueue[$streetName] = [];
+            array_unshift($streetSemaphoreQueue[$streetName], $carId);
+        }
+        unset($tToCarAtSemaphore[$T]);
 
-            if ($STREETS[$streetName]->duration > 1) {
-                for ($l = $STREETS[$streetName]->duration - 2; $l >= 0; $l--) {
-                    if ($l == $STREETS[$streetName]->duration - 2) {
-                        if (count($streets[$streetName][$l]) > 0) {
-                            $goingToMutexCars = [];
-                            foreach ($streets[$streetName][$l] as $carId) {
-                                if ($cars2streetIdx[$carId] < $CARS[$carId]->nStreets - 1) {
-                                    $goingToMutexCars[] = $carId;
-                                } else {
-                                    //if ($T + 1 < $DURATION) {
-                                    $points = $BONUS + ($DURATION - $T - 1);
-                                    $bonusScore += $BONUS;
-                                    $earlyScore += ($DURATION - $T - 1);
-                                    //Log::out("#Scoring $points for $carId @ $T=$T", 0, "green");
-                                    $score += $points;
-                                    //}
-                                }
-                            }
-                            if (!@$streets[$streetName]['mutex'])
-                                $streets[$streetName]['mutex'] = [];
-                            $streets[$streetName]['mutex'] = array_merge($goingToMutexCars, $streets[$streetName]['mutex']);
+        foreach ($INTERSECTIONS as $intersection) {
+            if (count($_config[$intersection->id]) > 0) {
+                $streetName = $_config[$intersection->id][$T % count($_config[$intersection->id])];
+                // if is there queue
+                if (count($streetSemaphoreQueue[$streetName])) {
+                    // go ahead (only 1)
+                    $carId = array_pop($streetSemaphoreQueue[$streetName]);
+                    $streetIdxForCar = $CARS[$carId]->streetName2IDX[$streetName];
+                    $nextStreet = $CARS[$carId]->streets[$streetIdxForCar + 1];
+                    if ($streetIdxForCar == count($CARS[$carId]->streets) - 2) {
+                        // fine corsa alla fine della prossima strada
+                        $tEnd = $T + 1 + $nextStreet->duration;
+                        if ($tEnd < $DURATION) {
+                            $bonusScore += $BONUS;
+                            $earlyScore += ($DURATION - $tEnd + 1);
+                            $score += $BONUS + ($DURATION - $tEnd + 1);
                         }
+                    } else {
+                        // next semaphore
+                        $tToCarAtSemaphore[$T + $nextStreet->duration][$carId] = $nextStreet->name;
                     }
-                    if ($l > 0)
-                        $streets[$streetName][$l] = $streets[$streetName][$l - 1];
                 }
-                $streets[$streetName][0] = [];
             }
         }
 
-        foreach ($carsToNext as $carId) {
-            $cars2streetIdx[$carId]++;
-            $nextStreet = $CARS[$carId]->streets[$cars2streetIdx[$carId]];
-            if ($nextStreet->duration == 1) {
-                if ($cars2streetIdx[$carId] == $CARS[$carId]->nStreets - 1) {
-                    if ($T + 1 < $DURATION - 1) {
-                        $points = $BONUS + ($DURATION - $T - 2);
-                        $bonusScore += $BONUS;
-                        $earlyScore += ($DURATION - $T - 2);
-                        //Log::out("*Scoring $points for $carId @ $T=$T", 0, "green");
-                        $score += $points;
-                    }
-                } else {
-                    if (!@$streets[$nextStreet->name]['mutex'])
-                        $streets[$nextStreet->name]['mutex'] = [];
-                    array_unshift($streets[$nextStreet->name]['mutex'], $carId);
-                }
-            } else {
-                if (!@$streets[$nextStreet->name][0])
-                    $streets[$nextStreet->name][0] = [];
-                array_unshift($streets[$nextStreet->name][0], $carId);
-            }
-        }
-
-        //Log::out(json_encode($streets));
-        //Log::out("T=$T [end]", 0, "red");
-
-        foreach ($streets as $streetName => $streetSteps) {
-            if (count($streetSteps['mutex']) > 0) {
-                $avgIntersectionsQueues[$STREETS[$streetName]->end->id][$streetName] += count($streetSteps['mutex']) * 1000 / $DURATION;
-                $avgStreetsWaitingTime[$streetName] += count($streetSteps['mutex']) * 1000 * 1000 / $DURATION; //rounding helper
-            }
-        }
     }
 
+    return [
+        'score' => $score,
+        'bonus' => $bonusScore,
+        'early' => $earlyScore,
+        //'avgIntersectionsQueues' => $avgIntersectionsQueues,
+        //'avgStreetsWaitingTime' => $avgStreetsWaitingTime,
+    ];
+
+    /*
     foreach ($avgStreetsWaitingTime as $k => $v) {
         $waitingMultiplier = ($config[$STREETS[$k]->end->id][$k] / array_sum($config[$STREETS[$k]->end->id]));
         if ($waitingMultiplier > 0)
@@ -155,16 +120,13 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
         $avgStreetsWaitingTime[$k] -= 1.0; //overhead for semaphores?
     }
 
-    /*arsort($avgStreetsWaitingTime);
-    print_r($avgStreetsWaitingTime);
-    die();*/
     return [
         'score' => $score,
         'bonus' => $bonusScore,
         'early' => $earlyScore,
         'avgIntersectionsQueues' => $avgIntersectionsQueues,
         'avgStreetsWaitingTime' => $avgStreetsWaitingTime,
-    ];
+    ];*/
 }
 
 function getSemaphores($streetsWaitingTime, $bestCarsPerc = 1.0, $cycleMaxDuration = 5)
@@ -244,7 +206,7 @@ foreach ($CARS as $car) {
     }
 }
 
-foreach($initialStreetsWaitingTime as $k => $v) {
+foreach ($initialStreetsWaitingTime as $k => $v) {
     $initialStreetsWaitingTime[$k] += 4.0;
 }
 
@@ -253,13 +215,15 @@ $cycleMaxDuration = min($DURATION, $cycleMaxDuration);
 $semaphores = getSemaphores($initialStreetsWaitingTime, $bestCarsPerc, $cycleMaxDuration);
 $configScore = getScore($semaphores);
 Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']}");
-$fileManager->outputV2(getOutput($semaphores), '_1st_score_' . $configScore['score']);
+//$fileManager->outputV2(getOutput($semaphores), '_d_score_' . $configScore['score']);
 
-$semaphores = getSemaphores($configScore['avgStreetsWaitingTime'], $bestCarsPerc, $cycleMaxDuration);
+print_r($configScore);
+
+/*$semaphores = getSemaphores($configScore['avgStreetsWaitingTime'], $bestCarsPerc, $cycleMaxDuration);
 $configScore = getScore($semaphores);
 Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']}");
 $fileManager->outputV2(getOutput($semaphores), '_2nd_score_' . $configScore['score']);
-
+*/
 
 
 /* OUTPUT */
