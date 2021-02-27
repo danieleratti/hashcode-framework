@@ -31,6 +31,8 @@ class Street
     public $queue = [];
     /** @var int $priority */
     public $priority = 0;
+    /** @var int $nSemaphorePassingCars */
+    public $nSemaphorePassingCars = 0;
 
     public function __construct($name, $duration, $start, $end)
     {
@@ -118,14 +120,12 @@ class Car
         $isFirst = true;
         foreach ($streets as $k => $street) {
             /** @var Street $street */
-            if($k < count($streets)-1)
+            if($k < count($streets)-1) {
                 $street->stoppingCars[] = $this; // tutte tranne l'ultima
-            if ($isFirst) {
-                // Ignore the first street because the car is already at the street end
-                $isFirst = false;
-                continue;
+                $street->nSemaphorePassingCars++; // in the last street, the car doesn't stop at the semaphore
             }
-            $this->pathDuration += $street->duration + $OVERHEADQUEUE;
+            if($k > 0)
+                $this->pathDuration += $street->duration; // the first street is already done
         }
         $this->nStreets = count($streets);
     }
