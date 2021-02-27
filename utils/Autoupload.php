@@ -141,7 +141,7 @@ class Autoupload
     {
         $res = self::req('GET', 'api/judge/v1/rounds');
         $ret = [];
-        foreach ($res['items'][0]['dataSets'] as $ds) {
+        foreach ($res['items'][count($res['items'])-1]['dataSets'] as $ds) {
             list($c) = explode(" ", $ds['name']);
             $ret[strtolower($c)] = $ds['id'];
         }

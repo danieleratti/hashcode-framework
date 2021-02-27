@@ -14,7 +14,7 @@ $fileName = 'a';
 $bestCarsPerc = 1.0;
 $cycleMaxDuration = 5;
 $OVERHEADQUEUE = 0;
-Cerberus::runClient(['fileName' => 'd', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 8]);
+Cerberus::runClient(['fileName' => 'e', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 2]);
 Autoupload::init();
 include 'topo-reader.php';
 
@@ -142,18 +142,25 @@ function getSemaphores($streetsWaitingTime, $bestCarsPerc = 1.0, $cycleMaxDurati
                 $lostPoints += $streetsWaitingTime[$street->name];
             }
         }
-        $maxPoints += $DURATION - $car->pathDuration - $lostPoints;
+        //$maxPoints += $DURATION - $car->pathDuration - $lostPoints;
+        //$maxPoints = $BONUS + $DURATION - $car->pathDuration - 5 * (count($car->streets) - 1);
+        $maxPoints = 1 / $car->pathDuration;
         $cars[] = ['car' => $car, 'maxPoints' => $maxPoints];
     }
     ArrayUtils::array_keysort($cars, 'maxPoints', 'DESC');
 
     $semaphores = [];
     $streetsPoints = [];
+    $streetsStartingPoints = [];
     for ($i = 0; $i < count($cars) * $bestCarsPerc; $i++) {
         $car = $cars[$i];
         foreach ($car['car']->streets as $idx => $street) {
             if ($idx < count($car['car']->streets) - 1) {
                 $streetsPoints[$street->name] += max(0, $car['maxPoints']);
+                if ($idx == 0) {
+                    //$streetsStartingPoints[$street->name] += max(0, $car['maxPoints']); //TODO test also 1
+                    $streetsStartingPoints[$street->name] += 1; //TODO test also 1
+                }
             }
         }
     }
@@ -174,7 +181,17 @@ function getSemaphores($streetsWaitingTime, $bestCarsPerc = 1.0, $cycleMaxDurati
             }
         }
         if (count($streetsInDuration) > 0) {
-            arsort($streetsInDuration);
+            //arsort($streetsInDuration);
+            uksort($streetsInDuration, function ($a, $b) use ($streetsInDuration, $streetsStartingPoints) {
+                return $streetsStartingPoints[$a] < $streetsStartingPoints[$b];
+            });
+            /*if(count($streetsInDuration) > 3) {
+                print_r($streetsInDuration);
+                foreach($streetsInDuration as $k => $v) {
+                    echo "$k => ".$streetsStartingPoints[$k]." starting points\n";
+                }
+                die();
+            }*/
             $semaphores[$intersection->id] = $streetsInDuration;
         }
     }
@@ -188,8 +205,8 @@ function getSemaphoresV2($carScores, $cycleMaxDuration = 5)
     $cars = [];
     foreach ($CARS as $car) {
         $maxPoints = $carScores[$car->id];
-        if($maxPoints == 0) {
-            foreach($car->streets as $street) {
+        if ($maxPoints == 0) {
+            foreach ($car->streets as $street) {
                 $maxPoints -= $street->nSemaphorePassingCars;
             }
         }
@@ -265,16 +282,18 @@ $cycleMaxDuration = min($DURATION, $cycleMaxDuration);
 
 $semaphores = getSemaphores($initialStreetsWaitingTime, $bestCarsPerc, $cycleMaxDuration);
 $configScore = getScore($semaphores);
-Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']}");
+Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']} ({$configScore['bonus']} + {$configScore['early']})");
 $fileManager->outputV2(getOutput($semaphores), '_d_score_' . $configScore['score']);
+//Autoupload::submission($fileName, null, getOutput($semaphores));
 
-for($i=0;$i<10;$i++) {
+/*
+for ($i = 0; $i < 10; $i++) {
     $semaphores = getSemaphoresV2($configScore['carScores'], $cycleMaxDuration);
     $configScore = getScore($semaphores);
     Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']}");
     $fileManager->outputV2(getOutput($semaphores), '_d_score_' . $configScore['score']);
 }
-
+*/
 
 
 /*$semaphores = getSemaphores($configScore['avgStreetsWaitingTime'], $bestCarsPerc, $cycleMaxDuration);
