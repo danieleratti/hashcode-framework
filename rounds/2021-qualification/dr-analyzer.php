@@ -4,7 +4,7 @@ use Utils\Analysis\Analyzer;
 use Utils\Collection;
 use Utils\Graph;
 
-$fileName = 'f';
+$fileName = 'd';
 
 include 'dr-reader.php';
 
@@ -24,9 +24,9 @@ $analyzer = new Analyzer($fileName, [
     'carsCount' => $N_CARS,
     'bonus' => $BONUS,
 ]);
-$analyzer->addDataset('streets', $STREETS, ['duration']);
+$analyzer->addDataset('streets', $STREETS, ['duration', 'nSemaphorePassingCars']);
 $analyzer->addDataset('intersections', $INTERSECTIONS, ['streetsIn', 'streetsOut']);
-$analyzer->addDataset('cars', $CARS, ['streets']);
+$analyzer->addDataset('cars', $CARS, ['streets', 'pathDuration']);
 $analyzer->analyze();
 
 /*
