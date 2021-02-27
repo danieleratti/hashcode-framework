@@ -198,15 +198,12 @@ class Autoupload
         $datasets = self::getDatasets();
         $ds = $datasets[$dataset];
 
-        if ($filename) {
-            if (strpos($filename, ".") === false)
-                $filename .= ".php";
-        } else {
+        if (!$filename) {
             $filename = $_SERVER["SCRIPT_NAME"];
         }
 
-        $source = self::remoteUpload($filename, self::$scriptContent);
-        $sub = self::remoteUpload($filename, $content);
+        $source = self::remoteUpload($filename . '.php', self::$scriptContent);
+        $sub = self::remoteUpload($filename . '.php', $content);
         $ret = self::req('POST', "api/judge/v1/submissions?dataSet=$ds&submissionBlobKey=$sub&sourcesBlobKey=$source", '', null);
         Log::out("Upload completed!", 0, "green");
         return $ret;
