@@ -25,7 +25,7 @@ $analyzer = new Analyzer($fileName, [
     'bonus' => $BONUS,
 ]);
 $analyzer->addDataset('streets', $STREETS, ['duration', 'nSemaphorePassingCars']);
-$analyzer->addDataset('intersections', $INTERSECTIONS, ['streetsIn', 'streetsOut']);
+$analyzer->addDataset('intersections', $INTERSECTIONS, ['streetsIn', 'streetsOut', 'nSemaphorePassingCars']);
 $analyzer->addDataset('cars', $CARS, ['streets', 'pathDuration']);
 $analyzer->analyze();
 

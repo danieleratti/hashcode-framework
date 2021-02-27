@@ -59,6 +59,8 @@ class Intersection
     public $streetsOut;
     /** @var Street $greenStreet */
     public $greenStreet;
+    /** @var int $nSemaphorePassingCars */
+    public $nSemaphorePassingCars = 0;
 
     public function __construct()
     {
@@ -193,6 +195,7 @@ foreach ($STREETS as $street) {
     /** @var Street $street */
     $street->start->streetsOut[] = $street;
     $street->end->streetsIn[] = $street;
+    $street->end->nSemaphorePassingCars += $street->nSemaphorePassingCars;
 }
 
 Log::out("Read finished");
