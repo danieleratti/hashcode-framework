@@ -1,5 +1,7 @@
 <?php
 
+use Utils\Log;
+
 include_once __DIR__ . '/reader.php';
 
 /**
@@ -106,10 +108,12 @@ while ($seed = generateSeed()) {
         }
 
         $edge->sit($replier);
-        $score += getCellScore($edge);
+        $score += getCellScore($edge, $edge->replier);
 
         foreach (getCellEdges($edge) as $cell) {
             $edges[] = $cell;
         }
     }
 }
+
+Log::out("Score: $score");
