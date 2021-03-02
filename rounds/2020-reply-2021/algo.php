@@ -64,14 +64,18 @@ function getCellScore($cell)
 $score = 0;
 
 // Mentre esistono ancora scrivanie da riempire o developer o manager
-while (false) {
-    // Generiamo il seed
-    $seed = generateSeed();
+while ($seed = generateSeed()) {
     $edges = [$seed];
 
     while (count($edges)) {
         $edge = array_shift($edges);
         $replier = getBestReplier($edge);
+
+        if (!$replier) {
+            $edge->setEmpty();
+            continue;
+        }
+
         $edge->sit($replier);
         $score += getCellScore($edge);
 

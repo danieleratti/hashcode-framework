@@ -25,17 +25,52 @@ class Cell
     }
 }
 
-class Replier
+abstract class Replier
 {
+    public $id;
     /** @var string $company */
     public $company;
     /** @var int $bonus */
     public $bonus;
 
-    public function __construct($company, $bonus)
+    public $type;
+
+    public $bestDevelopers = [];
+    public $bestManagers = [];
+
+    public function __construct($id, $company, $bonus)
     {
+        $this->id = $id;
         $this->company = $company;
         $this->bonus = (int)$bonus;
+    }
+
+    /** nella chiave l'id */
+    public function initBestList()
+    {
+        $possibilities = $this->getPossibleRepliers();
+        foreach ($possibilities as $replier) {
+            if ($replier->id == $this->id)
+                continue;
+
+            $score = getCoupleScore($replier, $this);
+            if ($replier instanceof Developer)
+                $this->bestDevelopers[$replier->id] = $replier;
+            else
+                $this->bestManagers[$replier->id] = $replier;
+        }
+
+        arsort($this->bestManagers);
+        asort($this->bestDevelopers);
+    }
+
+    public function getPossibleRepliers()
+    {
+        global $company2Managers, $company2Developers;
+        return array_merge(
+            array_values($company2Managers[$this->company]),
+            array_values($company2Developers[$this->company])
+        );
     }
 }
 
@@ -44,18 +79,29 @@ class Developer extends Replier
     /** @var string[] $skills */
     public $skills;
 
-    public function __construct($company, $bonus, $skills)
+    public function __construct($id, $company, $bonus, $skills)
     {
-        parent::__construct($company, $bonus);
+        parent::__construct($id, $company, $bonus);
         $this->skills = $skills;
+    }
+
+    public function getPossibleRepliers()
+    {
+        global $company2Managers, $company2Developers, $skill2Developers;
+        $ret = parent::getPossibleRepliers();
+        foreach ($this->skills as $skill) {
+            foreach ($skill2Developers[$skill] as $developer)
+                $ret[] = $developer;
+        }
+        return $ret;
     }
 }
 
 class Manager extends Replier
 {
-    public function __construct($company, $bonus)
+    public function __construct($id, $company, $bonus)
     {
-        parent::__construct($company, $bonus);
+        parent::__construct($id, $company, $bonus);
     }
 }
 
@@ -110,7 +156,7 @@ $DEVELOPERS = [];
 for ($i = 0; $i < $devsCount; $i++) {
     [$company, $bonus, $skillsCount, $skills] = explode(' ', $content[$i], 4);
     $skills = explode(' ', $skills);
-    $DEVELOPERS[] = new Developer($company, $bonus, $skills);
+    $DEVELOPERS[] = new Developer($i, $company, $bonus, $skills);
 }
 array_splice($content, 0, $devsCount);
 
@@ -121,7 +167,21 @@ array_shift($content);
 $MANAGERS = [];
 for ($i = 0; $i < $managersCount; $i++) {
     [$company, $bonus] = explode(' ', $content[$i], 4);
-    $MANAGERS[] = new Manager($company, $bonus);
+    $MANAGERS[] = new Manager($i, $company, $bonus);
 }
 array_splice($content, 0, $managersCount);
 
+$skill2Developers = [];
+$company2Developers = [];
+$company2Managers = [];
+
+foreach ($DEVELOPERS as $developer) {
+    foreach ($developer->skills as $skill) {
+        $skill2Developers[$skill][$developer->id] = $developer;
+    }
+    $company2Developers[$developer->company][$developer->id] = $developer;
+}
+
+foreach ($MANAGERS as $manager) {
+    $company2Managers[$manager->company][$manager->id] = $manager;
+}
