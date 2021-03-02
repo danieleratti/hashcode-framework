@@ -4,6 +4,7 @@ include_once __DIR__ . '/reader.php';
 
 /**
  * Ritorna lo score della coppia di persone
+ * @return int
  */
 function getCoupleScore(Replier $a, Replier $b)
 {
@@ -29,13 +30,14 @@ function getCoupleScore(Replier $a, Replier $b)
  */
 function generateSeed()
 {
+    return null;
 }
 
 /**
  * @param Cell $edge
  * @return Replier
  */
-function getBestReplier($edge)
+function getBestReplier(Cell $edge)
 {
     return null;
 }
@@ -52,6 +54,7 @@ function getCellEdges($cell)
 
 /**
  * @param Cell $cell
+ * @return int
  */
 function getCellScore($cell)
 {
