@@ -71,6 +71,11 @@ class Skill
         $this->name = $name;
         $this->inDevelopers = [];
     }
+
+    public function __toString()
+    {
+        return $this->name;
+    }
 }
 
 class Company
@@ -84,6 +89,10 @@ class Company
     public $inDevelopers;
     /** @var ProjectManager[] */
     public $inProjctManagers;
+
+    public $mediumBonus;
+
+    public $couples;
 
     public function __construct($name)
     {
