@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'f' /*, 'param1' => 1.0*/]);
+Cerberus::runClient(['fileName' => 'c' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
 include 'mm-reader.php';
@@ -27,65 +27,120 @@ include 'mm-reader.php';
 /** @var int $N_CARS */
 /** @var int $BONUS */
 
+function forgetStreet(Street $street)
+{
+    global $STREETS;
+    unset($STREETS[$street->name]);
+    if ($street->end) {
+        if (count($street->end->streetsIn) === 0) {
+            forgetIntersection($street->end);
+        }
+        unset($street->end->streetsIn[$street->name]);
+    }
+    if ($street->start) {
+        if (count($street->start->streetsOut) === 0) {
+            forgetIntersection($street->start);
+        }
+        unset($street->start->streetsOut[$street->name]);
+    }
+}
+
+function forgetIntersection(Intersection $intersection)
+{
+    global $INTERSECTIONS;
+    unset($INTERSECTIONS[$intersection->id]);
+    foreach ($intersection->streetsIn as $street) {
+        forgetStreet($street);
+    }
+    foreach ($intersection->streetsOut as $street) {
+        forgetStreet($street);
+    }
+}
+
 /* ALGO */
 Log::out("Run with fileName $fileName");
-die();
-// Execution
 
 $lastRun = false;
-$cycles = 10;
+$cycles = 30;
 
-$semaphoreTimes = [];
+// Remove streets with no usage
+foreach ($STREETS as $streetName => $street) {
+    if ($street->usage === 0) {
+        forgetStreet($street);
+    }
+}
 
 for ($o = 0; $o < $cycles; $o++) {
 
-    if ($o == $cycles - 1) $lastRun = true;
+    // Variables init
+    $isLastRun = $o == $cycles - 1;
+    $score = 0;
+    /** @var Intersection[] $activeIntersections */
+    $activeIntersections = [];
+    /** @var Car[] $activeCars */
+    $activeCars = $CARS;
 
-
-    $SCORE = 0;
-
-    $fixedIntersections = [];
-    $variableIntersections = $INTERSECTIONS;
-
-    // Init
-
-    foreach ($STREETS as $streetName => $street) {
-        if ($street->usage === 0) {
-            unset($STREETS[$streetName]);
-            unset($street->end->streetsIn[$streetName]);
-            unset($street->end->semaphoreTime[$streetName]);
-        }
+    // Objects init
+    foreach ($INTERSECTIONS as $intersection) {
+        $intersection->init();
+    }
+    foreach ($STREETS as $street) {
+        $street->init();
+    }
+    foreach ($CARS as $car) {
+        $car->init();
     }
 
+    // Calculate scheduling
     foreach ($INTERSECTIONS as $intersectionId => $intersection) {
-        if ($intersection->streetsIn === 1) {
-            $intersection->fixedGreen = true;
-            $fixedIntersections[$intersectionId] = $intersection;
-            unset($variableIntersections[$intersectionId]);
-        }
+        $intersection->calculateScheduling();
     }
 
-    // Run init
+    for ($t = 0; $t <= $DURATION; $t++) {
+        //Log::out("t: $t");
 
-    foreach ($INTERSECTIONS as $intersectionId => $intersection) {
-        $intersection->updateScheduling();
-    }
-
-    for ($t = 0; $t < $DURATION; $t++) {
-        //Log::out("Step: $t");
-
-        foreach ($CARS as $carId => $car) {
-            if ($car->nextStep()) {
-                $SCORE += $BONUS + ($DURATION - $t);
-                unset($CARS[$carId]);
+        // Cars movements
+        foreach ($activeCars as $carId => $car) {
+            $carState = $car->nextStep();
+            if ($carState === Car::STATE_JUST_ENQUEUED) {
+                $activeIntersections[$car->currentStreet->end->id] = $car->currentStreet->end;
+                if ($car->currentStreetIdx === count($car->streets) - 1) { // Era l'ultima strada
+                    $score += $BONUS + ($DURATION - $t);
+                    unset($activeCars[$carId]);
+                }
             }
         }
 
-        foreach ($INTERSECTIONS as $intersectionId => $intersection) {
-            $intersection->nextStep($t);
+        // Intersection handling
+        foreach ($activeIntersections as $intersectionId => $intersection) {
+            if ($intersection->nextStep($t)) {
+                if (count($intersection->remainingCars) === 0)
+                    unset($activeIntersections[$intersectionId]);
+            }
+
+        }
+
+        // Semaphores update
+        foreach ($STREETS as $street) {
+            $street->semaphore->update();
         }
     }
 
+    // Save history
+    /*foreach ($INTERSECTIONS as $intersection) {
+        $intersection->init();
+    }*/
+    foreach ($INTERSECTIONS as $intersection) {
+        $intersection->calculateTimeDuration();
+    }
+    /*foreach ($STREETS as $street) {
+        $street->semaphore->saveHistory();
+    }*/
+    /*foreach ($CARS as $car) {
+        $car->init();
+    }*/
+
+    /*
     foreach ($INTERSECTIONS as $intersectionId => $intersection) {
         $max = 1;
         $min = 100000;
@@ -101,14 +156,14 @@ for ($o = 0; $o < $cycles; $o++) {
             $semaphoreTimes[$streetName] = ceil(pow($street->maxQueue, 0.5) / $min);
         }
     }
+    */
 
-    Log::out("Score: $SCORE");
+    Log::out("Score: $score");
 
 }
 
 /* OUTPUT */
 Log::out('Output...');
-$output = "xxx";
 
 foreach ($INTERSECTIONS as $iid => $i) {
     if (!$i->streetsIn) unset($INTERSECTIONS[$iid]);
@@ -119,10 +174,10 @@ $file[] = count($INTERSECTIONS);
 foreach ($INTERSECTIONS as $i) {
     $file[] = $i->id;
     $file[] = count($i->streetsIn);
-    foreach ($i->semaphoreTime as $streetName => $time) {
-        $file[] = "$streetName $time";
+    foreach ($i->streetsIn as $streetName => $street) {
+        $file[] = "$streetName {$street->semaphore->timeDuration}";
     }
 }
 
-$fileManager->outputV2(implode("\n", $file), 'score_' . $SCORE);
+$fileManager->outputV2(implode("\n", $file), 'score_' . $score);
 //Autoupload::submission($fileName, null, $output);

@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'a' /*, 'param1' => 1.0*/]);
+Cerberus::runClient(['fileName' => 'f' /*, 'param1' => 1.0*/]);
 Autoupload::init();
 
 include 'mm-reader.php';
@@ -29,47 +29,100 @@ include 'mm-reader.php';
 
 /* ALGO */
 Log::out("Run with fileName $fileName");
-$SCORE = 0;
-
-$fixedIntersections = [];
-$variableIntersections = $INTERSECTIONS;
-
-// Init
-
-foreach ($STREETS as $streetName => $street) {
-    if ($street->usage === 0) {
-        unset($STREETS[$streetName]);
-        unset($street->end->streetsIn[$streetName]);
-    }
-}
-
-foreach ($INTERSECTIONS as $intersectionId => $intersection) {
-    if ($intersection->streetsIn === 1) {
-        $intersection->fixedGreen = true;
-        $fixedIntersections[$intersectionId] = $intersection;
-        unset($variableIntersections[$intersectionId]);
-    }
-}
 
 // Execution
 
-for ($t = 0; $t < $DURATION; $t++) {
+$lastRun = false;
+$cycles = 10;
 
-    foreach ($CARS as $carId => $car) {
-        if ($car->nextStep($t)) {
-            $SCORE += $BONUS + ($DURATION - $t);
-            unset($CARS[$this->id]);
+$semaphoreTimes = [];
+
+for ($o = 0; $o < $cycles; $o++) {
+
+    if ($o == $cycles - 1) $lastRun = true;
+
+
+    $SCORE = 0;
+
+    $fixedIntersections = [];
+    $variableIntersections = $INTERSECTIONS;
+
+    // Init
+
+    foreach ($STREETS as $streetName => $street) {
+        if ($street->usage === 0) {
+            unset($STREETS[$streetName]);
+            unset($street->end->streetsIn[$streetName]);
+            unset($street->end->semaphoreTime[$streetName]);
         }
     }
 
     foreach ($INTERSECTIONS as $intersectionId => $intersection) {
-        $intersection->nextStep($t);
+        if ($intersection->streetsIn === 1) {
+            $intersection->fixedGreen = true;
+            $fixedIntersections[$intersectionId] = $intersection;
+            unset($variableIntersections[$intersectionId]);
+        }
     }
+
+    // Run init
+
+    foreach ($INTERSECTIONS as $intersectionId => $intersection) {
+        $intersection->updateScheduling();
+    }
+
+    for ($t = 0; $t < $DURATION; $t++) {
+        //Log::out("Step: $t");
+
+        foreach ($CARS as $carId => $car) {
+            if ($car->nextStep()) {
+                $SCORE += $BONUS + ($DURATION - $t);
+                unset($CARS[$carId]);
+            }
+        }
+
+        foreach ($INTERSECTIONS as $intersectionId => $intersection) {
+            $intersection->nextStep($t);
+        }
+    }
+
+    foreach ($INTERSECTIONS as $intersectionId => $intersection) {
+        $max = 1;
+        $min = 100000;
+        foreach ($intersection->streetsIn as $streetName => $street) {
+            if ($street->maxQueue > $max) {
+                $max = $street->maxQueue;
+            }
+            if ($street->maxQueue < $min) {
+                $min = $street->maxQueue;
+            }
+        }
+        foreach ($intersection->streetsIn as $streetName => $street) {
+            $semaphoreTimes[$streetName] = ceil(pow($street->maxQueue, 0.5) / $min);
+        }
+    }
+
+    Log::out("Score: $SCORE");
 
 }
 
 /* OUTPUT */
 Log::out('Output...');
 $output = "xxx";
-//$fileManager->outputV2($output, 'score_' . $SCORE);
+
+foreach ($INTERSECTIONS as $iid => $i) {
+    if (!$i->streetsIn) unset($INTERSECTIONS[$iid]);
+}
+
+$file = [];
+$file[] = count($INTERSECTIONS);
+foreach ($INTERSECTIONS as $i) {
+    $file[] = $i->id;
+    $file[] = count($i->streetsIn);
+    foreach ($i->semaphoreTime as $streetName => $time) {
+        $file[] = "$streetName $time";
+    }
+}
+
+$fileManager->outputV2(implode("\n", $file), 'score_' . $SCORE);
 //Autoupload::submission($fileName, null, $output);
