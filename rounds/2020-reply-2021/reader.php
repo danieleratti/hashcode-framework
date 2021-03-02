@@ -15,7 +15,7 @@ class Cell
     /** @var string $type */
     public $type;
     /** @var Cell[] $ */
-    public $nearCells = [];
+    public $nears = [];
 
     public function __construct($r, $c, $type)
     {
@@ -85,16 +85,16 @@ for ($r = 0; $r < $rowsCount; $r++) {
 array_splice($content, 0, $rowsCount);
 foreach ($CELLS as $cell) {
     if ($cell->c > 0) {
-        $cell->nearCells[] = $MAP[$cell->r][$cell->c - 1];
+        $cell->nears[] = $MAP[$cell->r][$cell->c - 1];
     }
     if ($cell->c < $columnsCount - 1) {
-        $cell->nearCells[] = $MAP[$cell->r][$cell->c + 1];
+        $cell->nears[] = $MAP[$cell->r][$cell->c + 1];
     }
     if ($cell->r > 0) {
-        $cell->nearCells[] = $MAP[$cell->r - 1][$cell->c];
+        $cell->nears[] = $MAP[$cell->r - 1][$cell->c];
     }
     if ($cell->r < $rowsCount - 1) {
-        $cell->nearCells[] = $MAP[$cell->r + 1][$cell->c];
+        $cell->nears[] = $MAP[$cell->r + 1][$cell->c];
     }
 }
 
