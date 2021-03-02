@@ -24,7 +24,7 @@ class FileManager
 
     private function getFileByStart($query)
     {
-        foreach (self::listInputFiles() as $fileName) {
+        foreach (DirUtils::listFiles(self::$inputDir) as $fileName) {
             if (substr($fileName, 0, strlen($query)) === $query)
                 return $fileName;
         }
@@ -35,7 +35,7 @@ class FileManager
         $baseInputName = $this->getInputName();
         $scriptName = DirUtils::getScriptName();
         $filePath = DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $scriptName . '_' . $baseInputName . ($extra ? ('_' . $extra) : '') . '.txt';
-        $this->write($filePath, $content);
+        File::write($filePath, $content);
         return $filePath;
     }
 
@@ -46,46 +46,13 @@ class FileManager
         $basePath = DirUtils::getScriptDir() . '/' . self::$outputDir . '/' . $baseInputName . '/' . $scriptName . ($extra ? ('_' . $extra) : '');
         $outputPath = $basePath . '.txt';
         $sourcePath = $basePath . '.php.txt'; // in order to exclude from searches
-        $this->write($outputPath, $content);
+        File::write($outputPath, $content);
         if (Autoupload::$scriptContent)
-            $this->write($sourcePath, Autoupload::$scriptContent);
+            File::write($sourcePath, Autoupload::$scriptContent);
     }
 
     public function getInputName()
     {
         return basename($this->inputName, '.in');
-    }
-
-    public function write($fileName, $content)
-    {
-        $dirname = dirname($fileName);
-        DirUtils::makeDirOrCreate($dirname);
-
-        $fh = fopen($fileName, 'w');
-        fwrite($fh, $content);
-        fclose($fh);
-    }
-
-    private function append($fileName, $content)
-    {
-        $fh = fopen($fileName, 'w');
-        fwrite($fh, $content);
-        fclose($fh);
-    }
-
-    public static function listInputFiles()
-    {
-        $files = [];
-
-        if ($handle = opendir(self::$inputDir)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry[0] != '.')
-                    $files[] = $entry;
-            }
-
-            closedir($handle);
-        }
-
-        return $files;
     }
 }

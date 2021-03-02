@@ -124,3 +124,4 @@ for ($i = 0; $i < $managersCount; $i++) {
     $MANAGERS[] = new Manager($company, $bonus);
 }
 array_splice($content, 0, $managersCount);
+
