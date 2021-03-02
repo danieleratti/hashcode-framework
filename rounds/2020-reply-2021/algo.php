@@ -43,22 +43,26 @@ function getBestReplier(Cell $edge)
 }
 
 /**
- * ritorna tutte le celle adiacenti non ancora riempite
+ * ritorna tutte le celle adiacenti non ancora considerate
  * @param Cell $cell
  * @return Cell[]
  */
-function getCellEdges($cell)
+function getCellEdges(Cell $cell)
 {
-    return [];
+    return array_filter($cell->nears, function (Cell $c) {
+        return !$c->toBeChecked;
+    });
 }
 
 /**
  * @param Cell $cell
  * @return int
  */
-function getCellScore($cell)
+function getCellScore(Cell $cell)
 {
-    return 0;
+    return array_reduce($cell->nears, function (int $score, Cell $c) use ($cell) {
+        return $score + getCoupleScore($cell->replier, $c->replier);
+    }, 0);
 }
 
 $score = 0;

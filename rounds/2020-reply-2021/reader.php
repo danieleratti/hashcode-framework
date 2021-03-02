@@ -17,8 +17,9 @@ class Cell
     /** @var Cell[] $ */
     public $nears = [];
 
-
+    /** @var bool $toBeChecked */
     public $toBeChecked = true;
+    /** @var Replier $replier */
     public $replier;
 
     public function __construct($r, $c, $type)
@@ -39,7 +40,7 @@ class Cell
 
     public function setEmpty()
     {
-        if($this->replier)
+        if ($this->replier)
             die("hai fatto un errore poco dio");
         $this->toBeChecked = false;
     }
