@@ -6,6 +6,6 @@
 
 use Utils\Cerberus;
 
-require_once '../../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php';
 
 Cerberus::runServer();

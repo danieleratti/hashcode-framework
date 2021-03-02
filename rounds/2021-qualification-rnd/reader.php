@@ -1,39 +1,123 @@
 <?php
 
-use Utils\Log;
 use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
-global $fileName = 'a_solar.tx';
-
 // Classes
-
-class Employee
+abstract class Employee
 {
     /** @var int $id */
     public $id;
-    /** @var string $id */
+    /** @var Company $company */
     public $company;
-    /** @var int $id */
+    /** @var int $bonus */
     public $bonus;
-    /** @var array $id */
-    public $skills;
     /** @var int $posH */
     public $posH;
     /** @var int $posW */
     public $posW;
 
-    public function __construct($type, $id, $company, $bonus, $skills)
+    public function __construct($company, $bonus)
     {
-        $this->id = self::$lastId++;
-        $this->id = $id;
+        $this->bonus = (int)$bonus;
         $this->company = $company;
-        $this->bonus = $bonus;
-        $this->numSkills = count($skills);
-        $this->skills = $skills;
     }
 }
+
+class Developer extends Employee
+{
+    private static $lastId = 0;
+    /** @var Skill[] $skills */
+    public $skills;
+
+    public function __construct(Company $company, $bonus, $skills)
+    {
+        parent::__construct($company, $bonus);
+        $this->id = self::$lastId++;
+        foreach ($skills as $s) {
+            $s->inDevelopers[] = $this;
+        }
+        $this->skills = $skills;
+        $company->inDevelopers[] = $this;
+    }
+}
+
+class ProjectManager extends Employee
+{
+    private static $lastId = 0;
+
+    public function __construct(Company $company, $bonus)
+    {
+        parent::__construct($company, $bonus);
+        $this->id = self::$lastId++;
+        $company->inProjctManagers[] = $this;
+    }
+}
+
+class Skill
+{
+    private static $lastId = 0;
+    /** @var int */
+    public $id;
+    /** @var string */
+    public $name;
+    /** @var Developer[] */
+    public $inDevelopers;
+
+    public function __construct($name)
+    {
+        $this->id = self::$lastId++;
+        $this->name = $name;
+        $this->inDevelopers = [];
+    }
+}
+
+class Company
+{
+    private static $lastId = 0;
+    /** @var int */
+    public $id;
+    /** @var string */
+    public $name;
+    /** @var Developer[] */
+    public $inDevelopers;
+    /** @var ProjectManager[] */
+    public $inProjctManagers;
+
+    public function __construct($name)
+    {
+        $this->id = self::$lastId++;
+        $this->name = $name;
+        $this->inDevelopers = [];
+        $this->inProjctManagers = [];
+    }
+}
+
+class Map
+{
+    /** @var Cell[][] $map */
+    public $map;
+
+    public function __construct($map)
+    {
+        $this->map = $map;
+    }
+}
+
+class Cell
+{
+    /** @var string */
+    public $type;
+    /** @var Employee */
+    public $assignedTo;
+
+    public function __construct($type)
+    {
+        $this->type = $type;
+    }
+}
+
 
 // Reading the inputs
 $fileManager = new FileManager($fileName);
@@ -41,17 +125,50 @@ $content = explode("\n", $fileManager->get());
 
 list($WIDTH, $HEIGHT) = explode(' ', $content[0]);
 
-$officeFloor = [];
 for ($i = 0; $i < $HEIGHT; $i++) {
-    $officeFloor[] = str_split($content[1 + $i]);
+    $row = str_split($content[1 + $i]);
+    foreach ($row as $j => $r) {
+        $map[$i][$j] = new Cell($r);
+    }
 }
+
+$MAP = new Map($map);
 
 list($NDEVELOPERS) = explode(' ', $content[1 + $HEIGHT]);
 
-$EMPLOYEES = [];
+$SKILLS = [];
+$COMPANIES = [];
+$DEVELOPERS = [];
 for ($i = 0; $i < $NDEVELOPERS; $i++) {
-    $properties = explode(' ', $content[2 + $HEIGHT + $i]);
-
+    $prop = explode(' ', $content[2 + $HEIGHT + $i]);
+    $skills = array_slice($prop, 3);
+    $devSkills = [];
+    foreach ($skills as $s) {
+        $tempSkill = $SKILLS[$s];
+        if (!$tempSkill) {
+            $tempSkill = new Skill($s);
+            $SKILLS[$s] = $tempSkill;
+        }
+        $devSkills[] = $tempSkill;
+    }
+    $tempCompany = $COMPANIES[$prop[0]];
+    if (!$tempCompany) {
+        $tempCompany = new Company($prop[0]);
+        $COMPANIES[$prop[0]] = $tempCompany;
+    }
+    $DEVELOPERS[] = new Developer($tempCompany, $prop[1], $devSkills);
 }
 
+list($NPROJECTMANAGERS) = explode(' ', $content[2 + $HEIGHT + $NDEVELOPERS]);
+
+$PROJECTMANAGERS = [];
+for ($i = 0; $i < $NPROJECTMANAGERS; $i++) {
+    $prop = explode(' ', $content[3 + $HEIGHT + $i + $NDEVELOPERS]);
+    $tempCompany = $COMPANIES[$prop[0]];
+    if (!$tempCompany) {
+        $tempCompany = new Company($prop[0]);
+        $COMPANIES[$prop[0]] = $tempCompany;
+    }
+    $PROJECTMANAGERS[] = new ProjectManager($tempCompany, $prop[1]);
+}
 

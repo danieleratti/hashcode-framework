@@ -3,7 +3,7 @@
 error_reporting(E_ERROR | E_PARSE);
 
 // initialize composer
-require_once "vendor/autoload.php";
+require_once __DIR__ . "/vendor/autoload.php";
 
 // incrase the memory
 ini_set('memory_limit', '-1');
