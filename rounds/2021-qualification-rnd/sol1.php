@@ -10,6 +10,7 @@ include 'reader.php';
 /** @var ProjectManager[] $PROJECTMANAGERS */
 /** @var Developer[] $DEVELOPERS */
 /** @var FileManager $fileManager */
+/** @var Map $MAP */
 
 Log::out('Output...');
 foreach ($DEVELOPERS as $k=>$dev){
@@ -30,6 +31,6 @@ foreach ($PROJECTMANAGERS as $pm){
 }
 $fileManager->outputV2($output, time());
 
-
+$test = $MAP->getFreeNeighbours(5,0,'#');
 
 die();

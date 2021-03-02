@@ -98,10 +98,38 @@ class Map
 {
     /** @var Cell[][] $map */
     public $map;
+    /** @var int $width */
+    public $width;
+    /** @var int $height */
+    public $height;
 
-    public function __construct($map)
+    public function __construct($map, $height, $width)
     {
         $this->map = $map;
+        $this->height = $height;
+        $this->width = $width;
+    }
+
+    public function getFreeNeighbours(int $x, int $y, $type){
+        $freePositions = [];
+        if($x+1<=$this->width){
+            if($this->map[$y][$x+1]->assignedTo===null && $this->map[$y][$x+1]->type===$type)
+                $freePositions[]=['x'=>$x+1, 'y'=>$y];
+        }
+        if($x-1>=0){
+            if($this->map[$y][$x-1]->assignedTo===null && $this->map[$y][$x-1]->type===$type)
+                $freePositions[]=['x'=>$x-1, 'y'=>$y];
+        }
+        if($y-1>=0){
+            if($this->map[$y-1][$x]->assignedTo===null && $this->map[$y-1][$x]->type===$type)
+                $freePositions[]=['x'=>$x, 'y'=>$y-1];
+        }
+        if($y+1<=$this->height){
+            if($this->map[$y+1][$x]->assignedTo===null && $this->map[$y+1][$x]->type===$type)
+                $freePositions[]=['x'=>$x, 'y'=>$y+1];
+        }
+        return $freePositions;
+
     }
 }
 
@@ -132,7 +160,7 @@ for ($i = 0; $i < $HEIGHT; $i++) {
     }
 }
 
-$MAP = new Map($map);
+$MAP = new Map($map, $HEIGHT, $WIDTH);
 
 list($NDEVELOPERS) = explode(' ', $content[1 + $HEIGHT]);
 
