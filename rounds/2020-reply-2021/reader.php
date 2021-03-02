@@ -77,23 +77,27 @@ $MAP = [];
 $CELLS = [];
 for ($r = 0; $r < $rowsCount; $r++) {
     for ($c = 0; $c < $columnsCount; $c++) {
-        $cell = new Cell($r, $c, $content[$r][$c]);
-        $MAP[$r][$c] = $cell;
-        $CELLS[] = $cell;
+        if ($content[$r][$c] !== '#') {
+            $cell = new Cell($r, $c, $content[$r][$c]);
+            $MAP[$r][$c] = $cell;
+            $CELLS[] = $cell;
+        } else {
+            $MAP[$r][$c] = null;
+        }
     }
 }
 array_splice($content, 0, $rowsCount);
 foreach ($CELLS as $cell) {
-    if ($cell->c > 0 && $MAP[$cell->r][$cell->c - 1]->type !== null) {
+    if ($cell->c > 0 && $MAP[$cell->r][$cell->c - 1] !== null) {
         $cell->nears[] = $MAP[$cell->r][$cell->c - 1];
     }
-    if ($cell->c < $columnsCount - 1 && $MAP[$cell->r][$cell->c + 1]->type !== null) {
+    if ($cell->c < $columnsCount - 1 && $MAP[$cell->r][$cell->c + 1] !== null) {
         $cell->nears[] = $MAP[$cell->r][$cell->c + 1];
     }
-    if ($cell->r > 0 && $MAP[$cell->r - 1][$cell->c]->type !== null) {
+    if ($cell->r > 0 && $MAP[$cell->r - 1][$cell->c] !== null) {
         $cell->nears[] = $MAP[$cell->r - 1][$cell->c];
     }
-    if ($cell->r < $rowsCount - 1 && $MAP[$cell->r + 1][$cell->c]->type !== null) {
+    if ($cell->r < $rowsCount - 1 && $MAP[$cell->r + 1][$cell->c] !== null) {
         $cell->nears[] = $MAP[$cell->r + 1][$cell->c];
     }
 }
