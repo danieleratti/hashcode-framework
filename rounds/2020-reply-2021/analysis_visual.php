@@ -5,7 +5,7 @@ use Utils\Visual\VisualStandard;
 
 $fileName = 'a';
 
-include 'reader.php';
+include __DIR__ . '/reader.php';
 
 $visualStandard = new VisualStandard($rows, $cols);
 

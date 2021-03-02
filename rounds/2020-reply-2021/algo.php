@@ -1,6 +1,6 @@
 <?php
 
-include_once 'reader.php';
+include_once __DIR__ . '/reader.php';
 
 /**
  * Ritorna lo score della coppia di persone
@@ -62,5 +62,4 @@ while (false) {
             $edges[] = $cell;
         }
     }
-
 }

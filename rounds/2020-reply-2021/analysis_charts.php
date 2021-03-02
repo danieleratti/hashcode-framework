@@ -5,7 +5,7 @@ use Utils\Collection;
 
 $fileName = 'a';
 
-include 'reader.php';
+include __DIR__ . '/reader.php';
 
 $chart = new Chart('percentileChunkedScore_' . $fileName);
 $chart->plotMultiLineY([
