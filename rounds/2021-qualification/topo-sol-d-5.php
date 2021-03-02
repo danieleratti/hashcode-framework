@@ -12,9 +12,9 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = 'a';
 $bestCarsPerc = 1.0;
-$cycleMaxDuration = 5;
+$cycleMaxDuration = 1; // FIXED HERE!!!
 $OVERHEADQUEUE = 0;
-Cerberus::runClient(['fileName' => 'd', 'bestCarsPerc' => 1.0, 'cycleMaxDuration' => 2]);
+Cerberus::runClient(['fileName' => 'd', 'bestCarsPerc' => 1.0]);
 Autoupload::init();
 include 'topo-reader.php';
 
@@ -42,6 +42,7 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
     $avgIntersectionsQueues = [];
     $avgStreetsWaitingTime = [];
     $carScores = [];
+    $usedStreets = [];
 
     foreach ($STREETS as $street) {
         $streetSemaphoreQueue[$street->name] = [];
@@ -62,7 +63,7 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
 
     for ($T = 0; $T < $DURATION; $T++) {
         if ($T % 100 == 0) {
-            Log::out("getScore T = $T/$DURATION");
+            Log::out("getScore T = $T/$DURATION (score = $score)");
         }
 
         foreach ($tToCarAtSemaphore[$T] as $carId => $streetName) {
@@ -76,7 +77,23 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
             if (count($_config[$intersection->id]) > 0) {
                 $streetName = $_config[$intersection->id][$T % count($_config[$intersection->id])];
                 // if is there queue
+                if (count($streetSemaphoreQueue[$streetName]) == 0 && !$usedStreets[$streetName]) {
+                    $bestStreetInName = null;
+                    foreach($intersection->streetsIn as $streetIn) {
+                        if(!$usedStreets[$streetIn->name] && count($streetSemaphoreQueue[$streetIn->name]) > 0)
+                            $bestStreetInName = $streetIn->name;
+                    }
+                    if($bestStreetInName) {
+                        //Log::out("Switch $streetName <-> $bestStreetInName");
+                        $idxCurrent = $T % count($_config[$intersection->id]);
+                        $idxSearched = array_search($bestStreetInName, $_config[$intersection->id]);
+                        $_config[$intersection->id][$idxSearched] = $_config[$intersection->id][$idxCurrent];
+                        $_config[$intersection->id][$idxCurrent] = $bestStreetInName;
+                        $streetName = $_config[$intersection->id][$T % count($_config[$intersection->id])];
+                    }
+                }
                 if (count($streetSemaphoreQueue[$streetName])) {
+                    $usedStreets[$streetName] = true;
                     // go ahead (only 1)
                     $carId = array_pop($streetSemaphoreQueue[$streetName]);
                     $streetIdxForCar = $CARS[$carId]->streetName2IDX[$streetName];
@@ -120,11 +137,20 @@ function getScore($config) // $config[$intersectId] = [0 => [ 'street1' => 1, 's
         $avgStreetsWaitingTime[$k] -= 1.0; //overhead for semaphores?
     }*/
 
+    $__config = [];
+    foreach ($_config as $mutexId => $mutex) {
+        foreach ($mutex as $streetName) {
+            $__config[$mutexId][$streetName] = 1;
+        }
+    }
+
+
     return [
         'score' => $score,
         'bonus' => $bonusScore,
         'early' => $earlyScore,
         'carScores' => $carScores,
+        'config' => $__config,
         //'avgIntersectionsQueues' => $avgIntersectionsQueues,
         //'avgStreetsWaitingTime' => $avgStreetsWaitingTime,
     ];
@@ -283,7 +309,7 @@ $cycleMaxDuration = min($DURATION, $cycleMaxDuration);
 $semaphores = getSemaphores($initialStreetsWaitingTime, $bestCarsPerc, $cycleMaxDuration);
 $configScore = getScore($semaphores);
 Log::out("SCORE($fileName, $bestCarsPerc, $cycleMaxDuration) = {$configScore['score']} ({$configScore['bonus']} + {$configScore['early']})");
-$fileManager->outputV2(getOutput($semaphores), '_d_score_' . $configScore['score']);
+$fileManager->outputV2(getOutput($configScore['config']), '_d_score_' . $configScore['score']);
 //Autoupload::submission($fileName, null, getOutput($semaphores));
 
 /*
