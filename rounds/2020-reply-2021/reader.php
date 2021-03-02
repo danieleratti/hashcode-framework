@@ -54,8 +54,6 @@ abstract class Replier
     /** @var int $bonus */
     public $bonus;
 
-    public $type;
-
     public $bestDevelopers = [];
     public $bestManagers = [];
 

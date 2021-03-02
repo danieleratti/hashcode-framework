@@ -49,9 +49,22 @@ function generateSeed()
  */
 function getBestReplier(Cell $edge)
 {
-
-    //if($edge->replier)
-    return null;
+    $bestRepliers = [];
+    foreach ($edge->nears as $near) {
+        if ($near->replier) {
+            $bestRepliers = array_merge($bestRepliers, $near->type === 'M' ? $near->replier->bestManagers : $near->replier->bestDevelopers);
+        }
+    }
+    $bestScore = -1;
+    $bestReplier = null;
+    foreach ($bestRepliers as $replier) {
+        $score = getCellScore($edge, $replier);
+        if ($score > $bestScore) {
+            $bestScore = $score;
+            $bestReplier = $replier;
+        }
+    }
+    return $bestReplier;
 }
 
 /**
@@ -70,10 +83,10 @@ function getCellEdges(Cell $cell)
  * @param Cell $cell
  * @return int
  */
-function getCellScore(Cell $cell)
+function getCellScore(Cell $cell, Replier $replier)
 {
-    return array_reduce($cell->nears, function (int $score, Cell $c) use ($cell) {
-        return $score + getCoupleScore($cell->replier, $c->replier);
+    return array_reduce($cell->nears, function (int $score, Cell $c) use ($cell, $replier) {
+        return $score + getCoupleScore($replier, $c->replier);
     }, 0);
 }
 
