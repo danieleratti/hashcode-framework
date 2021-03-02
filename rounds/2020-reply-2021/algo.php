@@ -5,8 +5,22 @@ include_once __DIR__ . '/reader.php';
 /**
  * Ritorna lo score della coppia di persone
  */
-function getCoupleScore($a, $b)
+function getCoupleScore(Replier $a, Replier $b)
 {
+    $score = 0;
+
+    if ($a->company === $b->company) {
+        $score += $a->bonus * $b->bonus;
+    }
+
+    if ($a instanceof Developer && $b instanceof Developer) {
+        $commonSkillsNumber = count(array_intersect($a->skills, $b->skills));
+        $uncommonSkillsNumber = count(array_unique(array_merge($a->skills, $b->skills))) - $commonSkillsNumber;
+
+        $score += $commonSkillsNumber * $uncommonSkillsNumber;
+    }
+
+    return $score;
 }
 
 /**
