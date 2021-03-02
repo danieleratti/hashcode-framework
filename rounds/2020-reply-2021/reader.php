@@ -17,11 +17,31 @@ class Cell
     /** @var Cell[] $ */
     public $nears = [];
 
+
+    public $toBeChecked = true;
+    public $replier;
+
     public function __construct($r, $c, $type)
     {
         $this->r = (int)$r;
         $this->c = (int)$c;
         $this->type = $type === '_' ? 'D' : ($type === '#' ? null : 'M');
+    }
+
+    /**
+     * @param Replier $replier
+     */
+    public function sit($replier)
+    {
+        $this->replier = $replier;
+        $this->toBeChecked = false;
+    }
+
+    public function setEmpty()
+    {
+        if($this->replier)
+            die("hai fatto un errore poco dio");
+        $this->toBeChecked = false;
     }
 }
 
