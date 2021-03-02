@@ -12,16 +12,16 @@ class Cell
     public $r;
     /** @var int $c */
     public $c;
-    /** @var string $type */
+    /** @var string $type (D, M or null) */
     public $type;
     /** @var Cell[] $ */
     public $nears = [];
 
     public function __construct($r, $c, $type)
     {
-        $this->r = $r;
-        $this->c = $c;
-        $this->type = $type;
+        $this->r = (int)$r;
+        $this->c = (int)$c;
+        $this->type = $type === '_' ? 'D' : ($type === '#' ? null : 'M');
     }
 }
 
@@ -35,7 +35,7 @@ class Replier
     public function __construct($company, $bonus)
     {
         $this->company = $company;
-        $this->bonus = $bonus;
+        $this->bonus = (int)$bonus;
     }
 }
 
@@ -84,16 +84,16 @@ for ($r = 0; $r < $rowsCount; $r++) {
 }
 array_splice($content, 0, $rowsCount);
 foreach ($CELLS as $cell) {
-    if ($cell->c > 0) {
+    if ($cell->c > 0 && $MAP[$cell->r][$cell->c - 1]->type !== null) {
         $cell->nears[] = $MAP[$cell->r][$cell->c - 1];
     }
-    if ($cell->c < $columnsCount - 1) {
+    if ($cell->c < $columnsCount - 1 && $MAP[$cell->r][$cell->c + 1]->type !== null) {
         $cell->nears[] = $MAP[$cell->r][$cell->c + 1];
     }
-    if ($cell->r > 0) {
+    if ($cell->r > 0 && $MAP[$cell->r - 1][$cell->c]->type !== null) {
         $cell->nears[] = $MAP[$cell->r - 1][$cell->c];
     }
-    if ($cell->r < $rowsCount - 1) {
+    if ($cell->r < $rowsCount - 1 && $MAP[$cell->r + 1][$cell->c]->type !== null) {
         $cell->nears[] = $MAP[$cell->r + 1][$cell->c];
     }
 }
@@ -104,7 +104,7 @@ array_shift($content);
 /** @var Developer[] $DEVELOPERS */
 $DEVELOPERS = [];
 for ($i = 0; $i < $devsCount; $i++) {
-    [$company, $bonus, $skillsCount, $skills] = explode(' ', $content, 4);
+    [$company, $bonus, $skillsCount, $skills] = explode(' ', $content[$i], 4);
     $skills = explode(' ', $skills);
     $DEVELOPERS[] = new Developer($company, $bonus, $skills);
 }
@@ -116,7 +116,7 @@ array_shift($content);
 /** @var Manager[] $MANAGERS */
 $MANAGERS = [];
 for ($i = 0; $i < $managersCount; $i++) {
-    [$company, $bonus] = explode(' ', $content, 4);
+    [$company, $bonus] = explode(' ', $content[$i], 4);
     $MANAGERS[] = new Manager($company, $bonus);
 }
 array_splice($content, 0, $managersCount);
