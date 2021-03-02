@@ -25,11 +25,21 @@ function getCoupleScore(Replier $a, Replier $b)
 }
 
 /**
- * ritorna la prima cella ancora da riempire, false se ha finito
- * @return Cell
+ * ritorna la prima cella ancora da riempire, null se ha finito
+ * @return Cell|null
  */
 function generateSeed()
 {
+    global $freeDevelopers, $freeManagers, $freeDevelopersCells, $freeManagersCells;
+
+    if (count($freeDevelopers) && count($freeDevelopersCells)) {
+        return array_pop($freeDevelopersCells);
+    }
+
+    if (count($freeManagers) && count($freeManagersCells)) {
+        return array_pop($freeManagersCells);
+    }
+
     return null;
 }
 
@@ -43,26 +53,22 @@ function getBestReplier(Cell $edge)
 }
 
 /**
- * ritorna tutte le celle adiacenti non ancora considerate
+ * ritorna tutte le celle adiacenti non ancora riempite
  * @param Cell $cell
  * @return Cell[]
  */
-function getCellEdges(Cell $cell)
+function getCellEdges($cell)
 {
-    return array_filter($cell->nears, function (Cell $c) {
-        return !$c->toBeChecked;
-    });
+    return [];
 }
 
 /**
  * @param Cell $cell
  * @return int
  */
-function getCellScore(Cell $cell)
+function getCellScore($cell)
 {
-    return array_reduce($cell->nears, function (int $score, Cell $c) use ($cell) {
-        return $score + getCoupleScore($cell->replier, $c->replier);
-    }, 0);
+    return 0;
 }
 
 $score = 0;
