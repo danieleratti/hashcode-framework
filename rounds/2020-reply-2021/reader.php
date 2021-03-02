@@ -6,14 +6,117 @@ require_once '../../bootstrap.php';
 
 // Classes
 
+class Cell
+{
+    /** @var int $r */
+    public $r;
+    /** @var int $c */
+    public $c;
+    /** @var string $type */
+    public $type;
+    /** @var Cell[] $ */
+    public $nearCells = [];
+
+    public function __construct($r, $c, $type)
+    {
+        $this->r = $r;
+        $this->c = $c;
+        $this->type = $type;
+    }
+}
+
+class Replier
+{
+    /** @var string $company */
+    public $company;
+    /** @var int $bonus */
+    public $bonus;
+
+    public function __construct($company, $bonus)
+    {
+        $this->company = $company;
+        $this->bonus = $bonus;
+    }
+}
+
+class Developer extends Replier
+{
+    /** @var string[] $skills */
+    public $skills;
+
+    public function __construct($company, $bonus, $skills)
+    {
+        parent::__construct($company, $bonus);
+        $this->skills = $skills;
+    }
+}
+
+class Manager extends Replier
+{
+    public function __construct($company, $bonus)
+    {
+        parent::__construct($company, $bonus);
+    }
+}
+
 // Reading the inputs
+
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-//[$cityRows, $cityColumns, $maxWalkingDistance, $buildingPlansCount] = explode(' ', $content[0]);
+// Globals
+[$columnsCount, $rowsCount] = explode(' ', $content[0]);
+$columnsCount = (int)$columnsCount;
+$rowsCount = (int)$rowsCount;
+array_shift($content);
 
-foreach ($content as $rowNumber => $row) {
-    if ($rowNumber > 0) { /* skip first */
-
+// Map
+/** @var Cell[][] $MAP */
+$MAP = [];
+/** @var Cell[] $CELLS */
+$CELLS = [];
+for ($r = 0; $r < $rowsCount; $r++) {
+    for ($c = 0; $c < $columnsCount; $c++) {
+        $cell = new Cell($r, $c, $content[$r][$c]);
+        $MAP[$r][$c] = $cell;
+        $CELLS[] = $cell;
     }
 }
+array_splice($content, 0, $rowsCount);
+foreach ($CELLS as $cell) {
+    if ($cell->c > 0) {
+        $cell->nearCells[] = $MAP[$cell->r][$cell->c - 1];
+    }
+    if ($cell->c < $columnsCount - 1) {
+        $cell->nearCells[] = $MAP[$cell->r][$cell->c + 1];
+    }
+    if ($cell->r > 0) {
+        $cell->nearCells[] = $MAP[$cell->r - 1][$cell->c];
+    }
+    if ($cell->r < $rowsCount - 1) {
+        $cell->nearCells[] = $MAP[$cell->r + 1][$cell->c];
+    }
+}
+
+// Developers
+$devsCount = (int)$content[0];
+array_shift($content);
+/** @var Developer[] $DEVELOPERS */
+$DEVELOPERS = [];
+for ($i = 0; $i < $devsCount; $i++) {
+    [$company, $bonus, $skillsCount, $skills] = explode(' ', $content, 4);
+    $skills = explode(' ', $skills);
+    $DEVELOPERS[] = new Developer($company, $bonus, $skills);
+}
+array_splice($content, 0, $devsCount);
+
+// Managers
+$managersCount = (int)$content[0];
+array_shift($content);
+/** @var Manager[] $MANAGERS */
+$MANAGERS = [];
+for ($i = 0; $i < $managersCount; $i++) {
+    [$company, $bonus] = explode(' ', $content, 4);
+    $MANAGERS[] = new Manager($company, $bonus);
+}
+array_splice($content, 0, $managersCount);
