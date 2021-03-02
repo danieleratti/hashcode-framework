@@ -206,3 +206,8 @@ foreach ($DEVELOPERS as $developer) {
 foreach ($MANAGERS as $manager) {
     $company2Managers[$manager->company][$manager->id] = $manager;
 }
+
+$freeDevelopers = $DEVELOPERS;
+$freeManagers = $MANAGERS;
+$freeDevelopersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'D')->toArray();
+$freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toArray();
