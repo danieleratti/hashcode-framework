@@ -2,6 +2,8 @@
 
 use Utils\Log;
 
+$fileName = 'e';
+
 include_once __DIR__ . '/reader.php';
 
 /**
@@ -51,11 +53,17 @@ function generateSeed()
  */
 function getBestReplier(Cell $edge)
 {
+    global $freeDevelopers, $freeManagers;
     $bestRepliers = [];
     foreach ($edge->nears as $near) {
         if ($near->replier) {
-            $bestRepliers = array_merge($bestRepliers, $near->type === 'M' ? $near->replier->bestManagers : $near->replier->bestDevelopers);
+            $bestRepliers = array_merge($bestRepliers, $edge->type === 'M' ? $near->replier->bestManagers : $near->replier->bestDevelopers);
         }
+    }
+    if (!$bestRepliers) {
+        // Ne prendo uno random
+        $array = $edge->type === 'M' ? $freeManagers : $freeDevelopers;
+        return $array[array_key_first($array)];
     }
     $bestScore = -1;
     $bestReplier = null;
@@ -77,7 +85,7 @@ function getBestReplier(Cell $edge)
 function getCellEdges(Cell $cell)
 {
     return array_filter($cell->nears, function (Cell $c) {
-        return !$c->toBeChecked;
+        return $c->toBeChecked;
     });
 }
 
@@ -88,7 +96,7 @@ function getCellEdges(Cell $cell)
 function getCellScore(Cell $cell, Replier $replier)
 {
     return array_reduce($cell->nears, function (int $score, Cell $c) use ($cell, $replier) {
-        return $score + getCoupleScore($replier, $c->replier);
+        return $score + ($c->replier ? getCoupleScore($replier, $c->replier) : 0);
     }, 0);
 }
 
@@ -98,7 +106,7 @@ $score = 0;
 while ($seed = generateSeed()) {
     $edges = [$seed];
 
-    while (count($edges)) {
+    while (count($edges) > 0) {
         $edge = array_shift($edges);
         $replier = getBestReplier($edge);
 
