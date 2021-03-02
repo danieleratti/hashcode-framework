@@ -2,8 +2,8 @@
 
 $fileName = 'a';
 
-include 'reader.php';
-include_once '../../utils/Analysis/Analyzer.php';
+include __DIR__ . '/reader.php';
+include_once __DIR__ . '/../../utils/Analysis/Analyzer.php';
 
 /** @var \Utils\Collection $residences */
 /** @var \Utils\Collection $utilities */

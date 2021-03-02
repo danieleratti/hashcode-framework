@@ -20,4 +20,20 @@ class DirUtils
             mkdir($dirname, 0755, true);
         }
     }
+
+    public static function listFiles($dir)
+    {
+        $files = [];
+
+        if ($handle = opendir($dir)) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry[0] != '.')
+                    $files[] = $entry;
+            }
+
+            closedir($handle);
+        }
+
+        return $files;
+    }
 }
