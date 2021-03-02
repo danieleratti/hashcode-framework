@@ -1,5 +1,7 @@
 <?php
 
+use Utils\Analysis\Analyzer;
+
 $fileName = 'a';
 
 include __DIR__ . '/reader.php';
