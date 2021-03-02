@@ -211,3 +211,17 @@ $freeDevelopers = $DEVELOPERS;
 $freeManagers = $MANAGERS;
 $freeDevelopersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'D')->toArray();
 $freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toArray();
+
+/*
+     (/^\)
+     (\ /)
+     .-'-.
+    /(_I_)\
+    \\) (//
+     /   \
+     \ | /
+      \|/
+      /|\
+      \|/
+      /Y\
+*/
