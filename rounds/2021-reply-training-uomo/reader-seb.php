@@ -36,6 +36,10 @@ class Employee
         $this->numSkills = count($skills);
         $this->skills = $skills;
     }
+
+    public function isAvailable() {
+        return empty($coordinates);
+    }
 }
 
 // Reading the inputs

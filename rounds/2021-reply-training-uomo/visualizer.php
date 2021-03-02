@@ -13,6 +13,7 @@ include 'reader-seb.php';
 /** @var Employee[] $employees */
 /** @var Employee[] $developers */
 /** @var Employee[] $managers */
+/** @var int[] $companies */
 /** @var string[][] $office */
 /** @var int $width */
 /** @var int $height */
