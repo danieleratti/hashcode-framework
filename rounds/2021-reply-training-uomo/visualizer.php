@@ -11,6 +11,8 @@ include 'reader-seb.php';
 
 /** @var FileManager $fileManager */
 /** @var Employee[] $employees */
+/** @var Employee[] $developers */
+/** @var Employee[] $managers */
 /** @var string[][] $office */
 /** @var int $width */
 /** @var int $height */

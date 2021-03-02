@@ -53,6 +53,7 @@ $numDevs = (int) $content[1 + $height];
 
 $startingFrom = 2 + $height;
 $employees = [];
+$developers = [];
 $counter = 0;
 $companies = [];
 for ($i = 0; $i < $numDevs; $i++) {
@@ -60,7 +61,7 @@ for ($i = 0; $i < $numDevs; $i++) {
     $skills = array_splice($devProps, 3, count($devProps) - 1);
     $companies[$devProps[0]] += 1;
     $employees[] = new Employee('D', $i, $devProps[0], $devProps[1], $skills);
-    // $developers[] = new Employee('D', $i, $devProps[0], $devProps[1], $skills);
+    $developers[] = new Employee('D', $i, $devProps[0], $devProps[1], $skills);
     $counter ++;
 }
 
@@ -71,7 +72,7 @@ $startingFrom = 3 + $height + $numDevs;
 for ($i = 0; $i < $numProjManager; $i++) {
     $managerProps = explode(' ', $content[$startingFrom + $i]);
     $employees[] = new Employee('M', $counter, $managerProps[0], $managerProps[1], []);
-    // $managers[$counter] = new Employee('M', $counter, $managerProps[0], $managerProps[1], []);
+    $managers[$counter] = new Employee('M', $counter, $managerProps[0], $managerProps[1], []);
     $companies[$managerProps[0]] += 1;
     $counter++;
 }
