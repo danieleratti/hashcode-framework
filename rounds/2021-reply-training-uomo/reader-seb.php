@@ -38,7 +38,7 @@ class Employee
     }
 
     public function isAvailable() {
-        return empty($coordinates);
+        return empty($this->coordinates);
     }
 }
 
