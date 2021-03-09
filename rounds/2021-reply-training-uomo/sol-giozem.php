@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'a', 'param1' => 1.0]);
+Cerberus::runClient(['fileName' => 'b', 'param1' => 1.0]);
 // Autoupload::init();
 
 include 'reader-seb.php';
@@ -62,6 +62,8 @@ function isMapFull()
             $sum += $officeUnavailable[$i][$j];
         }
     }
+
+    Log::out("To be placed: " . (($width * $height) - $sum));
 
     return $sum == ($width * $height);
 }
@@ -175,7 +177,6 @@ function visitCoord($r, $c, $employee = null)
 }
 
 while (!isMapFull()) {
-    Log::out('Placing first');
     list($r, $c) = findFirstDeskAvailable();
     $isDev = $office[$r][$c] == '_';
     $bestEmployee = findBestEmployee($isDev);
@@ -213,7 +214,6 @@ while (!isMapFull()) {
             visitCoord($toPop[0], $toPop[1], $toPop[2]);
         }
     }
-    Log::out('Placed first group');
 }
 
 usort($developers, function ($a, $b) {
