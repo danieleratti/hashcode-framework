@@ -1,6 +1,7 @@
 <?php
 
 use Utils\FileManager;
+use Utils\Log;
 
 require_once __DIR__ . '/../../bootstrap.php';
 
@@ -210,11 +211,15 @@ $freeManagers = $MANAGERS;
 $freeDevelopersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'D')->toArray();
 $freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toArray();
 
-foreach($DEVELOPERS as $developer) {
+Log::out("Populating " . count($DEVELOPERS) . " developers");
+foreach ($DEVELOPERS as $idx => $developer) {
+    Log::out("$idx / " . count($DEVELOPERS));
     $developer->initBestList();
 }
 
-foreach($MANAGERS as $manager) {
+Log::out("Populating " . count($MANAGERS) . " managers");
+foreach ($MANAGERS as $idx => $manager) {
+    Log::out("$idx / " . count($MANAGERS));
     $manager->initBestList();
 }
 

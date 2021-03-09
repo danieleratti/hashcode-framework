@@ -2,7 +2,7 @@
 
 use Utils\Log;
 
-$fileName = 'e';
+$fileName = 'b';
 
 include_once __DIR__ . '/reader.php';
 
@@ -107,6 +107,7 @@ while ($seed = generateSeed()) {
     $edges = [$seed];
 
     while (count($edges) > 0) {
+        Log::out("Edges remaining = " . count($edges));
         $edge = array_shift($edges);
         $replier = getBestReplier($edge);
 
