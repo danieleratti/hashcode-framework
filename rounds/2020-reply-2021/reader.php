@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../bootstrap.php';
 
 class Cell
 {
+    public $id;
     /** @var int $r */
     public $r;
     /** @var int $c */
@@ -28,6 +29,7 @@ class Cell
         $this->r = (int)$r;
         $this->c = (int)$c;
         $this->type = $type === '_' ? 'D' : ($type === '#' ? null : 'M');
+        $this->id = $r . " " . $c;
     }
 
     /**
@@ -35,7 +37,7 @@ class Cell
      */
     public function sit($replier)
     {
-        global $freeDevelopers, $freeManagers;
+        global $freeDevelopers, $freeManagers, $freeDevelopersCells, $freeManagersCells;
         //$replier->
         $this->replier = $replier;
         $replier->cell = $this;
@@ -51,6 +53,7 @@ class Cell
                 unset($m->bestDevelopers[$replier->id]);
             }
             unset($freeDevelopers[$replier->id]);
+            unset($freeDevelopersCells[$this->id]);
         } else {
             foreach ($replier->originalBestDevelopers as $d) {
                 /** @var Developer $d */
@@ -61,6 +64,7 @@ class Cell
                 unset($m->bestManagers[$replier->id]);
             }
             unset($freeManagers[$replier->id]);
+            unset($freeManagersCells[$this->id]);
         }
     }
 
@@ -123,6 +127,8 @@ abstract class Replier
         }
         $this->originalBestDevelopers = $this->bestDevelopers;
         $this->originalBestManagers = $this->bestManagers;
+        Log::out("count(originalBestDevelopers) = " . count($this->originalBestDevelopers));
+        Log::out("count(originalBestManagers) = " . count($this->originalBestManagers));
     }
 
     public function getPossibleRepliers()
@@ -187,7 +193,7 @@ for ($r = 0; $r < $rowsCount; $r++) {
         if ($content[$r][$c] !== '#') {
             $cell = new Cell($r, $c, $content[$r][$c]);
             $MAP[$r][$c] = $cell;
-            $CELLS[] = $cell;
+            $CELLS[$cell->id] = $cell;
         } else {
             $MAP[$r][$c] = null;
         }
