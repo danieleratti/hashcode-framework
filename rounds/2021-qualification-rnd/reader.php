@@ -111,12 +111,18 @@ class Map
     public $width;
     /** @var int $height */
     public $height;
+    /** @var int $developersCell */
+    public $developersCell;
+    /** @var int $managerCells */
+    public $managerCells;
 
-    public function __construct($map, $height, $width)
+    public function __construct($map, $height, $width, $devCells, $manCells)
     {
         $this->map = $map;
         $this->height = $height;
         $this->width = $width;
+        $this->developersCell= $devCells;
+        $this->managerCells= $manCells;
     }
 
     public function getFreeNeighbours(int $x, int $y, $type){
@@ -148,10 +154,16 @@ class Cell
     public $type;
     /** @var Employee */
     public $assignedTo;
+    /** @var int $x */
+    public $x;
+    /** @var int $y */
+    public $y;
 
-    public function __construct($type)
+    public function __construct($type, $x, $y )
     {
         $this->type = $type;
+        $this->x=$x;
+        $this->y=$y;
     }
 }
 
@@ -162,14 +174,20 @@ $content = explode("\n", $fileManager->get());
 
 list($WIDTH, $HEIGHT) = explode(' ', $content[0]);
 
+$devCells=0;
+$managerCells=0;
 for ($i = 0; $i < $HEIGHT; $i++) {
-    $row = str_split($content[1 + $i]);
-    foreach ($row as $j => $r) {
-        $map[$i][$j] = new Cell($r);
+    $column = str_split($content[1 + $i]);
+    foreach ($column as $j => $r) {
+        $map[$i][$j] = new Cell($r, $j, $i);
+        if($r==='_')
+            $devCells++;
+        if($r==='M')
+            $managerCells++;
     }
 }
 
-$MAP = new Map($map, $HEIGHT, $WIDTH);
+$MAP = new Map($map, $HEIGHT, $WIDTH, $devCells, $managerCells);
 
 list($NDEVELOPERS) = explode(' ', $content[1 + $HEIGHT]);
 

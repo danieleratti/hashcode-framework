@@ -2,7 +2,7 @@
 
 use Utils\Analysis\Analyzer;
 
-$fileName = 'b';
+$fileName = 'd';
 
 include 'reader.php';
 
@@ -17,6 +17,8 @@ $analyzer = new Analyzer($fileName, [
     'project managers' => $NPROJECTMANAGERS,
     'width' => $WIDTH,
     'height' => $HEIGHT,
+    'devCells' => $MAP->developersCell,
+    'managerCells' => $MAP->managerCells,
     'companies' => count($COMPANIES),
     'skills' => count($SKILLS),
 ]);
