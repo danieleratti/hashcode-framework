@@ -125,23 +125,29 @@ class Map
         $this->managerCells= $manCells;
     }
 
-    public function getFreeNeighbours(int $x, int $y, $type){
+    public function getFreeNeighbours(Cell $cell, $type){
+        $x=$cell->x;
+        $y=$cell->y;
         $freePositions = [];
         if($x+1<=$this->width){
             if($this->map[$y][$x+1]->assignedTo===null && $this->map[$y][$x+1]->type===$type)
-                $freePositions[]=['x'=>$x+1, 'y'=>$y];
+                $freePositions[] = $this->map[$y][$x+1];
+                //$freePositions[]=['x'=>$x+1, 'y'=>$y];
         }
         if($x-1>=0){
             if($this->map[$y][$x-1]->assignedTo===null && $this->map[$y][$x-1]->type===$type)
-                $freePositions[]=['x'=>$x-1, 'y'=>$y];
+                $freePositions[] = $this->map[$y][$x-1];
+                //$freePositions[]=['x'=>$x-1, 'y'=>$y];
         }
         if($y-1>=0){
             if($this->map[$y-1][$x]->assignedTo===null && $this->map[$y-1][$x]->type===$type)
-                $freePositions[]=['x'=>$x, 'y'=>$y-1];
+                $freePositions[] = $this->map[$y-1][$x];
+                //$freePositions[]=['x'=>$x, 'y'=>$y-1];
         }
         if($y+1<=$this->height){
             if($this->map[$y+1][$x]->assignedTo===null && $this->map[$y+1][$x]->type===$type)
-                $freePositions[]=['x'=>$x, 'y'=>$y+1];
+                $freePositions[] = $this->map[$y+1][$x];
+                //$freePositions[]=['x'=>$x, 'y'=>$y+1];
         }
         return $freePositions;
 
