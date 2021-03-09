@@ -128,60 +128,48 @@ function findBestCoworker($employee, $isDev) {
     return $best;
 }
 
-function spreadCompany($r, $c, $employee)
+$queue = [];
+
+function visitCoord($r, $c, $employee = null)
 {
     global $office, $officeUnavailable, $width, $height;
+
+    $isDev = $office[$r][$c] == '_';
+    $best = findBestCoworker($employee, $isDev);
+    if($best == null) {
+        return;
+    }
+    $best->coordinates = [$r, $c];
+    $officeUnavailable[$r][$c] = 1;
+
     // UP
     if ($r - 1 >= 0) {
         if ($officeUnavailable[$r - 1][$c] == 0) {
-            $isDev = $office[$r - 1][$c] == '_';
-            $best = findBestCoworker($employee, $isDev);
-            if($best == null) {
-                return;
-            }
-            $best->coordinates = [$r - 1, $c];
-            $officeUnavailable[$r - 1][$c] = 1;
-            spreadCompany($r - 1, $c, $best);
+            $queue[] = [$r, $c, $employee];
         }
     }
     // LEFT
     if ($c - 1 >= 0) {
         if ($officeUnavailable[$r][$c-1] == 0) {
-            $isDev = $office[$r][$c-1] == '_';
-            $best = findBestCoworker($employee, $isDev);
-            if($best == null) {
-                return;
-            }
-            $best->coordinates = [$r, $c-1];
-            $officeUnavailable[$r][$c-1] = 1;
-            spreadCompany($r, $c-1, $best);
+            $queue[] = [$r, $c, $employee];
         }
     }
     // BOTTOM
     if ($r + 1 <= $height) {
         if ($officeUnavailable[$r + 1][$c] == 0) {
-            $isDev = $office[$r + 1][$c] == '_';
-            $best = findBestCoworker($employee, $isDev);
-            if($best == null) {
-                return;
-            }
-            $best->coordinates = [$r + 1, $c];
-            $officeUnavailable[$r + 1][$c] = 1;
-            spreadCompany($r + 1, $c, $best);
+            $queue[] = [$r, $c, $employee];
         }
     }
     // RIGHT
     if ($c + 1 <= $width) {
         if ($officeUnavailable[$r][$c+1] == 0) {
-            $isDev = $office[$r][$c+1] == '_';
-            $best = findBestCoworker($employee, $isDev);
-            if($best == null) {
-                return;
-            }
-            $best->coordinates = [$r, $c+1];
-            $officeUnavailable[$r][$c+1] = 1;
-            spreadCompany($r, $c+1, $best);
+            $queue[] = [$r, $c, $employee];
         }
+    }
+
+    if(!empty($queue)) {
+        $toPop = array_shift($queue);
+        visitCoord($toPop[0],$toPop[1],$toPop[2]);
     }
 }
 
@@ -193,7 +181,36 @@ while (!isMapFull()) {
     if($bestEmployee) {
         $bestEmployee->coordinates = [$r, $c];
         $officeUnavailable[$r][$c] = 1;
-        spreadCompany($r, $c, $bestEmployee);
+
+        // UP
+        if ($r - 1 >= 0) {
+            if ($officeUnavailable[$r - 1][$c] == 0) {
+                $queue[] = [$r, $c, $bestEmployee];
+            }
+        }
+        // LEFT
+        if ($c - 1 >= 0) {
+            if ($officeUnavailable[$r][$c-1] == 0) {
+                $queue[] = [$r, $c, $bestEmployee];
+            }
+        }
+        // BOTTOM
+        if ($r + 1 <= $height) {
+            if ($officeUnavailable[$r + 1][$c] == 0) {
+                $queue[] = [$r, $c, $bestEmployee];
+            }
+        }
+        // RIGHT
+        if ($c + 1 <= $width) {
+            if ($officeUnavailable[$r][$c+1] == 0) {
+                $queue[] = [$r, $c, $bestEmployee];
+            }
+        }
+
+        if(!empty($queue)) {
+            $toPop = array_shift($queue);
+            visitCoord($toPop[0],$toPop[1],$toPop[2]);
+        }
     }
     Log::out('Placed first group');
 }
