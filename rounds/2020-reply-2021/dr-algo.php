@@ -1,10 +1,13 @@
 <?php
 
+use Utils\Autoupload;
+use Utils\FileManager;
 use Utils\Log;
 
-$fileName = 'b';
+$fileName = 'a';
 
 include_once __DIR__ . '/reader.php';
+Autoupload::init();
 
 /**
  * Ritorna lo score della coppia di persone
@@ -100,11 +103,30 @@ function getCellScore(Cell $cell, Replier $replier)
     }, 0);
 }
 
+function generateOutput()
+{
+    global $DEVELOPERS, $MANAGERS;
+    $out = [];
+    foreach ($DEVELOPERS as $developer) {
+        if (!$developer->cell)
+            $out[] = "X";
+        else
+            $out[] = $developer->cell->c . " " . $developer->cell->r;
+    }
+    foreach ($MANAGERS as $manager) {
+        if (!$manager->cell)
+            $out[] = "X";
+        else
+            $out[] = $manager->cell->c . " " . $manager->cell->r;
+    }
+    return implode("\n", $out);
+}
+
 $score = 0;
 
 // Mentre esistono ancora scrivanie da riempire o developer o manager
 while ($seed = generateSeed()) {
-    $edges = [$seed];
+    $edges = [($seed->r . " " . $seed->c) => $seed];
 
     while (count($edges) > 0) {
         Log::out("Edges remaining = " . count($edges));
@@ -120,9 +142,11 @@ while ($seed = generateSeed()) {
         $score += getCellScore($edge, $edge->replier);
 
         foreach (getCellEdges($edge) as $cell) {
-            $edges[] = $cell;
+            $edges[$cell->r . " " . $cell->c] = $cell;
         }
     }
 }
 
 Log::out("Score: $score");
+/** @var FileManager $fileManager */
+$fileManager->outputV2(generateOutput(), 'score_' . $score);
