@@ -42,21 +42,21 @@ class Cell
         $this->toBeChecked = false;
         // DEALLOCARE quello usato e ovunque ci sono riferimento (es. bestDevelopers, bestManagers)!
         if ($replier instanceof Developer) {
-            foreach ($replier->bestDevelopers as $d) {
+            foreach ($replier->originalBestDevelopers as $d) {
                 /** @var Developer $d */
                 unset($d->bestDevelopers[$replier->id]);
             }
-            foreach ($replier->bestManagers as $m) {
+            foreach ($replier->originalBestManagers as $m) {
                 /** @var Manager $m */
                 unset($m->bestDevelopers[$replier->id]);
             }
             unset($freeDevelopers[$replier->id]);
         } else {
-            foreach ($replier->bestDevelopers as $d) {
+            foreach ($replier->originalBestDevelopers as $d) {
                 /** @var Developer $d */
                 unset($d->bestManagers[$replier->id]);
             }
-            foreach ($replier->bestManagers as $m) {
+            foreach ($replier->originalBestManagers as $m) {
                 /** @var Manager $m */
                 unset($m->bestManagers[$replier->id]);
             }
@@ -84,6 +84,8 @@ abstract class Replier
 
     public $bestDevelopers = [];
     public $bestManagers = [];
+    public $originalBestDevelopers = [];
+    public $originalBestManagers = [];
 
     public function __construct($id, $company, $bonus)
     {
@@ -119,6 +121,8 @@ abstract class Replier
         foreach ($bestDevelopers as $id => $score) {
             $this->bestDevelopers[$id] = $DEVELOPERS[$id];
         }
+        $this->originalBestDevelopers = $this->bestDevelopers;
+        $this->originalBestManagers = $this->bestManagers;
     }
 
     public function getPossibleRepliers()
