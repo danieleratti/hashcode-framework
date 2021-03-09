@@ -4,7 +4,7 @@ use Utils\Autoupload;
 use Utils\FileManager;
 use Utils\Log;
 
-$fileName = 'a';
+$fileName = 'f';
 
 include_once __DIR__ . '/reader.php';
 Autoupload::init();
@@ -147,6 +147,6 @@ while ($seed = generateSeed()) {
     }
 }
 
-Log::out("Score: $score");
+Log::out("Score ($fileName): $score");
 /** @var FileManager $fileManager */
 $fileManager->outputV2(generateOutput(), 'score_' . $score);
