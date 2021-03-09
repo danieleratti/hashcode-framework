@@ -177,6 +177,7 @@ function visitCoord($r, $c, $employee = null)
 }
 
 while (!isMapFull()) {
+    $queue = [];
     list($r, $c) = findFirstDeskAvailable();
     $isDev = $office[$r][$c] == '_';
     $bestEmployee = findBestEmployee($isDev);
