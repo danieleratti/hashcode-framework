@@ -156,10 +156,24 @@ class Developer extends Replier
     {
         global $skill2Developers;
         $ret = parent::getPossibleRepliers();
+
+        /* versione 1) a,b,c(lento) */
+
         foreach ($this->skills as $skill) {
             foreach ($skill2Developers[$skill] as $developer)
                 $ret[] = $developer;
         } // <-- RIMOSSA TEMPORANEAMENTE! RIMETTERE!!!!!!!
+
+
+        /* versione 2) */
+        /*$deltaSkillsToTake = 5;
+        foreach ($this->skills as $skill) {
+            foreach ($skill2Developers[$skill] as $developer)
+                /* @var Developer $developer * /
+                if (abs(count($developer->skills) - count($this->skills)) <= $deltaSkillsToTake)
+                    $ret[] = $developer;
+        }*/
+
         return $ret;
     }
 }
