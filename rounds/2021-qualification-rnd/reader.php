@@ -1,5 +1,6 @@
 <?php
 
+use Utils\Collection;
 use Utils\FileManager;
 
 require_once '../../bootstrap.php';
@@ -85,9 +86,9 @@ class Company
     public $id;
     /** @var string */
     public $name;
-    /** @var Developer[] */
+    /** @var Collection */
     public $inDevelopers;
-    /** @var ProjectManager[] */
+    /** @var Collection */
     public $inProjectManagers;
 
     public $mediumBonus;
@@ -123,6 +124,17 @@ class Map
         $this->width = $width;
         $this->developersCell= $devCells;
         $this->managerCells= $manCells;
+    }
+
+    /**
+     * @param Cell $currentCell
+     * @param string $type
+     * @return false|Cell
+     */
+    public function getFirstFreeNeighbour(Cell $currentCell, string $type) {
+        $freePositions = $this->getFreeNeighbours($currentCell, $type);
+
+        return $freePositions[0] ?? false;
     }
 
     public function getFreeNeighbours(Cell $cell, $type){
@@ -185,7 +197,7 @@ $managerCells=0;
 for ($i = 0; $i < $HEIGHT; $i++) {
     $column = str_split($content[1 + $i]);
     foreach ($column as $j => $r) {
-        $map[$i][$j] = new Cell($r, $j, $i);
+        $map[$i][$j] = new Cell($r, $i, $j);
         if($r==='_')
             $devCells++;
         if($r==='M')
@@ -231,5 +243,11 @@ for ($i = 0; $i < $NPROJECTMANAGERS; $i++) {
         $COMPANIES[$prop[0]] = $tempCompany;
     }
     $PROJECTMANAGERS[] = new ProjectManager($tempCompany, $prop[1]);
+}
+
+foreach ($COMPANIES as $c) {
+    /** @var Company $c */
+    $c->inDevelopers = collect($c->inDevelopers)->keyBy('id');
+    $c->inProjectManagers = collect($c->inProjectManagers)->keyBy('id');
 }
 
