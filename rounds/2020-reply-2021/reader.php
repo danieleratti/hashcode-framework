@@ -74,13 +74,13 @@ abstract class Replier
 
             $score = getCoupleScore($replier, $this);
             if ($replier instanceof Developer)
-                $this->bestDevelopers[$replier->id] = $replier;
+                $this->bestDevelopers[$replier->id] = $score;
             else
-                $this->bestManagers[$replier->id] = $replier;
+                $this->bestManagers[$replier->id] = $score;
         }
 
         arsort($this->bestManagers);
-        asort($this->bestDevelopers);
+        arsort($this->bestDevelopers);
     }
 
     public function getPossibleRepliers()
@@ -106,7 +106,7 @@ class Developer extends Replier
 
     public function getPossibleRepliers()
     {
-        global $company2Managers, $company2Developers, $skill2Developers;
+        global $skill2Developers;
         $ret = parent::getPossibleRepliers();
         foreach ($this->skills as $skill) {
             foreach ($skill2Developers[$skill] as $developer)
@@ -209,6 +209,14 @@ $freeDevelopers = $DEVELOPERS;
 $freeManagers = $MANAGERS;
 $freeDevelopersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'D')->toArray();
 $freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toArray();
+
+foreach($DEVELOPERS as $developer) {
+    $developer->initBestList();
+}
+
+foreach($MANAGERS as $manager) {
+    $manager->initBestList();
+}
 
 /*
      (/^\)
