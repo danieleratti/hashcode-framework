@@ -35,8 +35,33 @@ class Cell
      */
     public function sit($replier)
     {
+        global $freeDevelopers, $freeManagers;
+        //$replier->
         $this->replier = $replier;
+        $replier->cell = $this;
         $this->toBeChecked = false;
+        // DEALLOCARE quello usato e ovunque ci sono riferimento (es. bestDevelopers, bestManagers)!
+        if ($replier instanceof Developer) {
+            foreach ($replier->originalBestDevelopers as $d) {
+                /** @var Developer $d */
+                unset($d->bestDevelopers[$replier->id]);
+            }
+            foreach ($replier->originalBestManagers as $m) {
+                /** @var Manager $m */
+                unset($m->bestDevelopers[$replier->id]);
+            }
+            unset($freeDevelopers[$replier->id]);
+        } else {
+            foreach ($replier->originalBestDevelopers as $d) {
+                /** @var Developer $d */
+                unset($d->bestManagers[$replier->id]);
+            }
+            foreach ($replier->originalBestManagers as $m) {
+                /** @var Manager $m */
+                unset($m->bestManagers[$replier->id]);
+            }
+            unset($freeManagers[$replier->id]);
+        }
     }
 
     public function setEmpty()
@@ -54,9 +79,13 @@ abstract class Replier
     public $company;
     /** @var int $bonus */
     public $bonus;
+    /** @var Cell $cell */
+    public $cell;
 
     public $bestDevelopers = [];
     public $bestManagers = [];
+    public $originalBestDevelopers = [];
+    public $originalBestManagers = [];
 
     public function __construct($id, $company, $bonus)
     {
@@ -68,6 +97,9 @@ abstract class Replier
     /** nella chiave l'id */
     public function initBestList()
     {
+        global $MANAGERS, $DEVELOPERS;
+        $bestDevelopers = [];
+        $bestManagers = [];
         $possibilities = $this->getPossibleRepliers();
         foreach ($possibilities as $replier) {
             if ($replier->id == $this->id)
@@ -75,13 +107,22 @@ abstract class Replier
 
             $score = getCoupleScore($replier, $this);
             if ($replier instanceof Developer)
-                $this->bestDevelopers[$replier->id] = $score;
+                $bestDevelopers[$replier->id] = $score;
             else
-                $this->bestManagers[$replier->id] = $score;
+                $bestManagers[$replier->id] = $score;
         }
 
-        arsort($this->bestManagers);
-        arsort($this->bestDevelopers);
+        arsort($bestManagers);
+        arsort($bestDevelopers);
+
+        foreach ($bestManagers as $id => $score) {
+            $this->bestManagers[$id] = $MANAGERS[$id];
+        }
+        foreach ($bestDevelopers as $id => $score) {
+            $this->bestDevelopers[$id] = $DEVELOPERS[$id];
+        }
+        $this->originalBestDevelopers = $this->bestDevelopers;
+        $this->originalBestManagers = $this->bestManagers;
     }
 
     public function getPossibleRepliers()
@@ -101,7 +142,7 @@ class Developer extends Replier
 
     public function __construct($id, $company, $bonus, $skills)
     {
-        parent::__construct($id, $company, $bonus);
+        parent::__construct("D_" . $id, $company, $bonus);
         $this->skills = $skills;
     }
 
@@ -112,7 +153,7 @@ class Developer extends Replier
         foreach ($this->skills as $skill) {
             foreach ($skill2Developers[$skill] as $developer)
                 $ret[] = $developer;
-        }
+        } // <-- RIMOSSA TEMPORANEAMENTE! RIMETTERE!!!!!!!
         return $ret;
     }
 }
@@ -121,7 +162,7 @@ class Manager extends Replier
 {
     public function __construct($id, $company, $bonus)
     {
-        parent::__construct($id, $company, $bonus);
+        parent::__construct("M_" . $id, $company, $bonus);
     }
 }
 
@@ -176,7 +217,7 @@ $DEVELOPERS = [];
 for ($i = 0; $i < $devsCount; $i++) {
     [$company, $bonus, $skillsCount, $skills] = explode(' ', $content[$i], 4);
     $skills = explode(' ', $skills);
-    $DEVELOPERS[] = new Developer($i, $company, $bonus, $skills);
+    $DEVELOPERS["D_" . $i] = new Developer($i, $company, $bonus, $skills);
 }
 array_splice($content, 0, $devsCount);
 
@@ -187,7 +228,7 @@ array_shift($content);
 $MANAGERS = [];
 for ($i = 0; $i < $managersCount; $i++) {
     [$company, $bonus] = explode(' ', $content[$i], 4);
-    $MANAGERS[] = new Manager($i, $company, $bonus);
+    $MANAGERS["M_" . $i] = new Manager($i, $company, $bonus);
 }
 array_splice($content, 0, $managersCount);
 
@@ -213,13 +254,13 @@ $freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toAr
 
 Log::out("Populating " . count($DEVELOPERS) . " developers");
 foreach ($DEVELOPERS as $idx => $developer) {
-    Log::out("$idx / " . count($DEVELOPERS));
+    Log::out("$fileName => $idx / " . count($DEVELOPERS));
     $developer->initBestList();
 }
 
 Log::out("Populating " . count($MANAGERS) . " managers");
 foreach ($MANAGERS as $idx => $manager) {
-    Log::out("$idx / " . count($MANAGERS));
+    Log::out("$fileName => $idx / " . count($MANAGERS));
     $manager->initBestList();
 }
 
