@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'b', 'param1' => 1.0]);
+Cerberus::runClient(['fileName' => 'a', 'param1' => 1.0]);
 // Autoupload::init();
 
 include 'reader-seb.php';
@@ -103,11 +103,12 @@ function findBestEmployee($isDev)
     return null;
 }
 
-function findBestCoworker($employee, $isDev) {
+function findBestCoworker($employee, $isDev)
+{
     global $developers, $managers;
     $employees = $isDev ? $developers : $managers;
 
-    $coworkers = array_filter($employees, function($e) use ($employee) {
+    $coworkers = array_filter($employees, function ($e) use ($employee) {
         return $e->isAvailable() && $e->company == $employee->company;
     });
 
@@ -119,7 +120,7 @@ function findBestCoworker($employee, $isDev) {
         $bonus = $coworker->bonus * $employee->bonus;
         $score = $skillsScore + $bonus;
 
-        if($best == null || $score > $bestScore) {
+        if ($best == null || $score > $bestScore) {
             $best = $coworker;
             $bestScore = $score;
         }
@@ -136,7 +137,7 @@ function visitCoord($r, $c, $employee = null)
 
     $isDev = $office[$r][$c] == '_';
     $best = findBestCoworker($employee, $isDev);
-    if($best == null) {
+    if ($best == null) {
         return;
     }
     $best->coordinates = [$r, $c];
@@ -145,31 +146,31 @@ function visitCoord($r, $c, $employee = null)
     // UP
     if ($r - 1 >= 0) {
         if ($officeUnavailable[$r - 1][$c] == 0) {
-            $queue[] = [$r, $c, $employee];
+            $queue[] = [$r - 1, $c, $employee];
         }
     }
     // LEFT
     if ($c - 1 >= 0) {
-        if ($officeUnavailable[$r][$c-1] == 0) {
-            $queue[] = [$r, $c, $employee];
+        if ($officeUnavailable[$r][$c - 1] == 0) {
+            $queue[] = [$r, $c - 1, $employee];
         }
     }
     // BOTTOM
-    if ($r + 1 <= $height) {
+    if ($r + 1 < $height) {
         if ($officeUnavailable[$r + 1][$c] == 0) {
-            $queue[] = [$r, $c, $employee];
+            $queue[] = [$r + 1, $c, $employee];
         }
     }
     // RIGHT
-    if ($c + 1 <= $width) {
-        if ($officeUnavailable[$r][$c+1] == 0) {
-            $queue[] = [$r, $c, $employee];
+    if ($c + 1 < $width) {
+        if ($officeUnavailable[$r][$c + 1] == 0) {
+            $queue[] = [$r, $c + 1, $employee];
         }
     }
 
-    if(!empty($queue)) {
+    if (!empty($queue)) {
         $toPop = array_shift($queue);
-        visitCoord($toPop[0],$toPop[1],$toPop[2]);
+        visitCoord($toPop[0], $toPop[1], $toPop[2]);
     }
 }
 
@@ -178,38 +179,38 @@ while (!isMapFull()) {
     list($r, $c) = findFirstDeskAvailable();
     $isDev = $office[$r][$c] == '_';
     $bestEmployee = findBestEmployee($isDev);
-    if($bestEmployee) {
+    if ($bestEmployee) {
         $bestEmployee->coordinates = [$r, $c];
         $officeUnavailable[$r][$c] = 1;
 
         // UP
         if ($r - 1 >= 0) {
             if ($officeUnavailable[$r - 1][$c] == 0) {
-                $queue[] = [$r, $c, $bestEmployee];
+                $queue[] = [$r - 1, $c, $bestEmployee];
             }
         }
         // LEFT
         if ($c - 1 >= 0) {
-            if ($officeUnavailable[$r][$c-1] == 0) {
-                $queue[] = [$r, $c, $bestEmployee];
+            if ($officeUnavailable[$r][$c - 1] == 0) {
+                $queue[] = [$r, $c - 1, $bestEmployee];
             }
         }
         // BOTTOM
-        if ($r + 1 <= $height) {
+        if ($r + 1 < $height) {
             if ($officeUnavailable[$r + 1][$c] == 0) {
-                $queue[] = [$r, $c, $bestEmployee];
+                $queue[] = [$r + 1, $c, $bestEmployee];
             }
         }
         // RIGHT
-        if ($c + 1 <= $width) {
-            if ($officeUnavailable[$r][$c+1] == 0) {
-                $queue[] = [$r, $c, $bestEmployee];
+        if ($c + 1 < $width) {
+            if ($officeUnavailable[$r][$c + 1] == 0) {
+                $queue[] = [$r, $c + 1, $bestEmployee];
             }
         }
 
-        if(!empty($queue)) {
+        if (!empty($queue)) {
             $toPop = array_shift($queue);
-            visitCoord($toPop[0],$toPop[1],$toPop[2]);
+            visitCoord($toPop[0], $toPop[1], $toPop[2]);
         }
     }
     Log::out('Placed first group');
@@ -226,14 +227,14 @@ usort($managers, function ($a, $b) {
 Log::out('Output...');
 $output = '';
 foreach ($developers as $dev) {
-    if($dev->isAvailable()) {
+    if ($dev->isAvailable()) {
         $output .= 'X' . PHP_EOL;
     } else {
         $output .= $dev->coordinates[1] . ' ' . $dev->coordinates[0] . PHP_EOL;
     }
 }
 foreach ($managers as $man) {
-    if($man->isAvailable()) {
+    if ($man->isAvailable()) {
         $output .= 'X' . PHP_EOL;
     } else {
         $output .= $man->coordinates[1] . ' ' . $man->coordinates[0] . PHP_EOL;
