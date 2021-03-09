@@ -2,7 +2,7 @@
 
 use Utils\Analysis\Analyzer;
 
-$fileName = 'a';
+$fileName = 'b';
 
 include 'reader.php';
 
@@ -20,9 +20,9 @@ $analyzer = new Analyzer($fileName, [
     'companies' => count($COMPANIES),
     'skills' => count($SKILLS),
 ]);
-$analyzer->addDataset('developers', $DEVELOPERS, ['company', 'bonus', 'skills']);
-$analyzer->addDataset('project managers', $PROJECTMANAGERS, ['company', 'bonus']);
-$analyzer->addDataset('companies', $COMPANIES, ['name', 'inDevelopers', 'inProjectManagers']);
-$analyzer->addDataset('skills', $SKILLS, ['name', 'inDevelopers']);
+$analyzer->addDataset('developers', $DEVELOPERS, [ 'bonus', 'skills']);
+$analyzer->addDataset('project managers', $PROJECTMANAGERS, [ 'bonus']);
+$analyzer->addDataset('companies', $COMPANIES, [ 'inDevelopers', 'inProjectManagers']);
+$analyzer->addDataset('skills', $SKILLS, ['inDevelopers']);
 
 $analyzer->analyze();
