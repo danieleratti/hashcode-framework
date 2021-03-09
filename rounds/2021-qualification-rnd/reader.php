@@ -51,7 +51,7 @@ class ProjectManager extends Employee
     {
         parent::__construct($company, $bonus);
         $this->id = self::$lastId++;
-        $company->inProjctManagers[] = $this;
+        $company->inProjectManagers[] = $this;
     }
 }
 
@@ -88,7 +88,7 @@ class Company
     /** @var Developer[] */
     public $inDevelopers;
     /** @var ProjectManager[] */
-    public $inProjctManagers;
+    public $inProjectManagers;
 
     public $mediumBonus;
 
@@ -99,7 +99,7 @@ class Company
         $this->id = self::$lastId++;
         $this->name = $name;
         $this->inDevelopers = [];
-        $this->inProjctManagers = [];
+        $this->inProjectManagers = [];
     }
 }
 

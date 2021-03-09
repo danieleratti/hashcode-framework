@@ -22,7 +22,7 @@ $analyzer = new Analyzer($fileName, [
 ]);
 $analyzer->addDataset('developers', $DEVELOPERS, ['company', 'bonus', 'skills']);
 $analyzer->addDataset('project managers', $PROJECTMANAGERS, ['company', 'bonus']);
-$analyzer->addDataset('companies', $COMPANIES, ['mame', 'inDevelopers', 'inProjectManagers']);
+$analyzer->addDataset('companies', $COMPANIES, ['name', 'inDevelopers', 'inProjectManagers']);
 $analyzer->addDataset('skills', $SKILLS, ['name', 'inDevelopers']);
 
 $analyzer->analyze();
