@@ -25,7 +25,7 @@ $COMPANIES = collect($COMPANIES)->keyBy('id');
 $COMPANIES = $COMPANIES->sortByDesc('mediumBonus');
 
 // Punto di partenza della spirale
-$currentCell = $MAP->map[0][1];
+$currentCell = $MAP->map[1][0];
 
 do {
     /** @var Company $company */

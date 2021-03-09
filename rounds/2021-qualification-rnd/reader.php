@@ -197,7 +197,7 @@ $managerCells=0;
 for ($i = 0; $i < $HEIGHT; $i++) {
     $column = str_split($content[1 + $i]);
     foreach ($column as $j => $r) {
-        $map[$i][$j] = new Cell($r, $i, $j);
+        $map[$i][$j] = new Cell($r, $j, $i);
         if($r==='_')
             $devCells++;
         if($r==='M')
