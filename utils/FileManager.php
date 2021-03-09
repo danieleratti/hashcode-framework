@@ -24,7 +24,7 @@ class FileManager
 
     private function getFileByStart($query)
     {
-        foreach (DirUtils::listFiles(self::$inputDir) as $fileName) {
+        foreach (DirUtils::listFiles(DirUtils::getScriptDir() . '/' . self::$inputDir) as $fileName) {
             if (substr($fileName, 0, strlen($query)) === $query)
                 return $fileName;
         }
