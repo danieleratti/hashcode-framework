@@ -11,7 +11,7 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = null;
 $param1 = null;
-Cerberus::runClient(['fileName' => 'a', 'param1' => 1.0]);
+Cerberus::runClient(['fileName' => 'b', 'param1' => 1.0]);
 // Autoupload::init();
 
 include 'reader-seb.php';
@@ -32,13 +32,6 @@ $SCORE = 0;
 
 /* ALGO */
 Log::out("Run with fileName $fileName");
-$descCompanies = $companies;
-array_multisort($descCompanies, SORT_DESC, array_keys($descCompanies));
-$mostPopularCompany = array_keys($descCompanies)[0];
-$ascCompanies = $companies;
-array_multisort($ascCompanies, SORT_ASC, array_keys($descCompanies), 'bonus');
-$worstPopularCompany = array_keys($ascCompanies)[0];
-$keys = array_keys($developers);
 
 function employeeCompare($a, $b)
 {
@@ -47,13 +40,6 @@ function employeeCompare($a, $b)
 
 usort($developers, "employeeCompare");
 usort($managers, "employeeCompare");
-
-$keys = array_keys($managers);
-array_multisort(
-    array_column($managers, 'bonus'), SORT_DESC, SORT_NUMERIC, $managers, $keys
-);
-
-$managers = array_combine($keys, $managers);
 
 // Map of unavailable places of the office
 $officeUnavailable = [];
@@ -82,10 +68,18 @@ function isMapFull()
 
 function findFirstDeskAvailable()
 {
-    global $officeUnavailable, $width, $height;
+    global $office, $officeUnavailable, $width, $height;
     for ($i = 0; $i < $height; $i++) {
         for ($j = 0; $j < $width; $j++) {
-            if ($officeUnavailable[$i][$j] == 0) {
+            if ($officeUnavailable[$i][$j] == 0 && $office[$i][$j] == 'M') {
+                return [$i, $j];
+            }
+        }
+    }
+
+    for ($i = 0; $i < $height; $i++) {
+        for ($j = 0; $j < $width; $j++) {
+            if ($officeUnavailable[$i][$j] == 0 && $office[$i][$j] == '_') {
                 return [$i, $j];
             }
         }
@@ -121,7 +115,7 @@ function findBestCoworker($employee, $isDev) {
     $bestScore = 0;
     foreach ($coworkers as $coworker) {
         $intersection = array_intersect($coworker->skills, $employee->skills);
-        $skillsScore = count($intersection) - count(array_diff(array_unique(array_merge($coworker->skills, $employee->skills)), $intersection));
+        $skillsScore = $employee->type == 'M' ? 0 : count($intersection) - count(array_diff(array_unique(array_merge($coworker->skills, $employee->skills)), $intersection));
         $bonus = $coworker->bonus * $employee->bonus;
         $score = $skillsScore + $bonus;
 
@@ -196,9 +190,11 @@ while (!isMapFull()) {
     list($r, $c) = findFirstDeskAvailable();
     $isDev = $office[$r][$c] == '_';
     $bestEmployee = findBestEmployee($isDev);
-    $bestEmployee->coordinates = [$r, $c];
-    $officeUnavailable[$r][$c] = 1;
-    spreadCompany($r, $c, $bestEmployee);
+    if($bestEmployee) {
+        $bestEmployee->coordinates = [$r, $c];
+        $officeUnavailable[$r][$c] = 1;
+        spreadCompany($r, $c, $bestEmployee);
+    }
     Log::out('Placed first group');
 }
 
@@ -216,14 +212,14 @@ foreach ($developers as $dev) {
     if($dev->isAvailable()) {
         $output .= 'X' . PHP_EOL;
     } else {
-        $output .= $dev->coordinates[0] . ' ' . $dev->coordinates[1] . PHP_EOL;
+        $output .= $dev->coordinates[1] . ' ' . $dev->coordinates[0] . PHP_EOL;
     }
 }
 foreach ($managers as $man) {
     if($man->isAvailable()) {
         $output .= 'X' . PHP_EOL;
     } else {
-        $output .= $man->coordinates[0] . ' ' . $man->coordinates[1] . PHP_EOL;
+        $output .= $man->coordinates[1] . ' ' . $man->coordinates[0] . PHP_EOL;
     }
 }
 $fileManager->outputV2($output, 'score_' . $SCORE);
