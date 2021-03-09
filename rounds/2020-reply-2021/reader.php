@@ -150,10 +150,10 @@ class Developer extends Replier
     {
         global $skill2Developers;
         $ret = parent::getPossibleRepliers();
-        /*foreach ($this->skills as $skill) {
+        foreach ($this->skills as $skill) {
             foreach ($skill2Developers[$skill] as $developer)
                 $ret[] = $developer;
-        }*/ // <-- RIMOSSA TEMPORANEAMENTE! RIMETTERE!!!!!!!
+        } // <-- RIMOSSA TEMPORANEAMENTE! RIMETTERE!!!!!!!
         return $ret;
     }
 }
@@ -254,13 +254,13 @@ $freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toAr
 
 Log::out("Populating " . count($DEVELOPERS) . " developers");
 foreach ($DEVELOPERS as $idx => $developer) {
-    Log::out("$idx / " . count($DEVELOPERS));
+    Log::out("$fileName => $idx / " . count($DEVELOPERS));
     $developer->initBestList();
 }
 
 Log::out("Populating " . count($MANAGERS) . " managers");
 foreach ($MANAGERS as $idx => $manager) {
-    Log::out("$idx / " . count($MANAGERS));
+    Log::out("$fileName => $idx / " . count($MANAGERS));
     $manager->initBestList();
 }
 
