@@ -12,7 +12,7 @@ require_once '../../bootstrap.php';
 $fileName = 'a';
 Cerberus::runClient(['fileName' => $fileName]);
 Autoupload::init();
-include 'dr-reader.php';
+include 'rnd-reader.php';
 
 /* VARIABLES */
 /** @var FileManager $fileManager */
