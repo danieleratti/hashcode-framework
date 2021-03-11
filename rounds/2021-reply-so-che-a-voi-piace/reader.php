@@ -12,25 +12,37 @@ use Utils\Log;
 $fileName = @$fileName ?: 'a';
 
 // Classes
-class Foo
+class Building
 {
-    private static $lastId = 0;
-    /** @var int $id */
-    //public $id;
-    /** @var string $name */
-    public $name;
-    /** @var Foo[] $queue */
-    public $queue = [];
+    public $positions = [];
+    public $latency = 0;
+    public $speed = 0;
 
-    public function __construct()
+    public function __construct($id, $positions, $latency, $speed)
     {
-        //$this->id = self::$lastId++;
-        //$this->name = $name;
+        $this->id = $id;
+        $this->positions = $positions;
+        $this->latency = $latency;
+        $this->speed = $speed;
+    }
+}
+
+class Antenna
+{
+    public $range = 0;
+    public $speed = 0;
+
+    public function __construct($id, $range, $speed)
+    {
+        $this->id = $id;
+        $this->range = $range;
+        $this->speed = $speed;
     }
 }
 
 // Variables
-$FOO = 0;
+$H = 0;
+$W = 0;
 $FOOS = [];
 
 // Reading the inputs
