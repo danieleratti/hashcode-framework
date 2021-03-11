@@ -13,8 +13,8 @@ class FileManager
 
     public function __construct($name)
     {
-        $this->inputName = $this->getFileByStart($name);
-        $this->fileContent = trim(file_get_contents(DirUtils::getScriptDir() . '/' . self::$inputDir . '/' . $this->inputName));
+        $this->inputName = $name . '.txt'; /* $this->getFileByStart($name); */
+        $this->fileContent = trim(file_get_contents('./' . self::$inputDir . '/' . $this->inputName));
     }
 
     public function get()
