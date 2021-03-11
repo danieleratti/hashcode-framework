@@ -30,10 +30,10 @@ class Building
     public function __construct($r, $c, $latency, $speed)
     {
         $this->id = self::$lastId++;
-        $this->r = $r;
-        $this->c = $c;
-        $this->latency = $latency;
-        $this->speed = $speed;
+        $this->r = (int)$r;
+        $this->c = (int)$c;
+        $this->latency = (int)$latency;
+        $this->speed = (int)$speed;
     }
 }
 
@@ -51,8 +51,8 @@ class Antenna
     public function __construct($range, $speed)
     {
         $this->id = self::$lastId++;
-        $this->range = $range;
-        $this->speed = $speed;
+        $this->range = (int)$range;
+        $this->speed = (int)$speed;
     }
 }
 
