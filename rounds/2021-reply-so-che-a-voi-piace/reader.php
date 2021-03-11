@@ -43,6 +43,7 @@ class Antenna
 // Variables
 $H = 0;
 $W = 0;
+$totalBuildings = 0;
 $FOOS = [];
 
 // Reading the inputs
@@ -50,7 +51,10 @@ Log::out("Reading file");
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-list($foo1, $foo2) = explode(" ", $content[0]);
-$foo1 = (int)$foo1;
+list($W, $H) = explode(" ", $content[0]);
+
+list($totalBuildings, $totalAntennas, $finalReward) = explode(" ", $content[1]);
+
+
 
 Log::out("Read finished");
