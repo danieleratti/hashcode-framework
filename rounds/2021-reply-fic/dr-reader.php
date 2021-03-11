@@ -12,20 +12,47 @@ use Utils\Log;
 $fileName = @$fileName ?: 'a';
 
 // Classes
-class Foo
+class Building
 {
     private static $lastId = 0;
-    /** @var int $id */
-    //public $id;
-    /** @var string $name */
-    public $name;
-    /** @var Foo[] $queue */
-    public $queue = [];
 
-    public function __construct()
+    /** @var int $id */
+    public $id;
+    /** @var int $range */
+    public $range;
+    /** @var int $speed */
+    public $speed;
+
+    public function __construct($range, $speed)
     {
-        //$this->id = self::$lastId++;
-        //$this->name = $name;
+        $this->id = self::$lastId++;
+        $this->range = $range;
+        $this->speed = $speed;
+    }
+}
+
+class Antenna
+{
+    private static $lastId = 0;
+
+    /** @var int $id */
+    public $id;
+    /** @var int $r */
+    public $r;
+    /** @var int $c */
+    public $c;
+    /** @var int $latency */
+    public $latency;
+    /** @var int $speed */
+    public $speed;
+
+    public function __construct($r, $c, $latency, $speed)
+    {
+        $this->id = self::$lastId++;
+        $this->r = $r;
+        $this->c = $c;
+        $this->latency = $latency;
+        $this->speed = $speed;
     }
 }
 
@@ -38,7 +65,34 @@ Log::out("Reading file");
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-list($foo1, $foo2) = explode(" ", $content[0]);
-$foo1 = (int)$foo1;
+[$W, $H] = explode(" ", $content[0]);
+$W = (int)$W;
+$H = (int)$H;
+[$buildingsCount, $antennasCount, $reward] = explode(" ", $content[1]);
+$buildingsCount = (int)$buildingsCount;
+$antennasCount = (int)$antennasCount;
+$reward = (int)$reward;
+array_splice($content, 0, 2);
+
+// Buildings
+$buildingsCount = (int)$content[0];
+/** @var Building[] $BUILDINGS */
+$BUILDINGS = [];
+for ($i = 0; $i < $buildingsCount; $i++) {
+    [$c, $r, $latency, $speed] = explode(' ', $content[$i]);
+    $b = new Building($r, $c, $latency, $speed);
+    $BUILDINGS[$b->id] = $b;
+}
+array_splice($content, 0, $buildingsCount);
+
+// Antennas
+/** @var Antenna[] $ANTENNAS */
+$ANTENNAS = [];
+for ($i = 0; $i < $antennasCount; $i++) {
+    [$range, $speed] = explode(' ', $content[$i]);
+    $a = new Antenna($range, $speed);
+    $ANTENNAS[$a->id] = $a;
+}
+array_splice($content, 0, $antennasCount);
 
 Log::out("Read finished");
