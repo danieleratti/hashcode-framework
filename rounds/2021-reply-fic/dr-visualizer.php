@@ -9,14 +9,15 @@ $fileName = 'a';
 
 include __DIR__ . '/dr-reader.php';
 
-/** @var int $rows */
-/** @var int $columns */
-/** @var int $vehicles */
-/** @var int $rides */
-/** @var int $bonus */
-/** @var int $steps */
+/** @var int $W */
+/** @var int $H */
+/** @var int $buildingsCount */
+/** @var int $antennasCount */
+/** @var int $reward */
+/** @var Building[] $BUILDINGS */
+/** @var Antenna[] $ANTENNAS */
 
-$visualStarts = new VisualStandard($rows, $columns);
+$visualStarts = new VisualStandard($H, $W);
 $visualFinishes = new VisualStandard($rows, $columns);
 foreach ($RIDES as $ride) {
     $visualStarts->setPixel($ride->rStart, $ride->cStart, Colors::green5);

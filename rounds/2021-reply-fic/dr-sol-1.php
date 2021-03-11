@@ -2,8 +2,6 @@
 
 use Utils\Autoupload;
 use Utils\Cerberus;
-use Utils\Collection;
-use Utils\FileManager;
 use Utils\Log;
 
 require_once __DIR__ . '/../../bootstrap.php';
@@ -15,9 +13,13 @@ Autoupload::init();
 include __DIR__ . '/dr-reader.php';
 
 /* VARIABLES */
-/** @var FileManager $fileManager */
-/** @var Collection|Foo[] $FOO */
-/** @var int $DURATION */
+/** @var int $W */
+/** @var int $H */
+/** @var int $buildingsCount */
+/** @var int $antennasCount */
+/** @var int $reward */
+/** @var Building[] $BUILDINGS */
+/** @var Antenna[] $ANTENNAS */
 
 $SCORE = 0;
 
