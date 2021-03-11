@@ -8,7 +8,7 @@ use Utils\Log;
 require_once __DIR__ . '/../../bootstrap.php';
 
 /* CONFIG */
-$fileName = 'b';
+$fileName = 'f';
 Cerberus::runClient(['fileName' => $fileName]);
 Autoupload::init();
 include __DIR__ . '/dr-reader.php';
@@ -135,7 +135,7 @@ function placeAntenna($antenna, $r, $c)
     foreach ($buildings as $_building) {
         $building = $_building['building'];
         $score = calcScore($antenna, $building);
-        if ($score > $building->score) {
+        if ($score >= $building->score) {
             $deltaScore = $score - $building->score;
             $building->score = $score;
             $SCORE += $deltaScore;
@@ -149,6 +149,35 @@ function placeAntenna($antenna, $r, $c)
             }
         }
     }
+}
+
+function deltaScoreIfAntennaPlaced($antenna, $r, $c)
+{
+    global $bigPixel2antennas, $SCORE, $placedAntennas, $remainingAntennas, $reachedBuildings, $unreachedBuildings, $rewardGiven, $reward;
+    $DELTASCORE = 0;
+
+    // bigPixel
+    $antenna->placed = true;
+    $antenna->r = $r;
+    $antenna->c = $c;
+    $bigPixel = getBigPixel($antenna->r, $antenna->c);
+    $bigPixel2antennas[$bigPixel[0]][$bigPixel[1]][$antenna->id] = $antenna;
+
+    // scores
+    $buildingScoreOverride = [];
+    $buildings = getNearBuildings($antenna->r, $antenna->c, $antenna->range);
+    foreach ($buildings as $_building) {
+        $building = $_building['building'];
+        $score = calcScore($antenna, $building);
+        if (!$buildingScoreOverride[$building->id])
+            $buildingScoreOverride[$building->id] = $building->score;
+        if ($score >= $buildingScoreOverride[$building->id]) {
+            $deltaScore = $score - $buildingScoreOverride[$building->id];
+            $buildingScoreOverride[$building->id] = $score;
+            $DELTASCORE += $deltaScore;
+        }
+    }
+    return $DELTASCORE;
 }
 
 /**
@@ -185,6 +214,7 @@ $C_BUILDINGS = $C_BUILDINGS->keyBy('id');
 $orderedSpeedAntennas = $C_ANTENNAS->sortByDesc('speed');
 $orderedSpeedBuildings = $C_BUILDINGS->sortByDesc('speed');
 
+/*
 foreach ($orderedSpeedBuildings as $building) {
     Log::out("Placed " . count($placedAntennas) . " antennas");
     if (count($orderedSpeedAntennas) == 0)
@@ -192,6 +222,31 @@ foreach ($orderedSpeedBuildings as $building) {
     $antenna = $orderedSpeedAntennas->first();
     placeAntenna($antenna, $building->r, $building->c);
     $orderedSpeedAntennas->forget($antenna->id);
+}
+*/
+
+$takeN = 10;
+foreach ($orderedSpeedAntennas as $antenna) {
+    $possibleBuildings = $orderedSpeedBuildings->take($takeN);
+    $bestDeltaScore = 0;
+    $bestBuilding = null;
+
+    foreach ($possibleBuildings as $possibleBuilding) {
+        $deltaScore = deltaScoreIfAntennaPlaced($antenna, $possibleBuilding->r, $possibleBuilding->c);
+        if ($deltaScore > $bestDeltaScore) {
+            $bestDeltaScore = $deltaScore;
+            $bestBuilding = $possibleBuilding;
+        }
+    }
+
+    //if (!$bestBuilding)
+    //    Log::error("No best buildings... ?");
+
+    if ($bestBuilding) {
+        placeAntenna($antenna, $bestBuilding->r, $bestBuilding->c);
+        $orderedSpeedBuildings->forget($bestBuilding->id);
+        Log::out("Placed " . count($placedAntennas) . " antennas / " . count($remainingAntennas) . " => " . $SCORE);
+    }
 }
 
 
