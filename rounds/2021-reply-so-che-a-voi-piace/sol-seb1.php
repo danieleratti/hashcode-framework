@@ -9,8 +9,11 @@ use Utils\Log;
 require_once '../../bootstrap.php';
 
 /* CONFIG */
+
 $fileName = 'a';
+
 Cerberus::runClient(['fileName' => $fileName]);
+
 Autoupload::init();
 include 'reader.php';
 
@@ -37,6 +40,4 @@ function getOutput($semaphores)
 /* ALGO */
 
 
-/* SCORING & OUTPUT */
-Log::out("SCORE($fileName) = ");
-//$fileManager->outputV2(getOutput([]), 'score_' . $SCORE);
+$fileManager->outputV2(getOutput([]), 'score_' . $SCORE);
