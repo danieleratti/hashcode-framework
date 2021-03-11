@@ -26,6 +26,8 @@ class Building
     public $latency;
     /** @var int $speed */
     public $speed;
+    /** @var int $score */
+    public $score = 0;
 
     public function __construct($r, $c, $latency, $speed)
     {
@@ -47,6 +49,12 @@ class Antenna
     public $range;
     /** @var int $speed */
     public $speed;
+    /** @var int $placed */
+    public $placed = false;
+    /** @var int $r */
+    public $r;
+    /** @var int $c */
+    public $c;
 
     public function __construct($range, $speed)
     {
