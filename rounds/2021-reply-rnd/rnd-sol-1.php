@@ -10,8 +10,8 @@ require_once '../../bootstrap.php';
 
 /* CONFIG */
 $fileName = 'a';
-Cerberus::runClient(['fileName' => $fileName]);
-Autoupload::init();
+//Cerberus::runClient(['fileName' => $fileName]);
+//Autoupload::init();
 include 'rnd-reader.php';
 
 /* VARIABLES */

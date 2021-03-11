@@ -65,7 +65,7 @@ class Map
     /** @var int $height */
     public $height;
 
-    public function __construct($map, $height, $width, $devCells, $manCells)
+    public function __construct($map, $height, $width)
     {
         $this->map = $map;
         $this->height = $height;
@@ -94,8 +94,9 @@ class Cell
 
 
 // Variables
-$BUILDINGS;
-$ANTENNAS;
+$BUILDINGS = [];
+$ANTENNAS = [];
+$map = [];
 
 // Reading the inputs
 Log::out("Reading file");
@@ -107,12 +108,23 @@ list($WIDTH, $HEIGHT) = explode(" ", $content[0]);
 list($NBUILDINGS, $NANTENNAS, $REWARD) = explode(" ", $content[1]);
 
 for ($i = 0; $i < $NBUILDINGS; $i++) {
-    list($NBUILDINGS, $NANTENNAS, $REWARD) = explode(" ", $content[1]);
+    list($x, $y, $latency, $weight) = explode(" ", $content[2 + $i]);
+    $cell = new Cell($x, $y);
+    $building = new Building($latency, $weight);
+    $building->cell = $cell;
+    $cell->building = $building;
+    $BUILDINGS[] = $building;
+    $map[$x][$y] = $cell;
 }
 
 for ($i = 0; $i < $NANTENNAS; $i++) {
-    list($NBUILDINGS, $NANTENNAS, $REWARD) = explode(" ", $content[1]);
+    list($range, $speed) = explode(" ", $content[2 + $NANTENNAS + 1 + $i]);
+    $antenna = new Antenna($range, $speed);
+    $ANTENNAS[] = $antenna;
 }
 
+$MAP = new Map($map, $HEIGHT, $WIDTH);
+$BUILDINGS = collect($BUILDINGS)->keyBy('id');
+$ANTENNAS = collect($ANTENNAS)->keyBy('id');
 
 Log::out("Read finished");
