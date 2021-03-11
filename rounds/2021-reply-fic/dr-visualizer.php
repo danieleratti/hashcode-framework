@@ -7,7 +7,7 @@ use Utils\Visual\VisualStandard;
 
 $fileName = 'a';
 
-include 'dr-reader.php';
+include __DIR__ . '/dr-reader.php';
 
 /** @var int $rows */
 /** @var int $columns */
@@ -18,9 +18,9 @@ include 'dr-reader.php';
 
 $visualStarts = new VisualStandard($rows, $columns);
 $visualFinishes = new VisualStandard($rows, $columns);
-foreach($RIDES as $ride) {
+foreach ($RIDES as $ride) {
     $visualStarts->setPixel($ride->rStart, $ride->cStart, Colors::green5);
     $visualFinishes->setPixel($ride->rFinish, $ride->cFinish, Colors::red5);
 }
-$visualStarts->save($fileName."_starts");
-$visualFinishes->save($fileName."_finishes");
+$visualStarts->save($fileName . "_starts");
+$visualFinishes->save($fileName . "_finishes");

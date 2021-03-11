@@ -6,7 +6,7 @@ use Utils\Graph;
 
 $fileName = 'a';
 
-include 'dr-reader.php';
+include __DIR__ . '/dr-reader.php';
 
 /** @var Collection|Street[] $STREETS */
 /** @var Collection|Intersection[] $INTERSECTIONS */
