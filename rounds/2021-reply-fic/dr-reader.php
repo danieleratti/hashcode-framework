@@ -28,6 +28,8 @@ class Building
     public $speed;
     /** @var int $score */
     public $score = 0;
+    /** @var bool $reached */
+    public $reached = false;
 
     public function __construct($r, $c, $latency, $speed)
     {

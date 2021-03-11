@@ -26,6 +26,8 @@ define('bigPixelSize', 100); // TUNE THIS
 $SCORE = 0;
 $bigPixel2antennas = [];
 $bigPixel2buildings = [];
+$reachedBuildings = [];
+$unreachedBuildings = [];
 
 /* FUNCTIONS */
 /**
@@ -52,13 +54,7 @@ function getBigPixel($r, $c)
 
 function getNearBuildings($r, $c, $range)
 {
-    global $bigPixel2buildings, $BUILDINGS;
-
-    //if ($range == -1)
-    //    return $BUILDINGS;
-
-    //if (!$bigPixelNeighbors)
-    //    $bigPixelNeighbors = bigPixelNeighbors;
+    global $bigPixel2buildings;
 
     $bigPixelNeighbors = ceil($range / bigPixelSize);
     $bigPixel = getBigPixel($r, $c);
@@ -69,9 +65,9 @@ function getNearBuildings($r, $c, $range)
     for ($_r = $r - $bigPixelNeighbors; $_r <= $r + $bigPixelNeighbors; $_r++) {
         for ($_c = $c - $bigPixelNeighbors; $_c <= $c + $bigPixelNeighbors; $_c++) {
             if ($bigPixel2buildings[$_r][$_c]) {
-                foreach($bigPixel2buildings[$_r][$_c] as $building) {
+                foreach ($bigPixel2buildings[$_r][$_c] as $building) {
                     $dist = dist($r, $c, $building->r, $building->c);
-                    if($dist <= $range)
+                    if ($dist <= $range)
                         $buildings[] = ['building' => $building, 'distance' => $dist];
                 }
                 //$buildings = array_merge($buildings, $bigPixel2buildings[$_r][$_c]);
@@ -82,13 +78,82 @@ function getNearBuildings($r, $c, $range)
     return $buildings;
 }
 
+function getNearAntennas($r, $c, $range)
+{
+    global $bigPixel2antennas;
+
+    $bigPixelNeighbors = ceil($range / bigPixelSize);
+    $bigPixel = getBigPixel($r, $c);
+    $r = $bigPixel[0];
+    $c = $bigPixel[1];
+
+    $antennas = [];
+    for ($_r = $r - $bigPixelNeighbors; $_r <= $r + $bigPixelNeighbors; $_r++) {
+        for ($_c = $c - $bigPixelNeighbors; $_c <= $c + $bigPixelNeighbors; $_c++) {
+            if ($bigPixel2antennas[$_r][$_c]) {
+                foreach ($bigPixel2antennas[$_r][$_c] as $antenna) {
+                    $dist = dist($r, $c, $antenna->r, $antenna->c);
+                    if ($dist <= $range)
+                        $antennas[] = ['antenna' => $antenna, 'distance' => $dist];
+                }
+            }
+        }
+    }
+
+    return $antennas;
+}
+
+/**
+ * @param Antenna $antenna
+ * @param $r
+ * @param $c
+ */
+function placeAntenna($antenna, $r, $c)
+{
+    global $bigPixel2antennas, $SCORE;
+
+    // bigPixel
+    $antenna->placed = true;
+    $antenna->r = $r;
+    $antenna->c = $c;
+    $bigPixel = getBigPixel($antenna->r, $antenna->c);
+    $bigPixel2antennas[$bigPixel[0]][$bigPixel[1]][$antenna->id] = $antenna;
+
+    // scores
+    $buildings = getNearBuildings($antenna->r, $antenna->c, $antenna->range);
+    foreach ($buildings as $building) {
+        $score = calcScore($antenna, $building);
+        if ($score > $building->score) {
+            $deltaScore = $score - $building->score;
+            $building->score = $score;
+            $SCORE += $deltaScore;
+        }
+    }
+}
+
+/**
+ * @param Antenna $antenna
+ * @param Building $building
+ */
+function calcScore($antenna, $building)
+{
+    $dist = dist($antenna->r, $antenna->c, $building->r, $building->c);
+    if ($dist > $antenna->range) {
+        Log::error("dist $dist > antenna->range " . $antenna->range);
+    }
+    $score = $building->speed * $antenna->speed - $building->latency * $dist; // se negativo???
+    return $score;
+}
 
 /* ALGO */
 Log::out("Heating bigPixels...");
 foreach ($BUILDINGS as $building) {
-    $bigPixel = getBigPixel($building->r, $bigPixel2buildings->c);
+    $bigPixel = getBigPixel($building->r, $building->c);
     $bigPixel2buildings[$bigPixel[0]][$bigPixel[1]][$building->id] = $building;
 }
+
+/* REAL ALGO */
+Log::out("Real algo...");
 
 $buildings = getNearBuildings(0, 0, 7);
 die();
