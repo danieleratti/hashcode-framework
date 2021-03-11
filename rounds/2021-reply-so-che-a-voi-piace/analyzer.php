@@ -8,14 +8,14 @@ $fileName = 'a';
 
 include 'reader.php';
 
-/** @var Collection|Street[] $STREETS */
-/** @var Collection|Intersection[] $INTERSECTIONS */
-/** @var Collection|Car[] $CARS */
-/** @var int $DURATION */
-/** @var int $N_INTERSECTIONS */
-/** @var int $N_STREETS */
-/** @var int $N_CARS */
-/** @var int $BONUS */
+/** @var FileManager $fileManager */
+/** @var Building[] $buildings */
+/** @var Antenna[] $antenna */
+/** @var int $W */
+/** @var int $H */
+/** @var int $totalBuildings */
+/** @var int $totalAntennas */
+/** @var int $finalReward */
 
 $analyzer = new Analyzer($fileName, [
     'duration' => $DURATION,

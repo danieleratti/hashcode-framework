@@ -9,12 +9,14 @@ $fileName = 'a';
 
 include 'reader.php';
 
-/** @var int $rows */
-/** @var int $columns */
-/** @var int $vehicles */
-/** @var int $rides */
-/** @var int $bonus */
-/** @var int $steps */
+/** @var FileManager $fileManager */
+/** @var Building[] $buildings */
+/** @var Antenna[] $antenna */
+/** @var int $W */
+/** @var int $H */
+/** @var int $totalBuildings */
+/** @var int $totalAntennas */
+/** @var int $finalReward */
 
 $visualStarts = new VisualStandard($rows, $columns);
 $visualFinishes = new VisualStandard($rows, $columns);
