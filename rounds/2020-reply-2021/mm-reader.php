@@ -1,5 +1,6 @@
 <?php
 
+use Utils\DirUtils;
 use Utils\FileManager;
 use Utils\Log;
 
@@ -90,8 +91,6 @@ abstract class Replier
     public $bonus;
     /** @var Cell $cell */
     public $cell;
-    /** @var bool $isDev */
-    public $isDev;
 
     public $bestDevelopers = [];
     public $bestManagers = [];
@@ -104,13 +103,12 @@ abstract class Replier
         $this->id = $id;
         $this->company = $company;
         $this->bonus = (int)$bonus;
-        $this->isDev = $this instanceof Developer;
     }
 
     /** nella chiave l'id */
     public function initBestList()
     {
-        global $MANAGERS, $DEVELOPERS;
+        global $MANAGERS, $DEVELOPERS, $coupleScores;
         $bestDevelopers = [];
         $bestManagers = [];
         $possibilities = $this->getPossibleRepliers();
@@ -118,7 +116,7 @@ abstract class Replier
             if ($replier->id == $this->id)
                 continue;
 
-            $score = getCoupleScore($replier, $this);
+            $score = $coupleScores[$replier->id][$this->id];
             if ($replier instanceof Developer)
                 $bestDevelopers[$replier->id] = $score;
             else
@@ -136,8 +134,6 @@ abstract class Replier
         }
         $this->originalBestDevelopers = $this->bestDevelopers;
         $this->originalBestManagers = $this->bestManagers;
-        Log::out("count(originalBestDevelopers) = " . count($this->originalBestDevelopers));
-        Log::out("count(originalBestManagers) = " . count($this->originalBestManagers));
     }
 
     public function getPossibleRepliers()
@@ -155,10 +151,14 @@ class Developer extends Replier
     /** @var string[] $skills */
     public $skills;
 
+    /** @var bool[] $reverseSkills */
+    public $reverseSkills;
+
     public function __construct($id, $company, $bonus, $skills)
     {
         parent::__construct("D_" . $id, $company, $bonus);
         $this->skills = $skills;
+        $this->reverseSkills = array_flip($skills);
     }
 
     public function getPossibleRepliers()
@@ -192,6 +192,50 @@ class Manager extends Replier
     public function __construct($id, $company, $bonus)
     {
         parent::__construct("M_" . $id, $company, $bonus);
+    }
+}
+
+function generateCoupleScores()
+{
+    global $coupleScores, $fileName, $DEVELOPERS, $MANAGERS;
+    /** @var Replier[] $REPLIERS */
+    $REPLIERS = array_merge($DEVELOPERS, $MANAGERS);
+    usort($REPLIERS, function (Replier $r1, Replier $r2) {
+        return $r1->intId > $r2->intId;
+    });
+    $coupleScores = [];
+
+    $fileDir = DirUtils::getScriptDir() . '/cache/' . $fileName . '_compressed';
+    if (file_exists($fileDir)) {
+        $content = file_get_contents($fileDir);
+        $pieces = unpack('i*', $content);
+        $i = 1;
+        while ($i < sizeof($pieces)) {
+            $coupleScores[$REPLIERS[$pieces[$i]]->id][$REPLIERS[$pieces[$i + 1]]->id] = $pieces[$i + 2];
+            $i += 3;
+        }
+        unset($content);
+        //print_r($coupleScores);
+    } else {
+        $output = '';
+        foreach ($REPLIERS as $r1) {
+            Log::out('Scoring R ' . $r1->intId);
+            foreach ($REPLIERS as $r2) {
+                if ($r1 === $r2) break;
+                if ($cs = getCoupleScore($r1, $r2)) {
+                    $coupleScores[$r1->id][$r2->id] = $cs;
+                    $coupleScores[$r2->id][$r1->id] = $cs;
+                    //Log::out($r1->intId . ' ' . $r2->intId . ' ' . $cs);
+                    $output .= pack('i', $r1->intId) . pack('i', $r2->intId) . pack('i', $cs);
+                }
+            }
+        }
+
+        $file = fopen($fileDir, 'w');
+        fwrite($file, $output);
+        fclose($file);
+        unset($output);
+        unset($file);
     }
 }
 
@@ -280,6 +324,8 @@ $freeDevelopers = $DEVELOPERS;
 $freeManagers = $MANAGERS;
 $freeDevelopersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'D')->toArray();
 $freeManagersCells = collect($CELLS)->keyBy('id')->where('type', '=', 'M')->toArray();
+
+generateCoupleScores();
 
 Log::out("Populating " . count($DEVELOPERS) . " developers");
 foreach ($DEVELOPERS as $idx => $developer) {
