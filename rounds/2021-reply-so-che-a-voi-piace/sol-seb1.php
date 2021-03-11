@@ -15,8 +15,13 @@ include 'reader.php';
 
 /* VARIABLES */
 /** @var FileManager $fileManager */
-/** @var Collection|Foo[] $FOO */
-/** @var int $DURATION */
+/** @var Building[] $buildings */
+/** @var Antenna[] $antenna */
+/** @var int $W */
+/** @var int $H */
+/** @var int $totalBuildings */
+/** @var int $totalAntennas */
+/** @var int $finalReward */
 
 $SCORE = 0;
 
