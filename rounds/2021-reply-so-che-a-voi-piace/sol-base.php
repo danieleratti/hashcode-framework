@@ -25,7 +25,7 @@ include 'reader.php';
 /** @var int $finalReward */
 
 $SCORE = 0;
-$placedAntennas = 0;
+$numPlacedAntennas = 0;
 
 /* FUNCTIONS */
 
@@ -33,7 +33,7 @@ $placedAntennas = 0;
 
 
 /* SCORING & OUTPUT */
-$output = $placedAntennas . PHP_EOL;
+$output = $numPlacedAntennas . PHP_EOL;
 foreach ($antennas as $antenna) {
     if($antenna->placed()) {
         $output .= $antenna->id . " " . $antenna->c . " " . $antenna->r . PHP_EOL;
