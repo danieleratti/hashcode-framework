@@ -56,6 +56,26 @@ class Antenna
     }
 }
 
+class Square{
+    /** @var Cell $upperRight*/
+    public $upperRight;
+    /** @var Cell $upperLeft*/
+    public $upperLeft;
+    /** @var Cell $lowerRight*/
+    public $lowerRight;
+    /** @var Cell $lowerLeft*/
+    public $lowerLeft;
+
+    public function __constructor( $ul, $ur, $ll, $lr){
+        $this->lowerRight=$lr;
+        $this->lowerLeft=$ll;
+        $this->upperLeft=$ul;
+        $this->upperRight=$ur;
+
+    }
+
+}
+
 class Map
 {
     /** @var Cell[][] $map */

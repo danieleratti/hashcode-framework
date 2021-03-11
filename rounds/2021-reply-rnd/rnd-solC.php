@@ -14,7 +14,6 @@ include 'rnd-reader.php';
 /** @var FileManager $fileManager */
 
 
-$test='123';
 $sortedBuildings = $BUILDINGS->sortByDesc('connectionSpeedWeight');
 $sortedAntennas = $ANTENNAS->sortByDesc('connectionSpeed');
 
