@@ -66,7 +66,7 @@ class Square{
     /** @var Cell $lowerLeft*/
     public $lowerLeft;
 
-    public function __constructor( $ul, $ur, $ll, $lr){
+    public function __construct( $ul, $ur, $ll, $lr){
         $this->lowerRight=$lr;
         $this->lowerLeft=$ll;
         $this->upperLeft=$ul;
@@ -138,7 +138,7 @@ for ($i = 0; $i < $NBUILDINGS; $i++) {
 }
 
 for ($i = 0; $i < $NANTENNAS; $i++) {
-    list($range, $speed) = explode(" ", $content[2 + $NANTENNAS + 1 + $i]);
+    list($range, $speed) = explode(" ", $content[2 + $BUILDINGS + 1 + $i]);
     $antenna = new Antenna($range, $speed);
     $ANTENNAS[] = $antenna;
 }
