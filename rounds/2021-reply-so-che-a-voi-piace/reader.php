@@ -25,6 +25,8 @@ class Building
     /** @var int $speedWeight */
     public $speedWeight;
 
+    public $covered = false;
+
     public function __construct($id, $c, $r, $latencyWeight, $speedWeight)
     {
         $this->id = $id;
@@ -32,6 +34,7 @@ class Building
         $this->c = $c;
         $this->latencyWeight = $latencyWeight;
         $this->speedWeight = $speedWeight;
+        $this->covered = false;
     }
 }
 

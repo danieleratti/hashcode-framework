@@ -1,0 +1,121 @@
+<?php
+use Utils\Autoupload;
+use Utils\Cerberus;
+use Utils\FileManager;
+use Utils\Log;
+
+require_once '../../bootstrap.php';
+
+
+/* CONFIG */
+$fileName = 'b';
+$MIN_B = 50;
+$MAX_A = 3;
+$MAX_FR = 3;
+Autoupload::init();
+include 'reader.php';
+/* VARIABLES */
+/** @var FileManager $fileManager */
+/** @var Building[] $buildings */
+/** @var Antenna[] $antennas */
+/** @var int $W */
+/** @var int $H */
+/** @var int $totalBuildings */
+/** @var int $totalAntennas */
+/** @var int $finalReward */
+$SCORE = 0;
+$unavailableCoords = [];
+/* FUNCTIONS */
+function randomCoords() {
+    global $W, $H;
+    return [rand(0, $H - 1), rand(0, $W - 1)];
+}
+
+
+function compareBuilding($a, $b) {
+    return $a->speedWeight > $b->speedWeight;
+}
+function compareAntenna($a, $b) {
+    return $a->speed > $b->speed;
+}
+/* ALGO */
+// Ordino edifici per speed alta e antenna per speed alta.
+usort($buildings, "compareBuilding");
+usort($antennas, "compareAntenna");
+
+
+/* ALGO */
+// TODO
+$mapAntennas = [];
+$mapBuildings = [];
+foreach ($buildings as $building) {
+    $mapBuildings[$building->r . "_" .$building->c] = $building;
+}
+$placedCount = 0;
+
+foreach ($antennas as $antenna) {
+    Log::out("Placing antenna $antenna->id");
+    $placed = false;
+    $failedRuns = 0;
+    $minBuildings = $MIN_B;
+    $maxFailedRuns = $MAX_FR;
+    $maxAntennas = $MAX_A;
+    while(!$placed) {
+        $coords = randomCoords();
+        if($mapAntennas[$coords[0] . "_" . $coords[1]]) {
+            Log::out("Antenna already present");
+            continue;
+        }
+        $range = $antenna->range;
+        $start = [$coords[0] - $range, $coords[1] - $range];
+        $end = [$coords[0] + $range, $coords[1] + $range];
+        $countBuildings = 0;
+        $countAntennas = 0;
+        for ($i = $start[0]; $i < $end[0]; $i++) {
+            for ($j = $start[1]; $j < $end[1]; $j++) {
+                if($mapBuildings[$i . "_" . $j]) {
+                    $countBuildings++;
+                }
+                if($mapAntennas[$i . "_" . $j]) {
+                    $countAntennas++;
+                }
+            }
+        }
+        if($countBuildings >= $minBuildings && $countAntennas <= $maxAntennas) {
+            // place
+            $antenna->r = $coords[0];
+            $antenna->c = $coords[1];
+            $mapAntennas[$coords[0] . "_" . $coords[1]] = $antenna;
+            $placedCount++;
+            $placed = true;
+        } else {
+            $failedRuns++;
+            if($failedRuns >= $maxFailedRuns) {
+                $minBuildings--;
+                $maxAntennas++;
+                /*
+                if($minBuildings == 0) {
+                    Log::out("Min buildings = 0");
+                    break;
+                }
+                */
+            }
+        }
+    }
+    $remaining = count($antennas) - $placedCount;
+    Log::out("Placed, remaining $remaining");
+}
+/* SCORING & OUTPUT */
+$numPlacedAntennas = 0;
+$output = "";
+foreach ($antennas as $antenna) {
+    if($antenna->placed()) {
+        $numPlacedAntennas++;
+        $output .= $antenna->id . " " . $antenna->c . " " . $antenna->r . PHP_EOL;
+    } else {
+        Log::out("Antenna not placed");
+    }
+}
+$output = $numPlacedAntennas . PHP_EOL . $output;
+Log::out("SCORE($fileName) = ");
+$fileManager->outputV2($output, 'minb' . $MIN_B . 'maxfr' . $MAX_FR);
