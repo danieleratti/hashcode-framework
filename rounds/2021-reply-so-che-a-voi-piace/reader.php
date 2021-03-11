@@ -16,17 +16,20 @@ class Building
 {
     /** @var int $id */
     public $id;
-    /** @var int[] $positions */
-    public $positions = [];
+    /** @var int $r */
+    public $r = [];
+    /** @var int $c */
+    public $c = [];
     /** @var int $latencyWeight */
     public $latencyWeight = 0;
     /** @var int $speedWeight */
     public $speedWeight = 0;
 
-    public function __construct($id, $positions, $latencyWeight, $speedWeight)
+    public function __construct($id, $r, $c, $latencyWeight, $speedWeight)
     {
         $this->id = $id;
-        $this->positions = $positions;
+        $this->r = $r;
+        $this->c = $c;
         $this->latencyWeight = $latencyWeight;
         $this->speedWeight = $speedWeight;
     }
@@ -53,10 +56,13 @@ class Antenna
 $H = 0;
 $W = 0;
 $totalBuildings = 0;
-$FOOS = [];
+$totalAntennas = 0;
+$finalReward = 0;
+$buildings = [];
+$antennas = [];
 
 // Reading the inputs
-Log::out("Reading file");
+Log::out("Reading file " . $fileName);
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
@@ -64,6 +70,16 @@ list($W, $H) = explode(" ", $content[0]);
 
 list($totalBuildings, $totalAntennas, $finalReward) = explode(" ", $content[1]);
 
+$offset = 2;
+for($i = 0; $i < $totalBuildings; $i++) {
+    list($x, $y, $latencyW, $connectionW) = explode(" ", $content[$offset + $i]);
+    $buildings[] = new Building($i, $x, $y, $latencyW, $connectionW);
+}
 
+$offset = 2 + $totalBuildings;
+for($i = 0; $i < $totalAntennas; $i++) {
+    list($range, $connectionS) = explode(" ", $content[$offset + $i]);
+    $antennas[] = new Antenna($i, $range, $connectionS);
+}
 
 Log::out("Read finished");
