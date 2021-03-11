@@ -56,21 +56,23 @@ class Antenna
     }
 }
 
-class Square{
-    /** @var Cell $upperRight*/
+class Square
+{
+    /** @var Cell $upperRight */
     public $upperRight;
-    /** @var Cell $upperLeft*/
+    /** @var Cell $upperLeft */
     public $upperLeft;
-    /** @var Cell $lowerRight*/
+    /** @var Cell $lowerRight */
     public $lowerRight;
-    /** @var Cell $lowerLeft*/
+    /** @var Cell $lowerLeft */
     public $lowerLeft;
 
-    public function __constructor( $ul, $ur, $ll, $lr){
-        $this->lowerRight=$lr;
-        $this->lowerLeft=$ll;
-        $this->upperLeft=$ul;
-        $this->upperRight=$ur;
+    public function __constructor($ul, $ur, $ll, $lr)
+    {
+        $this->lowerRight = $lr;
+        $this->lowerLeft = $ll;
+        $this->upperLeft = $ul;
+        $this->upperRight = $ur;
 
     }
 
@@ -90,6 +92,15 @@ class Map
         $this->map = $map;
         $this->height = $height;
         $this->width = $width;
+    }
+
+    public function getCell($x, $y)
+    {
+        if (!$this->map[$x][$y]) {
+            $this->map[$x][$y] = new Cell($x, $y);
+        }
+
+        return $this->map[$x][$y];
     }
 }
 
