@@ -9,7 +9,8 @@ require_once __DIR__ . '/../../bootstrap.php';
 
 /* CONFIG */
 $fileName = 'f';
-Cerberus::runClient(['fileName' => $fileName]);
+$takeN = 300;
+Cerberus::runClient(['fileName' => $fileName, 'takeN' => $takeN]);
 Autoupload::init();
 include __DIR__ . '/dr-reader.php';
 
@@ -225,7 +226,7 @@ foreach ($orderedSpeedBuildings as $building) {
 }
 */
 
-$takeN = 300;
+//$takeN = 300;
 $cycle = 0;
 foreach ($orderedSpeedBuildings as $building) {
     $possibleAntennas = $orderedSpeedAntennas->take($takeN);
