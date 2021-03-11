@@ -75,7 +75,6 @@ $reward = (int)$reward;
 array_splice($content, 0, 2);
 
 // Buildings
-$buildingsCount = (int)$content[0];
 /** @var Building[] $BUILDINGS */
 $BUILDINGS = [];
 for ($i = 0; $i < $buildingsCount; $i++) {
