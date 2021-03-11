@@ -11,8 +11,6 @@ require_once '../../bootstrap.php';
 /* CONFIG */
 $fileName = 'a';
 
-Cerberus::runClient(['fileName' => $fileName]);
-Autoupload::init();
 include 'reader.php';
 
 /* VARIABLES */
