@@ -6,7 +6,7 @@ class DirUtils
 {
     public static function getScriptDir()
     {
-        return __DIR__ . '/../' . dirname($_SERVER["SCRIPT_FILENAME"]);
+        return dirname($_SERVER["SCRIPT_FILENAME"]);
     }
 
     public static function getScriptName()

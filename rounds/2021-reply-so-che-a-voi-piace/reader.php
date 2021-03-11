@@ -43,6 +43,10 @@ class Antenna
     public $range = 0;
     /** @var int $speed */
     public $speed = 0;
+    /** @var int $r */
+    public $r = 0;
+    /** @var int $c */
+    public $c = 0;
 
     public function __construct($id, $range, $speed)
     {
@@ -50,6 +54,13 @@ class Antenna
         $this->range = $range;
         $this->speed = $speed;
     }
+
+    // public function distance($building) {
+    //     return abs($this->currentR - $ride->rStart) + abs($this->currentC - $ride->cStart);
+    // }
+
+    // public function calculateScore($building) {
+    // }
 }
 
 // Variables
