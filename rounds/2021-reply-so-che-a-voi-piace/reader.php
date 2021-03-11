@@ -54,6 +54,13 @@ class Antenna
         $this->range = $range;
         $this->speed = $speed;
     }
+
+    /**
+     * @return int score della coppia antenna - building piazziando l'antenna a $r $c
+     */
+    public function score($building, $r, $c) {
+        return ($building->speedWeight * $this->speed) - ($building->latencyWeight * distance($r, $c, $building->r, $building->c));
+    }
 }
 
 function distance($r1, $c1, $r2, $c2) {
