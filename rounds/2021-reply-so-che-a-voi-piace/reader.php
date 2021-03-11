@@ -17,9 +17,9 @@ class Building
     /** @var int $id */
     public $id;
     /** @var int $r */
-    public $r;
+    public $r = null;
     /** @var int $c */
-    public $c;
+    public $c = null;
     /** @var int $latencyWeight */
     public $latencyWeight;
     /** @var int $speedWeight */
@@ -44,9 +44,9 @@ class Antenna
     /** @var int $speed */
     public $speed;
     /** @var int $r */
-    public $r;
+    public $r = null;
     /** @var int $c */
-    public $c;
+    public $c = null;
 
     public function __construct($id, $range, $speed)
     {

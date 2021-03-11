@@ -9,7 +9,7 @@ use Utils\Log;
 require_once '../../bootstrap.php';
 
 /* CONFIG */
-$fileName = 'a';
+$fileName = 'c';
 Cerberus::runClient(['fileName' => $fileName]);
 Autoupload::init();
 include 'reader.php';
@@ -26,10 +26,43 @@ include 'reader.php';
 
 $SCORE = 0;
 $numPlacedAntennas = 0;
+$unavailableCoords = [];
 
 /* FUNCTIONS */
 
+function findAdHocBuilding($antenna) {
+    global $buildings, $unavailableCoords;
+
+    $bestBuilding = null;
+    $bestScore = 0;
+    foreach ($buildings as $building) {
+        $score = $antenna->score($building, $building->r, $building->c);
+
+        $coords = [$building->r, $building->c];
+        if(!in_array($coords, $unavailableCoords)) {
+            if($bestBuilding == null || $score > $bestScore) {
+                $bestBuilding = $building;
+                $bestScore = $score;
+            }
+        }
+    }
+
+    return $bestBuilding;
+}
+
 /* ALGO */
+
+foreach ($antennas as $antenna) {
+    if($antenna->range == 0) {
+        $remaining = count($antennas) - $numPlacedAntennas;
+        Log::out("Placing antenna ($antenna->id), placed $numPlacedAntennas, remaining $remaining");
+        $building = findAdHocBuilding($antenna);
+        $antenna->r = $building->r;
+        $antenna->c = $building->c;
+        $unavailableCoords[] = [$antenna->r, $antenna->c];
+        $numPlacedAntennas++;
+    }
+}
 
 
 /* SCORING & OUTPUT */
