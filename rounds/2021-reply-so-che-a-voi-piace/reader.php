@@ -61,6 +61,13 @@ class Antenna
     public function score($building, $r, $c) {
         return ($building->speedWeight * $this->speed) - ($building->latencyWeight * distance($r, $c, $building->r, $building->c));
     }
+
+    /**
+     * @return boolean Se l'antenna è stata piazzata
+     */
+    public function placed() {
+        return $this->r != null && $this->c != null;
+    }
 }
 
 function distance($r1, $c1, $r2, $c2) {
