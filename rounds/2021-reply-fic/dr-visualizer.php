@@ -1,8 +1,7 @@
 <?php
 
-use Utils\Analysis\Analyzer;
-use Utils\Collection;
 use Utils\Visual\Colors;
+use Utils\Visual\VisualGradient;
 use Utils\Visual\VisualStandard;
 
 $fileName = 'a';
@@ -17,11 +16,22 @@ include __DIR__ . '/dr-reader.php';
 /** @var Building[] $BUILDINGS */
 /** @var Antenna[] $ANTENNAS */
 
-$visualStarts = new VisualStandard($H, $W);
-$visualFinishes = new VisualStandard($rows, $columns);
-foreach ($RIDES as $ride) {
-    $visualStarts->setPixel($ride->rStart, $ride->cStart, Colors::green5);
-    $visualFinishes->setPixel($ride->rFinish, $ride->cFinish, Colors::red5);
+$visual = new VisualStandard($W, $H);
+$visualGradient = new VisualGradient($W, $H);
+$visualGradient2 = new VisualGradient($W, $H);
+$maxSpeed = 0;
+$maxLatency = 0;
+foreach ($BUILDINGS as $building) {
+    $maxSpeed = max($maxSpeed, $building->speed);
+    $maxLatency = max($maxLatency, $building->latency);
 }
-$visualStarts->save($fileName . "_starts");
-$visualFinishes->save($fileName . "_finishes");
+foreach ($BUILDINGS as $building) {
+    $visual->setPixel($building->r, $building->c, Colors::green5);
+    $visualGradient->setPixel($building->r, $building->c, $building->speed / $maxSpeed - 000.1);
+    $visualGradient2->setPixel($building->r, $building->c, $building->latency / $maxLatency - 000.1);
+}
+$visual->save($fileName . "_buildings");
+$visualGradient->save($fileName . "_speedweight");
+$visualGradient2->save($fileName . "_latencyweight");
+
+// verde = poco, rosso = tanto
