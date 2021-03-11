@@ -4,7 +4,7 @@ ini_set('display_errors', E_ERROR);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ERROR);
 
-require_once '../../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php';
 
 use Utils\FileManager;
 use Utils\Log;

@@ -6,7 +6,7 @@ use Utils\Collection;
 use Utils\FileManager;
 use Utils\Log;
 
-require_once '../../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php';
 
 /* CONFIG */
 $fileName = 'a';
