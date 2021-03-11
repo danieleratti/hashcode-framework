@@ -14,22 +14,31 @@ $fileName = @$fileName ?: 'a';
 // Classes
 class Building
 {
+    /** @var int $id */
+    public $id;
+    /** @var int[] $positions */
     public $positions = [];
-    public $latency = 0;
-    public $speed = 0;
+    /** @var int $latencyWeight */
+    public $latencyWeight = 0;
+    /** @var int $speedWeight */
+    public $speedWeight = 0;
 
-    public function __construct($id, $positions, $latency, $speed)
+    public function __construct($id, $positions, $latencyWeight, $speedWeight)
     {
         $this->id = $id;
         $this->positions = $positions;
-        $this->latency = $latency;
-        $this->speed = $speed;
+        $this->latencyWeight = $latencyWeight;
+        $this->speedWeight = $speedWeight;
     }
 }
 
 class Antenna
 {
+    /** @var int $id */
+    public $id;
+    /** @var int $range */
     public $range = 0;
+    /** @var int $speed */
     public $speed = 0;
 
     public function __construct($id, $range, $speed)
