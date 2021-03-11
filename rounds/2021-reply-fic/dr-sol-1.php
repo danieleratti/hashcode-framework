@@ -8,7 +8,7 @@ use Utils\Log;
 require_once __DIR__ . '/../../bootstrap.php';
 
 /* CONFIG */
-$fileName = 'a';
+$fileName = 'b';
 Cerberus::runClient(['fileName' => $fileName]);
 Autoupload::init();
 include __DIR__ . '/dr-reader.php';
@@ -65,7 +65,7 @@ function getNearBuildings($realR, $realC, $range)
     global $bigPixel2buildings;
 
     $bigPixelNeighbors = ceil($range / bigPixelSize);
-    $bigPixel = getBigPixel($r, $c);
+    $bigPixel = getBigPixel($realR, $realC);
     $r = $bigPixel[0];
     $c = $bigPixel[1];
 
@@ -177,15 +177,27 @@ $remainingAntennas = $ANTENNAS;
 
 /* REAL ALGO */
 Log::out("Real algo...");
+$C_ANTENNAS = collect($ANTENNAS);
+$C_ANTENNAS = $C_ANTENNAS->keyBy('id');
+$C_BUILDINGS = collect($BUILDINGS);
+$C_BUILDINGS = $C_BUILDINGS->keyBy('id');
+
+$orderedSpeedAntennas = $C_ANTENNAS->sortByDesc('speed');
+$orderedSpeedBuildings = $C_BUILDINGS->sortByDesc('speed');
+
+foreach ($orderedSpeedBuildings as $building) {
+    Log::out("Placed " . count($placedAntennas) . " antennas");
+    if (count($orderedSpeedAntennas) == 0)
+        break;
+    $antenna = $orderedSpeedAntennas->first();
+    placeAntenna($antenna, $building->r, $building->c);
+    $orderedSpeedAntennas->forget($antenna->id);
+}
+
 
 //$buildings = getNearBuildings(0, 0, 7);
 //die();
 
-
-placeAntenna($ANTENNAS[0], 3, 12);
-placeAntenna($ANTENNAS[3], 4, 2);
-placeAntenna($ANTENNAS[2], 7, 11);
-placeAntenna($ANTENNAS[1], 6, 7);
 
 /* SCORING & OUTPUT */
 Log::out("SCORE($fileName) = $SCORE");
