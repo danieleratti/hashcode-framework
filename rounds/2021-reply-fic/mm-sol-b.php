@@ -8,7 +8,7 @@ use Utils\Log;
 require_once __DIR__ . '/../../bootstrap.php';
 
 /* CONFIG */
-$fileName = 'b';
+$fileName = 'f';
 Cerberus::runClient(['fileName' => $fileName]);
 Autoupload::init();
 include __DIR__ . '/dr-reader.php';
@@ -135,7 +135,7 @@ function placeAntenna($antenna, $r, $c)
     foreach ($buildings as $_building) {
         $building = $_building['building'];
         $score = calcScore($antenna, $building);
-        if ($score > $building->score) {
+        if ($score >= $building->score) {
             $deltaScore = $score - $building->score;
             $building->score = $score;
             $SCORE += $deltaScore;
@@ -179,7 +179,7 @@ $remainingAntennas = $ANTENNAS;
 /* REAL ALGO */
 $orderedBuildings = $BUILDINGS;
 usort($orderedBuildings, function (Building $b1, Building $b2) {
-    return ($b1->speed - $b1->latency) < ($b2->speed - $b2->latency);
+    return $b1->speed < $b2->speed;
 });
 
 $orderedAntennas = $ANTENNAS;

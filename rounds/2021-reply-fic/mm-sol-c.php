@@ -135,7 +135,7 @@ function placeAntenna($antenna, $r, $c)
     foreach ($buildings as $_building) {
         $building = $_building['building'];
         $score = calcScore($antenna, $building);
-        if ($score > $building->score) {
+        if ($score >= $building->score) {
             $deltaScore = $score - $building->score;
             $building->score = $score;
             $SCORE += $deltaScore;
