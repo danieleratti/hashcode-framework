@@ -18,25 +18,6 @@ class Building
 
     /** @var int $id */
     public $id;
-    /** @var int $range */
-    public $range;
-    /** @var int $speed */
-    public $speed;
-
-    public function __construct($range, $speed)
-    {
-        $this->id = self::$lastId++;
-        $this->range = $range;
-        $this->speed = $speed;
-    }
-}
-
-class Antenna
-{
-    private static $lastId = 0;
-
-    /** @var int $id */
-    public $id;
     /** @var int $r */
     public $r;
     /** @var int $c */
@@ -52,6 +33,25 @@ class Antenna
         $this->r = $r;
         $this->c = $c;
         $this->latency = $latency;
+        $this->speed = $speed;
+    }
+}
+
+class Antenna
+{
+    private static $lastId = 0;
+
+    /** @var int $id */
+    public $id;
+    /** @var int $range */
+    public $range;
+    /** @var int $speed */
+    public $speed;
+
+    public function __construct($range, $speed)
+    {
+        $this->id = self::$lastId++;
+        $this->range = $range;
         $this->speed = $speed;
     }
 }
