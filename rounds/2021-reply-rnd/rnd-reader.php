@@ -76,6 +76,15 @@ class Square
 
     }
 
+    public function getWidth()
+    {
+        return $this->upperRight->x - $this->upperLeft->x;
+    }
+
+    public function getHeight()
+    {
+        return $this->upperLeft->y - $this->lowerLeft->y;
+    }
 }
 
 class Map
@@ -149,7 +158,7 @@ for ($i = 0; $i < $NBUILDINGS; $i++) {
 }
 
 for ($i = 0; $i < $NANTENNAS; $i++) {
-    list($range, $speed) = explode(" ", $content[2 + $BUILDINGS + 1 + $i]);
+    list($range, $speed) = explode(" ", $content[2 + $NBUILDINGS + 1 + $i]);
     $antenna = new Antenna($range, $speed);
     $ANTENNAS[] = $antenna;
 }
