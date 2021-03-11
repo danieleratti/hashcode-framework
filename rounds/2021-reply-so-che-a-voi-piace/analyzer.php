@@ -4,13 +4,13 @@ use Utils\Analysis\Analyzer;
 use Utils\Collection;
 use Utils\Graph;
 
-$fileName = 'a';
+$fileName = 'f';
 
 include 'reader.php';
 
 /** @var FileManager $fileManager */
 /** @var Building[] $buildings */
-/** @var Antenna[] $antenna */
+/** @var Antenna[] $antennas */
 /** @var int $W */
 /** @var int $H */
 /** @var int $totalBuildings */
@@ -18,15 +18,15 @@ include 'reader.php';
 /** @var int $finalReward */
 
 $analyzer = new Analyzer($fileName, [
-    'duration' => $DURATION,
-    'intersectionsCount' => $N_INTERSECTIONS,
-    'streetsCount' => $N_STREETS,
-    'carsCount' => $N_CARS,
-    'bonus' => $BONUS,
+    'H' => $H,
+    'W' => $W,
+    'buildingCount' => $totalBuildings,
+    'antennasCount' => $totalAntennas,
+    'lastBonus' => $finalReward,
 ]);
-$analyzer->addDataset('streets', $STREETS, ['duration', 'nSemaphorePassingCars']);
-$analyzer->addDataset('intersections', $INTERSECTIONS, ['streetsIn', 'streetsOut', 'nSemaphorePassingCars']);
-$analyzer->addDataset('cars', $CARS, ['streets', 'pathDuration']);
+
+$analyzer->addDataset('buildings', $buildings, ['latencyWeight', 'speedWeight']);
+$analyzer->addDataset('antennas', $antennas, ['range', 'speed']);
 $analyzer->analyze();
 
 /*
