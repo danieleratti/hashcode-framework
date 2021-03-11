@@ -36,7 +36,7 @@ $placedAntennas = 0;
 $output = $placedAntennas . PHP_EOL;
 foreach ($antennas as $antenna) {
     if($antenna->placed()) {
-        $output .= $antenna->id . " " . $antenna->r . " " . $antenna->c . PHP_EOL;
+        $output .= $antenna->id . " " . $antenna->c . " " . $antenna->r . PHP_EOL;
     }
 }
 

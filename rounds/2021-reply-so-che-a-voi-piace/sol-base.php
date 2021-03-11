@@ -17,7 +17,7 @@ include 'reader.php';
 /* VARIABLES */
 /** @var FileManager $fileManager */
 /** @var Building[] $buildings */
-/** @var Antenna[] $antenna */
+/** @var Antenna[] $antennas */
 /** @var int $W */
 /** @var int $H */
 /** @var int $totalBuildings */
@@ -25,23 +25,20 @@ include 'reader.php';
 /** @var int $finalReward */
 
 $SCORE = 0;
+$placedAntennas = 0;
 
 /* FUNCTIONS */
-/**
- * @param $semaphores
- * @return string
- */
-function getOutput($semaphores)
-{
-    $output = [];
-    $output[] = count($semaphores);
-    $output = implode("\n", $output);
-    return $output;
-}
 
 /* ALGO */
 
 
 /* SCORING & OUTPUT */
+$output = $placedAntennas . PHP_EOL;
+foreach ($antennas as $antenna) {
+    if($antenna->placed()) {
+        $output .= $antenna->id . " " . $antenna->c . " " . $antenna->r . PHP_EOL;
+    }
+}
+
 Log::out("SCORE($fileName) = ");
-//$fileManager->outputV2(getOutput([]), 'score_' . $SCORE);
+$fileManager->outputV2($output, 'score_' . $SCORE);

@@ -25,7 +25,7 @@ class Building
     /** @var int $speedWeight */
     public $speedWeight;
 
-    public function __construct($id, $r, $c, $latencyWeight, $speedWeight)
+    public function __construct($id, $c, $r, $latencyWeight, $speedWeight)
     {
         $this->id = $id;
         $this->r = $r;
