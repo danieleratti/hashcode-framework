@@ -17,13 +17,13 @@ class Building
     /** @var int $id */
     public $id;
     /** @var int $r */
-    public $r = [];
+    public $r;
     /** @var int $c */
-    public $c = [];
+    public $c;
     /** @var int $latencyWeight */
-    public $latencyWeight = 0;
+    public $latencyWeight;
     /** @var int $speedWeight */
-    public $speedWeight = 0;
+    public $speedWeight;
 
     public function __construct($id, $r, $c, $latencyWeight, $speedWeight)
     {
@@ -40,13 +40,13 @@ class Antenna
     /** @var int $id */
     public $id;
     /** @var int $range */
-    public $range = 0;
+    public $range;
     /** @var int $speed */
-    public $speed = 0;
+    public $speed;
     /** @var int $r */
-    public $r = 0;
+    public $r;
     /** @var int $c */
-    public $c = 0;
+    public $c;
 
     public function __construct($id, $range, $speed)
     {
@@ -54,13 +54,10 @@ class Antenna
         $this->range = $range;
         $this->speed = $speed;
     }
+}
 
-    // public function distance($building) {
-    //     return abs($this->currentR - $ride->rStart) + abs($this->currentC - $ride->cStart);
-    // }
-
-    // public function calculateScore($building) {
-    // }
+function distance($r1, $c1, $r2, $c2) {
+    return abs($r1 - $c1) + abs($r2 - $c2);
 }
 
 // Variables
