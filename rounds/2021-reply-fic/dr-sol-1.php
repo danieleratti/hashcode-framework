@@ -2,6 +2,7 @@
 
 use Utils\Autoupload;
 use Utils\Cerberus;
+use Utils\FileManager;
 use Utils\Log;
 
 require_once __DIR__ . '/../../bootstrap.php';
@@ -20,24 +21,31 @@ include __DIR__ . '/dr-reader.php';
 /** @var int $reward */
 /** @var Building[] $BUILDINGS */
 /** @var Antenna[] $ANTENNAS */
+/** @var FileManager $fileManager */
 
 define('bigPixelSize', 100); // TUNE THIS
 
 $SCORE = 0;
+$rewardGiven = false;
 $bigPixel2antennas = [];
 $bigPixel2buildings = [];
 $reachedBuildings = [];
 $unreachedBuildings = [];
+$placedAntennas = [];
+$remainingAntennas = [];
 
 /* FUNCTIONS */
 /**
- * @param $semaphores
  * @return string
  */
-function getOutput($semaphores)
+function getOutput()
 {
+    global $placedAntennas;
     $output = [];
-    $output[] = count($semaphores);
+    $output[] = count($placedAntennas);
+    foreach ($placedAntennas as $antenna) {
+        $output[] = $antenna->id . " " . $antenna->c . " " . $antenna->r;
+    }
     $output = implode("\n", $output);
     return $output;
 }
@@ -52,7 +60,7 @@ function getBigPixel($r, $c)
     return [floor($r / bigPixelSize), floor($c / bigPixelSize)];
 }
 
-function getNearBuildings($r, $c, $range)
+function getNearBuildings($realR, $realC, $range)
 {
     global $bigPixel2buildings;
 
@@ -66,7 +74,7 @@ function getNearBuildings($r, $c, $range)
         for ($_c = $c - $bigPixelNeighbors; $_c <= $c + $bigPixelNeighbors; $_c++) {
             if ($bigPixel2buildings[$_r][$_c]) {
                 foreach ($bigPixel2buildings[$_r][$_c] as $building) {
-                    $dist = dist($r, $c, $building->r, $building->c);
+                    $dist = dist($realR, $realC, $building->r, $building->c);
                     if ($dist <= $range)
                         $buildings[] = ['building' => $building, 'distance' => $dist];
                 }
@@ -110,7 +118,7 @@ function getNearAntennas($r, $c, $range)
  */
 function placeAntenna($antenna, $r, $c)
 {
-    global $bigPixel2antennas, $SCORE;
+    global $bigPixel2antennas, $SCORE, $placedAntennas, $remainingAntennas, $reachedBuildings, $unreachedBuildings, $rewardGiven, $reward;
 
     // bigPixel
     $antenna->placed = true;
@@ -119,14 +127,26 @@ function placeAntenna($antenna, $r, $c)
     $bigPixel = getBigPixel($antenna->r, $antenna->c);
     $bigPixel2antennas[$bigPixel[0]][$bigPixel[1]][$antenna->id] = $antenna;
 
+    $placedAntennas[$antenna->id] = $antenna;
+    unset($remainingAntennas[$antenna->id]);
+
     // scores
     $buildings = getNearBuildings($antenna->r, $antenna->c, $antenna->range);
-    foreach ($buildings as $building) {
+    foreach ($buildings as $_building) {
+        $building = $_building['building'];
         $score = calcScore($antenna, $building);
         if ($score > $building->score) {
             $deltaScore = $score - $building->score;
             $building->score = $score;
             $SCORE += $deltaScore;
+            if ($deltaScore > 0 && $unreachedBuildings[$building->id]) {
+                $reachedBuildings[$building->id] = $building;
+                unset($unreachedBuildings[$building->id]);
+            }
+            if (!$rewardGiven && count($unreachedBuildings) == 0) {
+                $rewardGiven = true;
+                $SCORE += $reward;
+            }
         }
     }
 }
@@ -152,15 +172,21 @@ foreach ($BUILDINGS as $building) {
     $bigPixel2buildings[$bigPixel[0]][$bigPixel[1]][$building->id] = $building;
 }
 
+$unreachedBuildings = $BUILDINGS;
+$remainingAntennas = $ANTENNAS;
+
 /* REAL ALGO */
 Log::out("Real algo...");
 
-$buildings = getNearBuildings(0, 0, 7);
-die();
+//$buildings = getNearBuildings(0, 0, 7);
+//die();
 
-// megacells
 
+placeAntenna($ANTENNAS[0], 3, 12);
+placeAntenna($ANTENNAS[3], 4, 2);
+placeAntenna($ANTENNAS[2], 7, 11);
+placeAntenna($ANTENNAS[1], 6, 7);
 
 /* SCORING & OUTPUT */
-Log::out("SCORE($fileName) = ");
-//$fileManager->outputV2(getOutput([]), 'score_' . $SCORE);
+Log::out("SCORE($fileName) = $SCORE");
+$fileManager->outputV2(getOutput(), 'score_' . $SCORE);
