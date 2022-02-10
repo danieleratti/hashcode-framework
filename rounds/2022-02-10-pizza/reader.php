@@ -24,6 +24,10 @@ class Client
 class Ingredient
 {
     public string $name;
+    /** @var Client[] */
+    public array $likedBy = [];
+    /** @var Client[] */
+    public array $dislikedBy = [];
 }
 
 /**
@@ -53,15 +57,25 @@ $content = explode("\n", $fileManager->get());
 $clientsNumber = (int)$content[0];
 
 for ($r = 0; $r < $clientsNumber; $r++) {
+
     $p = new Client();
     $p->id = $r;
+
     $ing = explode(' ', $content[$r * 2 + 1]);
     unset($ing[0]);
     $p->likes = getIngredients($ing);
     $p->likesAsString = array_map(fn($i) => $i->name, $p->likes);
+    foreach ($p->likes as $like) {
+        $like->likedBy[] = $p;
+    }
+
     $ing = explode(' ', $content[$r * 2 + 2]);
     unset($ing[0]);
     $p->dislikes = getIngredients($ing);
     $p->dislikesAsString = array_map(fn($i) => $i->name, $p->dislikes);
+    foreach ($p->dislikes as $dislike) {
+        $dislike->dislikedBy[] = $p;
+    }
+
     $clients[] = $p;
 }

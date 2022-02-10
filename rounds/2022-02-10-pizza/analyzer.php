@@ -21,5 +21,3 @@ $analyzer = new Analyzer($fileName, [
 $analyzer->addDataset('clients', $clients, ['likesAsString', 'dislikesAsString']);
 
 $analyzer->analyze();
-
-die();

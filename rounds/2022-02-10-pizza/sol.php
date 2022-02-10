@@ -14,12 +14,15 @@ global $ingredients;
 $fileName = 'a';
 
 include_once 'reader.php';
-
-include_once 'analyzer.php';
+//include_once 'analyzer.php';
 
 $output = [];
 
 // Codice
+
+var_dump($ingredients);
+
+
 foreach ($ingredients as $i) {
     $output[] = $i->name;
 }
