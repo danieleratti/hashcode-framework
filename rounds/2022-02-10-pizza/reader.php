@@ -14,10 +14,10 @@ class Client
 {
     public int $id;
     public array $likes = [];
-    /** @var $likesAsString string[] */
+    /** @var string[] */
     public array $likesAsString = [];
     public array $dislikes = [];
-    /** @var $dislikesAsString string[] */
+    /** @var string[] */
     public array $dislikesAsString = [];
 
     public function __toString()
@@ -120,3 +120,24 @@ function getScoreByIngredients($ings)
 
     return $score;
 }
+
+function recalculateLikesAndDislikes()
+{
+    /** @var Client[] $clients */
+    global $clients;
+    /** @var Ingredient[] $ingredients */
+    global $ingredients;
+    foreach ($ingredients as $i) {
+        $i->likedBy = [];
+        $i->dislikedBy = [];
+    }
+    foreach ($clients as $c) {
+        foreach ($c->likes as $i) {
+            $i->likedBy[] = $c;
+        }
+        foreach ($c->dislikes as $i) {
+            $i->dislikedBy[] = $c;
+        }
+    }
+}
+
