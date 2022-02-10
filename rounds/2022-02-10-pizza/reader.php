@@ -79,3 +79,34 @@ for ($r = 0; $r < $clientsNumber; $r++) {
 
     $clients[] = $p;
 }
+
+function getIngredientsName($ings)
+{
+    return array_map(function ($i) {
+        return $i->name;
+    }, $ings);
+}
+
+function getScoreByIngredients($ings)
+{
+    global $clients;
+    $score = 0;
+
+    $ingsString = getIngredientsName($ings);
+
+    foreach ($clients as $client) {
+        foreach ($client->likesAsString as $like) {
+            if (!in_array($like, $ingsString)) {
+                continue 2;
+            }
+        }
+        foreach ($client->dislikesAsString as $dislike) {
+            if (in_array($dislike, $ingsString)) {
+                continue 2;
+            }
+        }
+        $score++;
+    }
+
+    return $score;
+}
