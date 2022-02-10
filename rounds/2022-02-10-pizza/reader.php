@@ -1,9 +1,9 @@
 <?php
 
 global $fileName;
-/** @var Client[] $clients */
+/** @var Client[] */
 global $clients;
-/** @var Ingredient[] $ingredients */
+/** @var Ingredient[] */
 global $ingredients;
 
 use Utils\FileManager;
@@ -53,7 +53,7 @@ function getIngredients(array $ing): array
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
 
-/** @var int $clientsNumber */
+/** @var int */
 $clientsNumber = (int)$content[0];
 
 for ($r = 0; $r < $clientsNumber; $r++) {

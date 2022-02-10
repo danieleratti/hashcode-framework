@@ -4,11 +4,11 @@ use Utils\FileManager;
 use Utils\Log;
 
 global $fileName;
-/** @var FileManager $fileManager */
+/** @var FileManager */
 global $fileManager;
-/** @var Client[] $clients */
+/** @var Client[] */
 global $clients;
-/** @var Ingredient[] $ingredients */
+/** @var Ingredient[] */
 global $ingredients;
 
 $fileName = 'a';
