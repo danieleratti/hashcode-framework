@@ -59,8 +59,3 @@ for ($r = 0; $r < $clientsNumber; $r++) {
     $p->dislikes = getIngredients($ing);
     $people[] = $p;
 }
-
-
-
-var_dump($people);
-

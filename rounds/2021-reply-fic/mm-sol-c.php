@@ -139,7 +139,7 @@ function placeAntenna($antenna, $r, $c)
             $deltaScore = $score - $building->score;
             $building->score = $score;
             $SCORE += $deltaScore;
-            if ($deltaScore > 0 && $unreachedBuildings[$building->id]) {
+            if ($deltaScore >= 0 && $unreachedBuildings[$building->id]) {
                 $reachedBuildings[$building->id] = $building;
                 unset($unreachedBuildings[$building->id]);
             }
@@ -179,12 +179,12 @@ $remainingAntennas = $ANTENNAS;
 /* REAL ALGO */
 $orderedBuildings = $BUILDINGS;
 usort($orderedBuildings, function (Building $b1, Building $b2) {
-    return $b1->speed > $b2->speed;
+    return $b1->speed < $b2->speed;
 });
 
 $orderedAntennas = $ANTENNAS;
 usort($orderedAntennas, function (Antenna $a1, Antenna $a2) {
-    return $a1->speed > $a2->speed;
+    return $a1->speed < $a2->speed;
 });
 
 for ($i = 0; $i < $buildingsCount; $i++) {

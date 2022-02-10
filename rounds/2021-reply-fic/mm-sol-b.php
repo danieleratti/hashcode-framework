@@ -139,7 +139,7 @@ function placeAntenna($antenna, $r, $c)
             $deltaScore = $score - $building->score;
             $building->score = $score;
             $SCORE += $deltaScore;
-            if ($deltaScore > 0 && $unreachedBuildings[$building->id]) {
+            if ($deltaScore >= 0 && $unreachedBuildings[$building->id]) {
                 $reachedBuildings[$building->id] = $building;
                 unset($unreachedBuildings[$building->id]);
             }
