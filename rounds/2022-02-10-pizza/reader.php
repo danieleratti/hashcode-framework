@@ -19,6 +19,11 @@ class Client
     public array $dislikes = [];
     /** @var $dislikesAsString string[] */
     public array $dislikesAsString = [];
+
+    public function __toString()
+    {
+        return 'C#' . $this->id . ' L(' . count($this->likes) . ')'  . 'D(' . count($this->dislikes) . ')';
+    }
 }
 
 class Ingredient
@@ -28,6 +33,11 @@ class Ingredient
     public array $likedBy = [];
     /** @var Client[] */
     public array $dislikedBy = [];
+
+    public function __toString()
+    {
+        return $this->name . ' L(' . count($this->likedBy) . ')'  . 'D(' . count($this->dislikedBy) . ')';
+    }
 }
 
 /**

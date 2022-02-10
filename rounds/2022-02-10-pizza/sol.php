@@ -20,11 +20,11 @@ $output = [];
 
 // Codice
 
-var_dump($ingredients);
+$sortedIngredients = $ingredients;
+usort($sortedIngredients, fn(Ingredient $i1, Ingredient $i2) => count($i1->dislikedBy) < count($i2->dislikedBy));
 
-
-foreach ($ingredients as $i) {
-    $output[] = $i->name;
+foreach ($sortedIngredients as $i) {
+    echo $i . PHP_EOL;
 }
 
 // Output
