@@ -6,14 +6,16 @@ use Utils\Log;
 global $fileName;
 /** @var FileManager $fileManager */
 global $fileManager;
-/** @var Person[] $people */
-global $people;
+/** @var Client[] $clients */
+global $clients;
 /** @var Ingredient[] $ingredients */
 global $ingredients;
 
 $fileName = 'a';
 
 include_once 'reader.php';
+
+include_once 'analyzer.php';
 
 $output = [];
 
