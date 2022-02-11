@@ -102,16 +102,19 @@ function getScoreByIngredients($ings)
     global $clients;
     $score = 0;
 
-    $ingsString = getIngredientsName($ings);
+    $check = [];
+    foreach ($ings as $i){
+        $check[$i->name] = true;
+    }
 
     foreach ($clients as $client) {
         foreach ($client->likesAsString as $like) {
-            if (!in_array($like, $ingsString)) {
+            if (!isset($check[$like])) {
                 continue 2;
             }
         }
         foreach ($client->dislikesAsString as $dislike) {
-            if (in_array($dislike, $ingsString)) {
+            if (isset($check[$dislike])) {
                 continue 2;
             }
         }
