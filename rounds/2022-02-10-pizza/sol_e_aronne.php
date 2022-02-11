@@ -29,17 +29,17 @@ function printClients()
     }
 }
 
-$fileName = 'c';
+$fileName = 'e';
 
 include_once 'reader.php';
 
 $output = [];
 
 // Codice
-// Sort customers for dislikes number descending. If they have same dislikes number order by likes number ascending.
+// Sort customers for dislikes number descending. If they have same dislikes number order by likes number descending.
 usort($clients, function (Client $a, Client $b) {
     if (count($a->dislikes) === count($b->dislikes)) {
-        return count($a->likes) < count($b->likes);
+        return count($a->likes) > count($b->likes);
     }
 
     return count($a->dislikes) > count($b->dislikes);

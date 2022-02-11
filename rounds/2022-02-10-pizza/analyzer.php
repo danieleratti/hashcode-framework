@@ -20,4 +20,8 @@ $analyzer = new Analyzer($fileName, [
 
 $analyzer->addDataset('clients', $clients, ['likesAsString', 'dislikesAsString']);
 
+$analyzer->addDataset('ingredients', $ingredients, ['likedBy', 'dislikedBy']);
+
 $analyzer->analyze();
+
+die();
