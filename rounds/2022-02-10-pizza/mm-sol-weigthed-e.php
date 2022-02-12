@@ -31,8 +31,8 @@ function recalculateLikesAndDislikes()
         $i->importance = 0.0;
     }
     foreach ($clients as $c) {
-        $likesImportance = 1 / pow((count($c->likes) ?: 1), 1);
-        $dislikesImportance = 2.2 / pow((count($c->dislikes) ?: 1), 1);
+        $likesImportance = 1 / pow((count($c->likes) ?: 1), 1.0);
+        $dislikesImportance = 2.2 / pow((count($c->dislikes) ?: 1), 2.8);
         foreach ($c->likes as $i) {
             $i->likedBy[] = $c;
             $i->importance += $likesImportance;

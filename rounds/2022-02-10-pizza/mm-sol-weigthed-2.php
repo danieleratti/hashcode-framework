@@ -31,8 +31,8 @@ function recalculateLikesAndDislikes()
         $i->importance = 0.0;
     }
     foreach ($clients as $c) {
-        $likesImportance = 1 / pow((count($c->likes) ?: 1), 1);
-        $dislikesImportance = 2.2 / pow((count($c->dislikes) ?: 1), 1);
+        $likesImportance = 1 / pow((count($c->likes) ?: 1), 0.7);
+        $dislikesImportance = 1 / pow((count($c->dislikes) ?: 1), 0.6);
         foreach ($c->likes as $i) {
             $i->likedBy[] = $c;
             $i->importance += $likesImportance;
@@ -55,14 +55,19 @@ foreach ($ingredients as $k => $i) {
 $bestIngredients = $goodIngredients;
 $bestScore = getScoreByIngredients($bestIngredients);
 
-recalculateLikesAndDislikes();
-orderByImportance($ingredients);
-
 echo "Start at $bestScore points\n";
 
 while (count($ingredients) > 0) {
+    recalculateLikesAndDislikes();
+    orderByImportance($ingredients);
     /** @var Ingredient $current */
     $current = array_pop($ingredients);
+    foreach ($current->likedBy as $l) {
+        unset($l->likes[$current->name]);
+    }
+    foreach ($current->dislikedBy as $d) {
+        unset($d->dislikes[$current->name]);
+    }
     $goodIngredients[] = $current;
     $currentScore = getScoreByIngredients($goodIngredients);
     echo "Score is $currentScore points\n";

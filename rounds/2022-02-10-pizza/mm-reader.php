@@ -56,7 +56,7 @@ function getIngredients(array $ing): array
             $ing->name = $name;
             $ingredients[$name] = $ing;
         }
-        $result[] = $ingredients[$name];
+        $result[$name] = $ingredients[$name];
     }
     return $result;
 }
@@ -122,37 +122,20 @@ function getScoreByIngredients($ings)
     return $score;
 }
 
-function recalculateLikesAndDislikes()
-{
-    /** @var Client[] $clients */
-    global $clients;
-    /** @var Ingredient[] $ingredients */
-    global $ingredients;
-    foreach ($ingredients as $i) {
-        $i->likedBy = [];
-        $i->dislikedBy = [];
-        $i->importance = 0.0;
-    }
-    foreach ($clients as $c) {
-        $likesImportance = 1 / (count($c->likes) ?: 1);
-        $dislikesImportance = 1 / (count($c->dislikes) ?: 1);
-        foreach ($c->likes as $i) {
-            $i->likedBy[] = $c;
-            $i->importance += $likesImportance;
-        }
-        foreach ($c->dislikes as $i) {
-            $i->dislikedBy[] = $c;
-            $i->importance -= $dislikesImportance;
-        }
-    }
-}
-
 /**
  * @param Ingredient[] $ingredients
  */
 function orderByLikedAndDislikes(array &$ingredients)
 {
     usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => count($i1->dislikedBy) - count($i1->likedBy) < count($i2->dislikedBy) - count($i2->likedBy));
+}
+
+/**
+ * @param Ingredient[] $ingredients
+ */
+function orderByImportance(array &$ingredients)
+{
+    usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance > $i2->importance);
 }
 
 function printArray(?array $array)
