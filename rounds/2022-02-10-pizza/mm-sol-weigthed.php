@@ -10,11 +10,14 @@ global $clients;
 /** @var Ingredient[] */
 global $ingredients;
 
-$fileName = 'c';
+$fileName = 'd';
 
-include_once 'reader.php';
+include_once 'mm-reader.php';
 //include_once 'analyzer.php';
 // Codice
+
+//printArray($ingredients);
+//die();
 
 $goodIngredients = [];
 foreach ($ingredients as $k => $i) {
@@ -49,9 +52,7 @@ while (count($sortedIngredients) > 0) {
 }
 
 
-foreach ($goodIngredients as $i) {
-    echo $i . PHP_EOL;
-}
+printArray($goodIngredients);
 
 echo "\n\n";
 echo $lastScore;

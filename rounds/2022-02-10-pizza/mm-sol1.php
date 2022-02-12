@@ -17,15 +17,6 @@ include_once 'reader.php';
 //include_once 'analyzer.php';
 // Codice
 
-/**
- * @param Ingredient[] $ingredients
- */
-function orderByLikedAndDislikes(array &$ingredients)
-{
-    usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => count($i1->dislikedBy) - count($i1->likedBy) < count($i2->dislikedBy) - count($i2->likedBy));
-}
-
-
 orderByLikedAndDislikes($ingredients);
 $i = 0;
 $lastScore = 0;

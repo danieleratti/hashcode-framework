@@ -22,7 +22,7 @@ class Client
 
     public function __toString()
     {
-        return 'C#' . $this->id . ' L(' . count($this->likes) . ')'  . 'D(' . count($this->dislikes) . ')';
+        return 'C-' . str_pad($this->id, 10, ' ', STR_PAD_LEFT) . ' L[' . count($this->likes) . '] D[' . count($this->dislikes) . ']';
     }
 }
 
@@ -33,10 +33,12 @@ class Ingredient
     public array $likedBy = [];
     /** @var Client[] */
     public array $dislikedBy = [];
+    /** @var float */
+    public float $importance = 0.0;
 
     public function __toString()
     {
-        return $this->name . ' L(' . count($this->likedBy) . ')'  . 'D(' . count($this->dislikedBy) . ')';
+        return $this->name . ' L[' . count($this->likedBy) . '] D[' . count($this->dislikedBy) . '] I[' . $this->importance . ']';
     }
 }
 
@@ -75,20 +77,16 @@ for ($r = 0; $r < $clientsNumber; $r++) {
     unset($ing[0]);
     $p->likes = getIngredients($ing);
     $p->likesAsString = array_map(fn($i) => $i->name, $p->likes);
-    foreach ($p->likes as $like) {
-        $like->likedBy[] = $p;
-    }
 
     $ing = explode(' ', $content[$r * 2 + 2]);
     unset($ing[0]);
     $p->dislikes = getIngredients($ing);
     $p->dislikesAsString = array_map(fn($i) => $i->name, $p->dislikes);
-    foreach ($p->dislikes as $dislike) {
-        $dislike->dislikedBy[] = $p;
-    }
 
     $clients[] = $p;
 }
+
+recalculateLikesAndDislikes();
 
 function getIngredientsName($ings)
 {
@@ -103,7 +101,7 @@ function getScoreByIngredients($ings)
     $score = 0;
 
     $check = [];
-    foreach ($ings as $i){
+    foreach ($ings as $i) {
         $check[$i->name] = true;
     }
 
@@ -133,13 +131,18 @@ function recalculateLikesAndDislikes()
     foreach ($ingredients as $i) {
         $i->likedBy = [];
         $i->dislikedBy = [];
+        $i->importance = 0.0;
     }
     foreach ($clients as $c) {
+        $likesImportance = 1 / (count($c->likes) ?: 1);
+        $dislikesImportance = 1 / (count($c->dislikes) ?: 1);
         foreach ($c->likes as $i) {
             $i->likedBy[] = $c;
+            $i->importance += $likesImportance;
         }
         foreach ($c->dislikes as $i) {
             $i->dislikedBy[] = $c;
+            $i->importance -= $dislikesImportance;
         }
     }
 }
@@ -150,4 +153,11 @@ function recalculateLikesAndDislikes()
 function orderByLikedAndDislikes(array &$ingredients)
 {
     usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => count($i1->dislikedBy) - count($i1->likedBy) < count($i2->dislikedBy) - count($i2->likedBy));
+}
+
+function printArray(?array $array)
+{
+    foreach ($array as $i) {
+        echo $i . PHP_EOL;
+    }
 }
