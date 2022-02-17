@@ -10,7 +10,7 @@ global $clients;
 /** @var Ingredient[] */
 global $ingredients;
 
-$fileName = 'd';
+$fileName = 'e';
 
 include_once 'mm-reader.php';
 //include_once 'analyzer.php';
@@ -52,18 +52,23 @@ foreach ($ingredients as $k => $i) {
     }
 }
 
+$badIngredients = [];
+$badClients = [];
+
 orderByImportance($ingredients);
-$killsNumber = floor(count($ingredients) * 0.242);
+$killsNumber = floor(count($ingredients) * 0.242); //0.242
 $n = 0;
 foreach ($ingredients as $k => $i) {
     if ($n <= $killsNumber) {
         foreach ($i->likedBy as $c) {
             unset($c->likes[$i->name]);
+            $badClients[$c->id] = $c;
             unset($clients[$c->id]);
         }
         foreach ($i->dislikedBy as $c) {
             unset($c->dislikes[$i->name]);
         }
+        $badIngredients[$k] = $i;
         unset($ingredients[$k]);
     }
     $n++;
@@ -89,12 +94,90 @@ while (count($ingredients) > 0) {
     }
 }
 
+echo "\n\n";
+echo "Best score is $bestScore";
+echo "\n\nFine prima parte\n\n";
+sleep(2);
+
+$reversedIngredients = array_reverse($bestIngredients, true);
+$bestScore2 = $bestScore;
+
+// Aggiungo ingredienti che avevo tolto all'inizio
+foreach ($badClients as $k => $c) {
+    $clients[$k] = $c;
+}
+foreach ($badIngredients as $k => $i) {
+    $temp = $reversedIngredients;
+    $temp[$k] = $i;
+    $currentScore = getScoreByIngredients($temp);
+    echo "Score is $currentScore points\n";
+    if ($currentScore > $bestScore2) {
+        $bestScore2 = $currentScore;
+        $reversedIngredients = $temp;
+    }
+}
+foreach ($badIngredients as $k => $i) {
+    $temp = $reversedIngredients;
+    $temp[$k] = $i;
+    $currentScore = getScoreByIngredients($temp);
+    echo "Score is $currentScore points\n";
+    if ($currentScore > $bestScore2) {
+        $bestScore2 = $currentScore;
+        $reversedIngredients = $temp;
+    }
+}
+
+// Tolgo ingredienti a campione
+foreach ($reversedIngredients as $k => $i) {
+    $temp = $reversedIngredients;
+    unset($temp[$k]);
+    $currentScore = getScoreByIngredients($temp);
+    echo "Score is $currentScore points\n";
+    if ($currentScore > $bestScore2) {
+        $bestScore2 = $currentScore;
+        $reversedIngredients = $temp;
+    }
+}
+foreach ($reversedIngredients as $k => $i) {
+    $temp = $reversedIngredients;
+    unset($temp[$k]);
+    $currentScore = getScoreByIngredients($temp);
+    echo "Score is $currentScore points\n";
+    if ($currentScore > $bestScore2) {
+        $bestScore2 = $currentScore;
+        $reversedIngredients = $temp;
+    }
+}
+
+// Aggiungo ingredienti che avevo tolto all'inizio
+foreach ($badIngredients as $k => $i) {
+    $temp = $reversedIngredients;
+    $temp[$k] = $i;
+    $currentScore = getScoreByIngredients($temp);
+    echo "Score is $currentScore points\n";
+    if ($currentScore > $bestScore2) {
+        $bestScore2 = $currentScore;
+        $reversedIngredients = $temp;
+    }
+}
+foreach ($badIngredients as $k => $i) {
+    $temp = $reversedIngredients;
+    $temp[$k] = $i;
+    $currentScore = getScoreByIngredients($temp);
+    echo "Score is $currentScore points\n";
+    if ($currentScore > $bestScore2) {
+        $bestScore2 = $currentScore;
+        $reversedIngredients = $temp;
+    }
+}
+
+
 //printArray($bestIngredients);
 
 echo "\n\n";
-echo "Best score is $bestScore";
+echo "Best score is $bestScore2";
 
 // Output
-$output = count($bestIngredients) . ' ' . implode(' ', array_map(fn($i) => $i->name, $bestIngredients));
+$output = count($reversedIngredients) . ' ' . implode(' ', array_map(fn($i) => $i->name, $reversedIngredients));
 //Log::out('Output...');
 $fileManager->outputV2($output);
