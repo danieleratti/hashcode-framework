@@ -83,7 +83,7 @@ for ($r = 0; $r < $clientsNumber; $r++) {
     $p->dislikes = getIngredients($ing);
     $p->dislikesAsString = array_map(fn($i) => $i->name, $p->dislikes);
 
-    $clients[] = $p;
+    $clients[$p->id] = $p;
 }
 
 recalculateLikesAndDislikes();
@@ -133,9 +133,20 @@ function orderByLikedAndDislikes(array &$ingredients)
 /**
  * @param Ingredient[] $ingredients
  */
-function orderByImportance(array &$ingredients)
+function orderByDislikesDesc(array &$ingredients)
 {
-    usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance > $i2->importance);
+    usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => count($i1->dislikedBy) < count($i2->dislikedBy));
+}
+
+/**
+ * @param Ingredient[] $ingredients
+ */
+function orderByImportance(array &$ingredients, bool $asc = true)
+{
+    if ($asc)
+        usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance > $i2->importance);
+    else
+        usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance < $i2->importance);
 }
 
 function printArray(?array $array)

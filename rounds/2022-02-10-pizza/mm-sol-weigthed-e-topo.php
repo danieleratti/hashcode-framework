@@ -53,7 +53,7 @@ foreach ($ingredients as $k => $i) {
 }
 
 orderByImportance($ingredients);
-$killsNumber = floor(count($ingredients) * 0.1);
+$killsNumber = floor(count($ingredients) * 0.242);
 $n = 0;
 foreach ($ingredients as $k => $i) {
     if ($n <= $killsNumber) {
@@ -72,19 +72,14 @@ foreach ($ingredients as $k => $i) {
 $bestIngredients = $goodIngredients;
 $bestScore = getScoreByIngredients($bestIngredients);
 
+recalculateLikesAndDislikes();
+orderByImportance($ingredients);
+
 echo "Start at $bestScore points\n";
 
 while (count($ingredients) > 0) {
-    recalculateLikesAndDislikes();
-    orderByImportance($ingredients);
     /** @var Ingredient $current */
     $current = array_pop($ingredients);
-    foreach ($current->likedBy as $l) {
-        unset($l->likes[$current->name]);
-    }
-    foreach ($current->dislikedBy as $d) {
-        unset($d->dislikes[$current->name]);
-    }
     $goodIngredients[] = $current;
     $currentScore = getScoreByIngredients($goodIngredients);
     echo "Score is $currentScore points\n";
