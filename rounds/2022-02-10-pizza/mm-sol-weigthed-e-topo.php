@@ -10,7 +10,7 @@ global $clients;
 /** @var Ingredient[] */
 global $ingredients;
 
-$fileName = 'd';
+$fileName = 'e';
 
 include_once 'mm-reader.php';
 //include_once 'analyzer.php';
@@ -29,18 +29,23 @@ function recalculateLikesAndDislikes()
         $i->likedBy = [];
         $i->dislikedBy = [];
         $i->importance = 0.0;
+        $i->importanceL = 0.0;
+        $i->importanceD = 0.0;
     }
     foreach ($clients as $c) {
         $likesImportance = 1 / pow((count($c->likes) ?: 1), 1.0);
         $dislikesImportance = 2.2 / pow((count($c->dislikes) ?: 1), 2.8);
         foreach ($c->likes as $i) {
             $i->likedBy[] = $c;
-            $i->importance += $likesImportance;
+            $i->importanceL += $likesImportance;
         }
         foreach ($c->dislikes as $i) {
             $i->dislikedBy[] = $c;
-            $i->importance -= $dislikesImportance;
+            $i->importanceD += $dislikesImportance;
         }
+    }
+    foreach ($ingredients as $i) {
+        $i->importance = $i->importanceL / $i->importanceD;
     }
 }
 

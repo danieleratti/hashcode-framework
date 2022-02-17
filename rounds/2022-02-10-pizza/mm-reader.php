@@ -35,6 +35,10 @@ class Ingredient
     public array $dislikedBy = [];
     /** @var float */
     public float $importance = 0.0;
+    /** @var float */
+    public float $importanceL = 0.0;
+    /** @var float */
+    public float $importanceD = 0.0;
 
     public function __toString()
     {
