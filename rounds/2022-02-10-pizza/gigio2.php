@@ -19,47 +19,89 @@ function saveOut($ings)
 {
     global $fileManager;
 
+    $score = getScoreByIngredients($ings);
+    Log::out('SCORE ' . $score);
+
     $output = getIngredientsName($ings);
     $output = count($output) . ' ' . implode(' ', $output);
 
     $fileManager->outputV2($output);
 }
 
-usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => count($i1->dislikedBy) > count($i2->dislikedBy));
-$remainingIngredients = [];
+$ingsTake = [];
+$ingsAvailable = [];
+
 foreach ($ingredients as $name => $ingredient) {
-    $remainingIngredients[$ingredient->name] = $ingredient;
+    $ingsTake[$name] = $ingredient;
 }
 
-$bestScore = getScoreByIngredients($remainingIngredients);
-$maxCheck = 10;
+$bestScore = 0;
 
-do {
-    $toBeRemoved = null;
-    $i = 0;
+while (true) {
+    $impCout = 0;
 
-    Log::out('COUNT: ' . count($remainingIngredients) . " - BEST: " . $bestScore);
-    saveOut($remainingIngredients);
+    while (true) {
+        $improved = false;
 
-    foreach ($remainingIngredients as $ingName => $ingredient) {
-        $remaining = $maxCheck ? min(count($remainingIngredients), $maxCheck) : count($remainingIngredients);
+        foreach ($ingsAvailable as $name => $ing) {
+            takeIng($ing);
+            $newScore = getScoreByIngredients($ingsTake);
 
-        unset($remainingIngredients[$ingName]);
-
-        $newScore = getScoreByIngredients($remainingIngredients);
-
-        if ($newScore > $bestScore) {
-            $bestScore = $newScore;
-            $toBeRemoved = $ingredient;
+            if ($newScore > $bestScore) {
+                Log::out("add $name $newScore");
+                $improved = true;
+                $bestScore = $newScore;
+                $impCout++;
+            } else {
+                removeIng($ing);
+            }
         }
 
-        $remainingIngredients[$ingName] = $ingredient;
-
-        if (!is_null($maxCheck) && $i >= $maxCheck)
+        if (!$improved)
             break;
-
-        $i++;
     }
 
-    unset($remainingIngredients[$toBeRemoved->name]);
-} while (!is_null($toBeRemoved));
+    while (true) {
+        $improved = false;
+
+        foreach ($ingsTake as $name => $ing) {
+            removeIng($ing);
+            $newScore = getScoreByIngredients($ingsTake);
+
+            if ($newScore > $bestScore) {
+                Log::out("remove $name $newScore");
+                $improved = true;
+                $bestScore = $newScore;
+                $impCout++;
+            } else {
+                takeIng($ing);
+            }
+        }
+
+        if (!$improved)
+            break;
+    }
+
+    if ($impCout == 0)
+        break;
+}
+
+saveOut($ingsTake);
+
+function takeIng($ing)
+{
+    global $ingsTake;
+    global $ingsAvailable;
+
+    $ingsTake[$ing->name] = $ing;
+    unset($ingsAvailable[$ing->name]);
+}
+
+function removeIng($ing)
+{
+    global $ingsTake;
+    global $ingsAvailable;
+
+    $ingsAvailable[$ing->name] = $ing;
+    unset($ingsTake[$ing->name]);
+}
