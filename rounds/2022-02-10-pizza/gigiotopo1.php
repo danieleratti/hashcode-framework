@@ -11,7 +11,7 @@ global $clients;
 /** @var Ingredient[] */
 global $ingredients;
 
-$fileName = 'e';
+$fileName = 'd';
 
 include_once 'reader.php';
 
@@ -44,16 +44,24 @@ while (true) {
         $improved = false;
 
         foreach ($ingsAvailable as $name => $ing) {
-            takeIng($ing);
-            $newScore = getScoreByIngredients($ingsTake);
+            foreach ($ingsAvailable as $name2 => $ing2) {
+                if ($name == $name2)
+                    continue;
 
-            if ($newScore > $bestScore) {
-                Log::out("add $name $newScore");
-                $improved = true;
-                $bestScore = $newScore;
-                $impCout++;
-            } else {
-                removeIng($ing);
+                takeIng($ing);
+                takeIng($ing2);
+
+                $newScore = getScoreByIngredients($ingsTake);
+
+                if ($newScore > $bestScore) {
+                    Log::out("add $name $newScore");
+                    $improved = true;
+                    $bestScore = $newScore;
+                    $impCout++;
+                } else {
+                    removeIng($ing);
+                    removeIng($ing2);
+                }
             }
         }
 
@@ -65,16 +73,23 @@ while (true) {
         $improved = false;
 
         foreach ($ingsTake as $name => $ing) {
-            removeIng($ing);
-            $newScore = getScoreByIngredients($ingsTake);
+            foreach ($ingsTake as $name2 => $ing2) {
+                if ($name == $name2)
+                    continue;
 
-            if ($newScore > $bestScore) {
-                Log::out("remove $name $newScore");
-                $improved = true;
-                $bestScore = $newScore;
-                $impCout++;
-            } else {
-                takeIng($ing);
+                removeIng($ing);
+                removeIng($ing2);
+                $newScore = getScoreByIngredients($ingsTake);
+
+                if ($newScore > $bestScore) {
+                    Log::out("remove $name $newScore");
+                    $improved = true;
+                    $bestScore = $newScore;
+                    $impCout++;
+                } else {
+                    takeIng($ing);
+                    takeIng($ing2);
+                }
             }
         }
 
