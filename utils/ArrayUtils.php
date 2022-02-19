@@ -137,4 +137,33 @@ class ArrayUtils
         }
         return $comb;
     }
+
+    public static function array_keysort_objects(&$data, $_key, $sort = SORT_DESC)
+    {
+        if ($sort == SORT_DESC)
+            usort($data, fn($i1, $i2) => $i1->$_key < $i2->$_key);
+        else
+            usort($data, fn($i1, $i2) => $i1->$_key > $i2->$_key);
+    }
+
+    public static function array_double_keysort_objects(&$data, $_key, $sort, $_key2, $sort2 = SORT_DESC)
+    {
+        if ($sort == SORT_DESC)
+            usort($data, fn($i1, $i2) => $i1->$_key < $i2->$_key);
+        else
+            usort($data, fn($i1, $i2) => $i1->$_key > $i2->$_key);
+
+        usort($data, function($i1, $i2) use ($_key, $_key2, $sort, $sort2) {
+            if($i1->$_key == $i2->$_key) {
+                if($sort2 == SORT_ASC)
+                    return $i1->$_key2 > $i2->$_key2;
+                else
+                    return $i1->$_key2 < $i2->$_key2;
+            }
+            elseif($sort == SORT_ASC)
+                 return $i1->$_key > $i2->$_key;
+            else
+                return $i1->$_key < $i2->$_key;
+        });
+    }
 }

@@ -6,6 +6,7 @@ global $clients;
 /** @var Ingredient[] */
 global $ingredients;
 
+use Utils\ArrayUtils;
 use Utils\FileManager;
 
 require_once '../../bootstrap.php';
@@ -148,9 +149,11 @@ function orderByDislikesDesc(array &$ingredients)
 function orderByImportance(array &$ingredients, bool $asc = true)
 {
     if ($asc)
-        usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance > $i2->importance);
+        ArrayUtils::array_keysort_objects($ingredients, 'importance', SORT_ASC);
+        //usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance > $i2->importance);
     else
-        usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance < $i2->importance);
+        ArrayUtils::array_keysort_objects($ingredients, 'importance', SORT_DESC);
+        //usort($ingredients, fn(Ingredient $i1, Ingredient $i2) => $i1->importance < $i2->importance);
 }
 
 function printArray(?array $array)
