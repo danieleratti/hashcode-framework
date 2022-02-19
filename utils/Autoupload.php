@@ -10,16 +10,25 @@ class Autoupload
     {
         $f = trim(file_get_contents(".google_pk"));
         if (strlen($f) <= 10)
-            Log::error("Missing .google_pk file with private key. Take it from authorization header in https://hashcode-judge.appspot.com/api/judge/v1/rounds");
+            Log::error("Missing .google_pk file with private key. Take it from authorization header in https://codingcompetitions.withgoogle.com searching for poll");
         if (strpos($f, "Bearer") !== false)
             list(, $f) = explode("Bearer ", $f);
         return $f;
     }
 
+    private static function getRound()
+    {
+        $f = trim(file_get_contents(".google_round"));
+        if (strlen($f) <= 10)
+            Log::error("Missing .google_round containing something like '00000000008f5ca9/00000000008f6f33' (https://codingcompetitions.withgoogle.com/hashcode/round/00000000008f5ca9/00000000008f6f33)");
+        list($round_id, $task_id) = explode("/", $f);
+        return ["round_id" => $round_id, "task_id" => $task_id];
+    }
+
     private static function req($method, $url, $body = null, $additionalHeaders = null)
     {
         $headers = [
-            'Authority: hashcode-judge.appspot.com',
+            'Authority: codejam.googleapis.com',
             'Pragma: no-cache',
             'Cache-Control: no-cache',
             'X-Goog-Encode-Response-If-Executable: base64',
@@ -29,12 +38,12 @@ class Autoupload
             'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
             'X-Requested-With: XMLHttpRequest',
             'X-Javascript-User-Agent: google-api-javascript-client/1.1.0',
-            'X-Referer: https://hashcodejudge.withgoogle.com',
+            'X-Referer: https://codingcompetitions.withgoogle.com/',
             'Accept: */*',
             'Sec-Fetch-Site: same-origin',
             'Sec-Fetch-Mode: cors',
             'Sec-Fetch-Dest: empty',
-            'Referer: https://hashcode-judge.appspot.com/api/static/proxy.html',
+            'Referer: https://codingcompetitions.withgoogle.com/',
             'Accept-Language: it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
             'Accept-Encoding: deflate',
         ];
@@ -48,7 +57,7 @@ class Autoupload
         if (strpos($url, "http") === 0)
             $completeUrl = $url;
         else
-            $completeUrl = 'https://hashcode-judge.appspot.com/' . $url;
+            $completeUrl = 'https://codejam.googleapis.com/' . $url;
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
@@ -66,16 +75,19 @@ class Autoupload
         if (!$response) {
             die('Error ' . $method . ' ' . $completeUrl . ': "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
         }
-        curl_close($ch);
-        $jresponse = json_decode($response, true);
+        $info = curl_getinfo($ch);
 
-        if (@$jresponse['error']['code'] == 401) {
-            print_r($jresponse);
+        //echo $response;
+
+        //$jresponse = json_decode($response, true);
+
+        if ($info['http_code'] == 401) {
+            print_r($response);
             Log::out("Missing or invalid OAuth Token. Please set .google_pk file! Retrying in 30s", 0, "red");
             sleep(30);
             return self::req($method, $url, $body, $additionalHeaders);
         }
-        return $jresponse;
+        return $response;
     }
 
     private static function createMultipartPostBody($delimiter, $postFields, $fileFields = array())
@@ -195,16 +207,53 @@ class Autoupload
     {
         if (!self::$scriptContent)
             self::init();
-        $datasets = self::getDatasets();
-        $ds = $datasets[$dataset];
+        /*$datasets = self::getDatasets();
+        $ds = $datasets[$dataset];*/
 
         if (!$filename) {
             $filename = $_SERVER["SCRIPT_NAME"];
         }
 
-        $source = self::remoteUpload($filename . '.php', self::$scriptContent);
-        $sub = self::remoteUpload($filename . '.php', $content);
-        $ret = self::req('POST', "api/judge/v1/submissions?dataSet=$ds&submissionBlobKey=$sub&sourcesBlobKey=$source", '', null);
+        //$source = self::remoteUpload($filename . '.php', self::$scriptContent);
+        //$sub = self::remoteUpload($filename . '.php', $content);
+        //$ret = self::req('POST', "api/judge/v1/submissions?dataSet=$ds&submissionBlobKey=$sub&sourcesBlobKey=$source", '', null);
+        $round = self::getRound();
+        if(is_string($dataset))
+            $dataset = ord(strtolower($dataset))-ord('a');
+
+        /*$postFields = [
+            'p' => base64_encode(json_encode([
+                'task_id' => $round['task_id'],
+                'for_test' => $dataset,
+            ])),
+            'codeFile' => 'x',
+            'outputFile' => 'y',
+        ];*/
+
+        $delimiter = '----WebKitFormBoundary' . uniqid();
+        $body = self::createMultipartPostBody($delimiter, [
+            'p' => base64_encode(json_encode([
+                'task_id' => $round['task_id'],
+                'for_test' => $dataset,
+            ]))
+        ], array(
+            'codeFile' => array(
+                'filename' => $filename.".php",
+                'type' => 'text/plain',
+                'content' => self::$scriptContent,
+            ),
+            'outputFile' => array(
+                'filename' => $filename,
+                'type' => 'text/plain',
+                'content' => $content,
+            )
+        ));
+        $headers = [
+            'Content-Type: multipart/form-data; boundary=' . $delimiter,
+            'Content-Length: ' . strlen($body)
+        ];
+
+        $ret = self::req('POST', "dashboard/".$round["round_id"]."/submit", $body, $headers);
         Log::out("Upload completed!", 0, "green");
         return $ret;
     }

@@ -4,6 +4,7 @@ benchmarks
 .DS_Store
 ./**/.DS_Store
 .google_pk
+.google_round
 
 rounds/**/output
 rounds/**/images
