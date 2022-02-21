@@ -21,6 +21,7 @@ class ArrayUtils
      */
     public static function array_keysort(&$data, $_key, $sort = SORT_DESC)
     {
+        $sorter = [];
         if ($sort == 'DESC')
             $sort = SORT_DESC;
         elseif ($sort == 'ASC')

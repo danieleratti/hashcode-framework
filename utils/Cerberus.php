@@ -11,6 +11,7 @@ namespace Utils;
 class Cerberus
 {
     public static $db;
+    public static $phpPath = "php";
 
     /*
      * run a Cerberus client asking for params $params
@@ -122,7 +123,7 @@ class Cerberus
         self::$db['lastLaunchScript'] = $scriptName;
         self::writeDb();
 
-        $cmd = "php " . $scriptName . ".php cerberus '" . json_encode(["action" => "info"]) . "'";
+        $cmd = self::$phpPath . " " . $scriptName . ".php cerberus '" . json_encode(["action" => "info"]) . "'";
         $ret = shell_exec($cmd);
         $params = json_decode($ret, true);
         if (!$params) {
@@ -140,10 +141,10 @@ class Cerberus
             $value = readline('Param ' . $param . '? ');
 
             foreach (explode(",", $value) as $v) {
-                if($lvl == 0)
+                if ($lvl == 0)
                     $possibilities[$lvl][] = [$param => $v];
                 else {
-                    foreach($possibilities[$lvl-1] as $oldP) {
+                    foreach ($possibilities[$lvl - 1] as $oldP) {
                         $oldP[$param] = $v;
                         $possibilities[$lvl][] = $oldP;
                     }
@@ -151,7 +152,7 @@ class Cerberus
             }
             $lvl++;
         }
-        foreach ($possibilities[$lvl-1] as $possibility) {
+        foreach ($possibilities[$lvl - 1] as $possibility) {
             self::runScript($scriptName, $possibility);
         }
         usleep(500 * 1000);
@@ -161,7 +162,7 @@ class Cerberus
     {
         Log::out('Running ' . $script . ' with ' . json_encode($params), 1, 'green');
         $id = ++self::$db['lastIdx'];
-        $cmd = "nohup php " . $script . ".php cerberus '" . json_encode(["action" => "run", "params" => $params]) . "' " . (PHP_OS_FAMILY === "Linux" ? ">" : "&>") . " cerberus/" . $id . ".log & echo $!";
+        $cmd = "nohup " . self::$phpPath . " " . $script . ".php cerberus '" . json_encode(["action" => "run", "params" => $params]) . "' " . (PHP_OS_FAMILY === "Linux" ? ">" : "&>") . " cerberus/" . $id . ".log & echo $!";
         $pid = shell_exec($cmd);
         self::$db['scripts'][$id] = [
             'id' => $id,
