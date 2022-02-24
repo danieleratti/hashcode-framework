@@ -15,16 +15,21 @@ require_once '../../bootstrap.php';
 class Contributor
 {
     public string $name;
-    public $skills = [];
+    /** @var string[] */
+    public array $skills = [];
 }
 
 class Project
 {
     public string $name;
+    /** @var int */
     public int $duration;
+    /** @var int */
     public int $award;
+    /** @var int */
     public int $expire;
-    public $roles = [];
+    /** @var array[] */
+    public array $roles = [];
 }
 
 /* Reading the input */
