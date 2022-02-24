@@ -119,6 +119,8 @@ for ($c = 0;
     $contributors[$contributorName] = $contrib;
 }
 
+$maxExpire = 0;
+$maxTime = 0;
 for ($p = 0; $p < $projectsCount; $p++) {
     list($projectName, $daysToComplete, $award, $bestBeforeDays, $rolesCount) = explode(' ', $content[$fileRow++]);
     $project = new Project();
@@ -126,6 +128,8 @@ for ($p = 0; $p < $projectsCount; $p++) {
     $project->duration = (int)$daysToComplete;
     $project->award = (int)$award;
     $project->expire = (int)$bestBeforeDays;
+    if($project->expire > $maxExpire) $maxExpire = $project->expire;
+    if($project->expire + $project->award > $maxTime) $maxTime = $project->expire + $project->award;
     for ($r = 0; $r < $rolesCount; $r++) {
         list($skill, $level) = explode(' ', $content[$fileRow++]);
         $project->roles[] = ["skill" => $skill, "level" => (int)$level];

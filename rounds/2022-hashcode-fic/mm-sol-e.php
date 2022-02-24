@@ -2,7 +2,7 @@
 
 use Utils\ArrayUtils;
 
-$fileName = 'e';
+$fileName = 'a';
 
 /** @var Contributor[] */
 global $contributors;
@@ -12,35 +12,49 @@ global $projects;
 
 /** @var Output */
 global $OUTPUT;
-
 /* Reader */
-include_once 'reader.php';
+include_once 'mm-reader.php';
 
-ArrayUtils::array_keysort_objects($projects, '');
-
-/** @var Project $project */
-foreach ($projects as $project) {
-    $selectedContributors = [];
-    foreach ($project->roles as $role) {
-        $selected = null;
-        /** @var Contributor $contributor */
-        foreach ($contributors as $contributor) {
-            if ($contributor->skills[$role['skill']] >= $role['level'] && !isset($selectedContributors[$contributor->name])) {
-                $selected = $contributor;
-                break;
-            }
-        }
-
-        if (!$selected)
-            break;
-
-        $selectedContributors[$selected->name] = $selected;
-    }
-
-    if (count($selectedContributors) < count($project->roles))
-        continue;
-
-    $OUTPUT->setProjectAndScore($project, $selectedContributors);
+$skills2Contributors = [];
+foreach ($contributors as $name => $c) {
+    /** @var Contributor $c */
+    $skills2Contributors[$c->skills[0]] = $c;
 }
 
-$OUTPUT->save();
+function recalculateProjectsScore($t)
+{
+    global $projects;
+    foreach ($projects as $p) {
+        /** @var Project $p */
+        $remainingTime = $p->expire - $p->duration - $t;
+        if ($remainingTime <= 0) {
+            $base = max(($p->award + $remainingTime) / $p->award, 0);
+        } else {
+            $base = (1 + ($t / ($p->expire - $p->duration))) / 2;
+        }
+        $p->score = $p->award / $p->duration * $base;
+    }
+    ArrayUtils::array_keysort_objects($projects, 'score', SORT_DESC);
+}
+
+foreach ($projects as $p) {
+    /** @var Project $p */
+    echo $p->name . " - " . $p->score . "\n";
+}
+
+die();
+
+// Algo
+
+echo $maxTime;
+for ($t = 0; $t < $maxTime; $t++) {
+    //echo $t;
+}
+
+
+die();
+
+/*
+ArrayUtils::array_keysort_objects($projects, 'expire', SORT_ASC);
+*/
+

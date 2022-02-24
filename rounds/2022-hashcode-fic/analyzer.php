@@ -19,7 +19,7 @@ global $contributorsCount;
 /** @var int $projectsCount */
 global $projectsCount;
 
-$fileName = 'f';
+$fileName = 'a';
 
 /* Reader */
 include_once 'reader.php';
@@ -77,7 +77,7 @@ foreach ($projects as $p) {
         $skill = $roleInfo['skill'];
         $level = $roleInfo['level'];
         $skillId = $skill2Id[$skill];
-        $roleLevels[$skillId][$level]++;
+        $roleLevels[$skillId][$level] += $p->award/count($p->roles)/$p->duration;
         if($roleLevels[$skillId][$level] > $roleMaxCount) $roleMaxCount = $roleLevels[$skillId][$level];
         if($level > $roleMaxLevel) $roleMaxLevel = $level;
     }
@@ -90,6 +90,6 @@ for ($i = 0; $i < count($skill2Id); $i++) {
     }
 }
 
-$visual->save($fileName."_role_levels");
+$visual->save($fileName."_role_levels_x_score_x_duration");
 
 die();
