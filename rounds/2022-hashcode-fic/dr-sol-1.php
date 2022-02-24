@@ -17,7 +17,7 @@ global $contributors;
 global $projects;
 
 /* Config & Pre runtime */
-$fileName = 'b';
+$fileName = 'c';
 $param1 = 1;
 
 Cerberus::runClient(['fileName' => $fileName, 'param1' => $param1]);
@@ -180,8 +180,8 @@ function getProjectFeasibility(Project $project)
         }
         if (!$bestContributorToTake)
             return null;
-        $contributorsTaken[$c->name] = $c;
-        $contributorsOutput[] = $c;
+        $contributorsTaken[$bestContributorToTake->name] = $bestContributorToTake;
+        $contributorsOutput[] = $bestContributorToTake;
     }
     return $contributorsOutput;
 }
@@ -206,6 +206,9 @@ releaseContributors();
 $output = getOutput();
 */
 
+$lastUploadedScore = 0;
+$lastUploadedScoreDate = 0;
+
 while (true) {
     $preScore = $SCORE;
     if($T <= 10 || $T%100==0)
@@ -214,8 +217,12 @@ while (true) {
     ArrayUtils::array_keysort_objects($remainingProjects, 'score', SORT_DESC);
     foreach ($remainingProjects as $remainingProject) {
         /** @var Project $remainingProject */
+        //if($T == 135 && $remainingProject->name == "MapsSv7")
+        //    echo "1";
         $feasibleContributors = getProjectFeasibility($remainingProject);
         if($feasibleContributors) {
+            //if($remainingProject->name == "MapsSv7")
+            //    echo "12";
             doProject($remainingProject, $feasibleContributors);
         }
     }
@@ -227,6 +234,13 @@ while (true) {
     $T++;
     releaseContributors();
     recalculateRemainingProjectsScores(); // TODO: pesa un sacco così ogni volta...
+
+    if($SCORE > $lastUploadedScore && time()-$lastUploadedScoreDate > 10) {
+        $lastUploadedScoreDate = time();
+        $lastUploadedScore = $SCORE;
+        Log::out("Uploading!", 0, "green");
+        Autoupload::submission($fileName, null, getOutput());
+    }
 }
 
 //Log::out("Uploading!", 0, "green");
