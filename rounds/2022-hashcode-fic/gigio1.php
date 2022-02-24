@@ -36,7 +36,7 @@ foreach ($projects as $project) {
     if (count($selectedContributors) < count($project->roles))
         continue;
 
-    $OUTPUT->setProject($project, $selectedContributors);
+    $OUTPUT->setProjectAndScore($project, $selectedContributors);
 }
 
 $OUTPUT->save();

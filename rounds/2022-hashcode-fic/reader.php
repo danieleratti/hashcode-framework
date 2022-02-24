@@ -35,13 +35,36 @@ class Project
 class Output
 {
     private $rows = [];
+    private $freeAt = [];
+    private $score = null;
 
-    public function setProject($project, $contributors)
+    public function setProject(Project $project, array $contributors)
     {
+
         $this->rows[] = [
             'project' => $project,
             'contributors' => $contributors,
         ];
+    }
+
+    public function setProjectAndScore(Project $project, array $contributors)
+    {
+        $this->setProject($project, $contributors);
+
+        $maxFreeAt = 0;
+        foreach ($contributors as $contributor) {
+            $contribFreeAt = $this->freeAt[$contributor->name];
+            if ($this->freeAt[$contributor->name] > $maxFreeAt)
+                $maxFreeAt = $contribFreeAt;
+        }
+
+        $projectFinishAt = $maxFreeAt + $project->duration;
+
+        foreach ($contributors as $contributor) {
+            $this->freeAt[$contributor->name] = $projectFinishAt;
+        }
+
+        $this->score += max(0, $project->award - max(0, $projectFinishAt - $project->expire));
     }
 
     public function save()
@@ -59,6 +82,9 @@ class Output
         }
 
         $fileManager->outputV2(implode("\n", $result));
+
+        if ($this->score !== null)
+            echo "SCORE: " . $this->score;
     }
 }
 
@@ -73,14 +99,19 @@ $fileRow = 0;
 
 list($contributorsCount, $projectsCount) = explode(' ', $content[$fileRow++]);
 
-for ($c = 0; $c < $contributorsCount; $c++) {
+for ($c = 0;
+     $c < $contributorsCount;
+     $c++) {
     list($contributorName, $skillsCount) = explode(' ', $content[$fileRow++]);
     $contrib = new Contributor();
     $contrib->name = $contributorName;
-    for ($s = 0; $s < $skillsCount; $s++) {
+    for ($s = 0;
+         $s < $skillsCount;
+         $s++) {
         list($skill, $level) = explode(' ', $content[$fileRow++]);
         $contrib->skills[$skill] = (int)$level;
     }
+
     $contributors[$contributorName] = $contrib;
 }
 
