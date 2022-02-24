@@ -27,6 +27,39 @@ class Project
     public $roles = [];
 }
 
+class Output
+{
+    private $rows = [];
+
+    public function setProject($project, $contributors)
+    {
+        $this->rows[] = [
+            'project' => $project,
+            'contributors' => $contributors,
+        ];
+    }
+
+    public function save()
+    {
+        /** @var FileManager */
+        global $fileManager;
+
+        $result = [count($this->rows)];
+
+        foreach ($this->rows as $row) {
+            $result[] = $row['project']->name;
+            $result[] = implode(' ', array_map(function ($contrib) {
+                return $contrib->name;
+            }, $row['contributors']));
+        }
+
+        $fileManager->outputV2(implode("\n", $result));
+    }
+}
+
+$OUTPUT = new Output();
+global $OUTPUT;
+
 /* Reading the input */
 $fileManager = new FileManager($fileName);
 $content = explode("\n", $fileManager->get());
