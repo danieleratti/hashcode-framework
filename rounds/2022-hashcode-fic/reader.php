@@ -30,6 +30,10 @@ class Project
     public int $expire;
     /** @var array[] */
     public array $roles = [];
+
+    public function canGetSomePointAt($time) {
+        return $this->expire - ($time + $this->duration) + $this->award > 0;
+    }
 }
 
 class Output
