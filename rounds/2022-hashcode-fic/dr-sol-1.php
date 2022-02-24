@@ -17,7 +17,14 @@ global $contributors;
 global $projects;
 
 /* Config & Pre runtime */
-$fileName = 'c';
+/**
+ * b => 37740
+c => 133826
+d => 15497
+e => 50979
+f => 54614
+ */
+$fileName = 'f';
 $param1 = 1;
 
 Cerberus::runClient(['fileName' => $fileName, 'param1' => $param1]);
@@ -43,7 +50,7 @@ $projectsDone = [];
 /* Functions */
 function doProject(Project $project, array $contributors)
 {
-    global $SCORE, $T, $remainingProjects, $projectsDone;
+    global $fileName, $SCORE, $T, $remainingProjects, $projectsDone;
     $freeAt = $T + $project->duration;
     $score = $project->award;
 
@@ -77,7 +84,7 @@ function doProject(Project $project, array $contributors)
         'project' => $project,
         'contributors' => $contributors,
     ];
-    Log::out("Project " . $project->name . " done. New SCORE = " . $SCORE);
+    Log::out("$fileName) Project " . $project->name . " done. New SCORE = " . $SCORE);
 }
 
 function occupyContributor(Contributor $contributor, $freeAt, $skillImproved = null)
@@ -212,7 +219,7 @@ $lastUploadedScoreDate = 0;
 while (true) {
     $preScore = $SCORE;
     if($T <= 10 || $T%100==0)
-        Log::out("T = $T // SCORE = $SCORE");
+        Log::out("$fileName) T = $T // SCORE = $SCORE");
 
     ArrayUtils::array_keysort_objects($remainingProjects, 'score', SORT_DESC);
     foreach ($remainingProjects as $remainingProject) {
@@ -240,6 +247,9 @@ while (true) {
         $lastUploadedScore = $SCORE;
         Log::out("Uploading!", 0, "green");
         Autoupload::submission($fileName, null, getOutput());
+    } elseif(time()-$lastUploadedScoreDate > 60) {
+        if(count($remainingProjects) == 0)
+            die();
     }
 }
 
