@@ -25,6 +25,7 @@ e => 50979
 f => 54614
  */
 $fileName = 'f';
+$lastUploadedScore = 88196;
 $param1 = 1;
 
 Cerberus::runClient(['fileName' => $fileName, 'param1' => $param1]);
@@ -193,6 +194,79 @@ function getProjectFeasibility(Project $project)
     return $contributorsOutput;
 }
 
+
+function getProjectFeasibilityAdvanced(Project $project, $currentContributors)
+{
+    global $skillMatrixMinLevel, $skillMatrixExactLevel;
+    $contributorsPossibles = [];
+    $contributorsPossiblesMinusOne = [];
+    $contributorsOutput = [];
+    $skillsNeeded = [];
+    $possibleMentors = []; //[mainSkill][altraSkill][] = $c
+    $skill2roleId = [];
+    $rolesTouched = [];
+    $contributorsTaken = [];
+
+    foreach($currentContributors as $c) {
+        $contributorsTaken[$c->name] = $c;
+    }
+
+    foreach ($project->roles as $roleId => $role) {
+        $skillName = $role['skill'];
+        $skillLevel = $role['level'];
+        $skillsNeeded[$skillName] = max($skillsNeeded[$skillName], $skillLevel);
+        $skill2roleId[$skillName] = $roleId;
+    }
+
+    foreach ($project->roles as $roleId => $role) {
+        $skillName = $role['skill'];
+        $skillLevel = $role['level'];
+        $bestContributorTakenSkillLevel = null;
+        $bestContributorToTake = null;
+        if (@$skillMatrixMinLevel[$skillName][$skillLevel] && count($skillMatrixMinLevel[$skillName][$skillLevel]) > 0) {
+            $contributorsPossibles[$roleId] = $skillMatrixMinLevel[$skillName][$skillLevel];
+            $contributorsPossiblesMinusOne[$roleId] = $skillMatrixExactLevel[$skillName][$skillLevel-1];
+        }
+    }
+
+    foreach($contributorsPossibles as $roleId => $cs) {
+        foreach($cs as $c) {
+            /** @var Contributor $c */
+            foreach ($c->skills as $skill => $level) {
+                if ($skill != $project->roles[$roleId]['skill']) {
+                    if ($skillsNeeded[$skill] && $skillsNeeded[$skill] <= $level) {
+                        //$possibleMentors[$project->roles[$roleId]['skill']][$skill][$c->name] = $c;
+                        $possibleMentors[$roleId][$skill2roleId[$skill]][$c->name] = $c;
+                    }
+                }
+            }
+        }
+    }
+
+    foreach($possibleMentors as $roleId => $rolesAlt) {
+        foreach($rolesAlt as $roleAlt => $pm) {
+            foreach($pm as $mentor) {
+                if(!@$rolesTouched[$roleId] && !@$rolesTouched[$roleAlt] && !@$contributorsTaken[$mentor->name]) {
+                    if(isset($contributorsPossiblesMinusOne[$roleAlt]) && count($contributorsPossiblesMinusOne[$roleAlt]) > 0) {
+                        shuffle($contributorsPossiblesMinusOne[$roleAlt]);
+                        $key = array_key_first($contributorsPossiblesMinusOne[$roleAlt]);
+                        $randomAlunno = $contributorsPossiblesMinusOne[$roleAlt][$key];
+                        $contributorsTaken[$mentor->name] = $mentor;
+                        $contributorsTaken[$randomAlunno->name] = $randomAlunno;
+                        $currentContributors[$roleId] = $mentor;
+                        $currentContributors[$roleAlt] = $randomAlunno;
+                        $rolesTouched[$roleId] = true;
+                        $rolesTouched[$roleAlt] = true;
+                    }
+                }
+            }
+        }
+    }
+
+    return $currentContributors;
+}
+
+
 /* Runtime */
 releaseContributors();
 recalculateRemainingProjectsScores();
@@ -213,7 +287,6 @@ releaseContributors();
 $output = getOutput();
 */
 
-$lastUploadedScore = 0;
 $lastUploadedScoreDate = 0;
 
 while (true) {
@@ -224,12 +297,9 @@ while (true) {
     ArrayUtils::array_keysort_objects($remainingProjects, 'score', SORT_DESC);
     foreach ($remainingProjects as $remainingProject) {
         /** @var Project $remainingProject */
-        //if($T == 135 && $remainingProject->name == "MapsSv7")
-        //    echo "1";
         $feasibleContributors = getProjectFeasibility($remainingProject);
         if($feasibleContributors) {
-            //if($remainingProject->name == "MapsSv7")
-            //    echo "12";
+            $feasibleContributors = getProjectFeasibilityAdvanced($remainingProject, $feasibleContributors);
             doProject($remainingProject, $feasibleContributors);
         }
     }
