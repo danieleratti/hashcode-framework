@@ -33,6 +33,18 @@ class Demon
     public int $fragmentsRewardTime;
     /** @var int[] */
     public array $fragmentsRewardDetails = [];
+
+    public function getScoreAtTime(int $t): int
+    {
+        global $turnsNumber;
+        $i = 0;
+        $score = 0;
+        while ($i < $this->fragmentsRewardTime && $t + $i < $turnsNumber) {
+            $score += $this->fragmentsRewardDetails[$i];
+            $i++;
+        }
+        return $score;
+    }
 }
 
 /* Reading the input */
