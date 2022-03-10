@@ -1,5 +1,6 @@
 <?php
 
+/** @var string */
 global $fileName;
 
 /** @var Demon[] */
@@ -40,7 +41,7 @@ $content = explode("\n", $fileManager->get());
 
 $fileRow = 0;
 
-list($initialStamina, $maxStamina, $turnsNumber, $demonsCount) = explode(' ', $content[$fileRow++]);
+[$initialStamina, $maxStamina, $turnsNumber, $demonsCount] = explode(' ', $content[$fileRow++]);
 $initialStamina = (int)$initialStamina;
 $maxStamina = (int)$maxStamina;
 $turnsNumber = (int)$turnsNumber;
@@ -49,7 +50,7 @@ $demonsCount = (int)$demonsCount;
 $demons = [];
 
 for ($i = 0; $i < $demonsCount; $i++) {
-    list($requiredStamina, $staminaRecoverTime, $staminaRecoverAmount, $fragmentsRewardTime, $fragmentsDetails) = explode(' ', $content[$fileRow++], 5);
+    [$requiredStamina, $staminaRecoverTime, $staminaRecoverAmount, $fragmentsRewardTime, $fragmentsDetails] = explode(' ', $content[$fileRow++], 5);
     $d = new Demon();
     $d->id = $i;
     $d->staminaRequired = (int)$requiredStamina;
