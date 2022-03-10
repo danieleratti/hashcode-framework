@@ -1,7 +1,11 @@
 <?php
 
+use Utils\FileManager;
+
 /** @var string */
 global $fileName;
+/** @var FileManager */
+global $fileManager;
 
 /** @var Demon[] */
 global $demons;
@@ -14,8 +18,6 @@ global $maxStamina;
 global $turnsNumber;
 /** @var int */
 global $demonsCount;
-
-use Utils\FileManager;
 
 require_once '../../bootstrap.php';
 
