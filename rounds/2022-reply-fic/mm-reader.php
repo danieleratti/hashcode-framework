@@ -21,6 +21,46 @@ global $demonsCount;
 
 require_once '../../bootstrap.php';
 
+class Hero
+{
+    /** @var int */
+    public int $stamina;
+    /** @var int */
+    public int $fragments = 0;
+    /** @var int */
+    public int $maxStamina;
+    /** @var int[] */
+    public array $staminaRecovering = [];
+
+    public function __construct(int $maxStamina, int $initialStamina)
+    {
+        $this->stamina = $initialStamina;
+        $this->maxStamina = $maxStamina;
+    }
+
+    public function battleDemon(Demon $d, int $t)
+    {
+        $this->stamina -= $d->staminaRequired;
+        $this->fragments += $d->getScoreAtTime($t);
+        $this->staminaRecovering[$t + $d->staminaRecoverTime] = $d->staminaRecoverAmount;
+    }
+
+    public function recoverStamina(int $t)
+    {
+        if(isset($this->staminaRecovering[$t])) {
+            $this->stamina += $this->staminaRecovering[$t];
+            if($this->stamina > $this->maxStamina) {
+                $this->stamina = $this->maxStamina;
+            }
+        }
+    }
+
+    public function canDefeat(Demon $d): bool
+    {
+        return $d->staminaRequired <= $this->stamina;
+    }
+}
+
 class Demon
 {
     /** @var int */
@@ -36,6 +76,13 @@ class Demon
     /** @var int[] */
     public array $fragmentsRewardDetails = [];
 
+    /** @var int */
+    public int $totalFragments = 0;
+    /** @var float */
+    public float $weightedReward = 0;
+    /** @var float */
+    public float $value = 0;
+
     public function getScoreAtTime(int $t): int
     {
         global $turnsNumber;
@@ -46,6 +93,26 @@ class Demon
             $i++;
         }
         return $score;
+    }
+
+    public function calculateTotalFragments(int $t = 0)
+    {
+        global $turnsNumber;
+        $this->totalFragments = 0;
+        $this->weightedReward = 0;
+        foreach ($this->fragmentsRewardDetails as $i => $r) {
+            if($t + $i < $turnsNumber) {
+                $this->totalFragments += $r;
+                $this->weightedReward += $r / $i;
+            }
+        }
+    }
+
+    public function calculateValue(int $t = 0)
+    {
+        //$this->value = ($this->staminaRecoverAmount - $this->staminaRequired);
+        $this->value = log($this->weightedReward) * ($this->staminaRecoverAmount - $this->staminaRequired) / pow($this->staminaRecoverTime, 0.5);
+        //$this->value = 1 / (1 + pow(M_E, - $this->staminaRecoverAmount + $this->staminaRequired)) / pow($this->staminaRecoverTime, 0.5);
     }
 }
 
@@ -76,5 +143,6 @@ for ($i = 0; $i < $demonsCount; $i++) {
         $f = (int)$f;
     }
     $d->fragmentsRewardDetails = $fragmentsDetails;
+    $d->calculateTotalFragments();
     $demons[$i] = $d;
 }

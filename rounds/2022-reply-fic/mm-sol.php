@@ -29,7 +29,7 @@ global $t;
 /** @var int[] */
 global $staminaRecovering;
 
-$fileName = 'a';
+$fileName = 'b';
 
 /* Reader */
 include_once 'mm-reader.php';
@@ -39,31 +39,36 @@ include_once 'mm-reader.php';
 
 function calculateScoreForSolution(array $defeatedDemons): int
 {
-    global $turnsNumber, $initialStamina, $staminaRecovering;
-    $currentStamina = $initialStamina;
-    $currentScore = 0;
+    global $turnsNumber, $initialStamina, $maxStamina;
+    $hero = new Hero($maxStamina, $initialStamina);
     $dIdx = 0;
     for ($t = 0; $t < $turnsNumber; $t++) {
+        //echo "\nT = $t";
         /** @var Demon $d */
         $d = $defeatedDemons[$dIdx];
         // Stamina recover
-        if(isset($staminaRecovering[$t])) {
-            $currentStamina += $staminaRecovering[$t];
-        }
+        //echo "\nStamina = {$hero->stamina}";
+        $hero->recoverStamina($t);
+        //echo "\nNew stamina = {$hero->stamina}";
         // Battle demon
-        if($d->staminaRequired <= $currentStamina) {
-            battleDemon($d, $t);
+        if($hero->canDefeat($d)) {
+            $hero->battleDemon($d, $t);
+            $dIdx++;
+            //echo "\nDefeated = {$d->id}";
+            //echo "\nStamina after battle = {$hero->stamina}";
         }
     }
-    return $currentScore;
+    return $hero->fragments;
 }
 
-function battleDemon(Demon $d, int $t)
-{
-    global $currentStamina, $currentScore, $staminaRecovering;
-    $currentStamina -= $d->staminaRequired;
-    $currentScore += $d->getScoreAtTime($t);
-    $staminaRecovering[$t + $d->staminaRecoverTime] = $d->staminaRecoverAmount;
+function output(array $defeatedDemons, int $score) {
+    global $fileManager, $fileName;
+    $output = '';
+    foreach ($defeatedDemons as $d) {
+        $output .= $d->id . "\n";
+    }
+    Log::out("SCORE($fileName) = " . $score);
+    $fileManager->output($output, 'score_' . $score);
 }
 
 /* Algo */
@@ -71,10 +76,22 @@ $currentStamina = $initialStamina;
 $currentScore = 0;
 $t = 0;
 
-$defeatedDemons = $demons;
-shuffle($defeatedDemons);
-
-$currentScore = calculateScoreForSolution($defeatedDemons);
+$bestScore = 0;
+$bestSolution = [];
+for($i = 0; $i < 1000000; $i++) {
+    $defeatedDemons = $demons;
+    shuffle($defeatedDemons);
+    $currentScore = calculateScoreForSolution($defeatedDemons);
+    if($currentScore > $bestScore) {
+        $bestScore = $currentScore;
+        $bestSolution = $defeatedDemons;
+        echo "Best score = $bestScore\n";
+        output($bestSolution, $bestScore);
+    }
+    if($i % 1000 === 0) {
+        echo "Tentativo $i\n";
+    }
+}
 
 /*
 for ($t = 0; $t < $turnsNumber; $t++) {
@@ -88,10 +105,6 @@ foreach ($demons as $d) {
 }
 */
 
-/* SCORING & OUTPUT */
-$output = '';
-foreach ($defeatedDemons as $d) {
-    $output .= $d->id . "\n";
-}
-Log::out("SCORE($fileName) = " . $currentScore);
-$fileManager->output($output, 'score_' . $currentScore);
+
+
+
