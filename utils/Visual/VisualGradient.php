@@ -4,7 +4,7 @@ namespace Utils\Visual;
 
 class VisualGradient extends Visual
 {
-    private $colors;
+    private array $colors;
 
     public function __construct($rows, $columns)
     {
@@ -26,9 +26,9 @@ class VisualGradient extends Visual
         }
     }
 
-    public function setPixel($row, $col, $gradient)
+    public function setPixel($row, $col, $color)
     {
-        $colorId = (int)count($this->colors) * $gradient;
+        $colorId = (int)count($this->colors) * $color;
         imagesetpixel($this->image, $col, $row, $this->colors[$colorId]);
     }
 

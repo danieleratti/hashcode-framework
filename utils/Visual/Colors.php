@@ -95,7 +95,7 @@ class Colors
     const red8 = 'd12206';
     const red9 = 'c81603';
 
-    static function randomColor()
+    static function randomColor(): string
     {
         $colors = [
             Colors::blue3,

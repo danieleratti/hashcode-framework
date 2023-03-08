@@ -2,11 +2,11 @@
 
 namespace Utils;
 
-use Tightenco\Collect\Support\Arr;
+use Illuminate\Support\Arr;
 
-class Collection extends \Tightenco\Collect\Support\Collection
+class Collection extends \Illuminate\Support\Collection
 {
-    public function sortDesc()
+    public function sortDesc($options = SORT_REGULAR): Collection
     {
         return parent::sort(function ($a, $b) {
             if ($a == $b)
@@ -18,14 +18,15 @@ class Collection extends \Tightenco\Collect\Support\Collection
     /**
      * Get and remove the item with the maximum value of the given key.
      *
-     * @param string $key
+     * @param string|int $key
      * @return mixed
      */
-    public function pullMax($key) {
+    public function pullMax(string|int $key): mixed
+    {
         $maxIndex = null;
         $maxValue = null;
         foreach ($this->items as $index => $item) {
-            if($maxValue === null || $item->{$key} > $maxValue) {
+            if ($maxValue === null || $item->{$key} > $maxValue) {
                 $maxIndex = $index;
                 $maxValue = $item->{$key};
             }
@@ -37,14 +38,15 @@ class Collection extends \Tightenco\Collect\Support\Collection
     /**
      * Get and remove the item with the minimum value of the given key.
      *
-     * @param string $key
+     * @param string|int $key
      * @return mixed
      */
-    public function pullMin($key) {
+    public function pullMin(string|int $key): mixed
+    {
         $minIndex = null;
         $minValue = null;
         foreach ($this->items as $index => $item) {
-            if($minValue === null || $item->{$key} < $minValue) {
+            if ($minValue === null || $item->{$key} < $minValue) {
                 $minIndex = $index;
                 $minValue = $item->{$key};
             }

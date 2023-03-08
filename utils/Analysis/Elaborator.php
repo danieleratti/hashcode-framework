@@ -48,9 +48,9 @@ class Elaborator
                     [, , $type] = explode(' ', $reflection->getProperty($property)->getDocComment());
                     if (in_array($type, ['bool', 'int', 'double'])) {
                         $type = 'number';
-                    } elseif ($type == 'array' || strpos($type, '[]') !== false) {
+                    } elseif ($type == 'array' || str_contains($type, '[]')) {
                         $type = 'array';
-                    } elseif (strpos($type, 'Collection') !== false) {
+                    } elseif (str_contains($type, 'Collection')) {
                         $type = 'collection';
                     }
                     $item['type'] = $type;

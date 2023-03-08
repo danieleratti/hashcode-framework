@@ -7,11 +7,11 @@ namespace Utils\Analysis;
 class Dataset
 {
     /** @var string $name */
-    public $name;
+    public string $name;
     /** @var array $data */
-    public $data;
+    public array $data;
     /** @var string[] $properties */
-    public $properties;
+    public array $properties;
 
     public function __construct(string $name, array $data, array $properties)
     {

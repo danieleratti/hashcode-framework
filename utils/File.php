@@ -4,7 +4,7 @@ namespace Utils;
 
 class File
 {
-    public static function write($fileName, $content)
+    public static function write($fileName, $content): void
     {
         $dirname = dirname($fileName);
         DirUtils::makeDirOrCreate($dirname);
@@ -14,7 +14,7 @@ class File
         fclose($fh);
     }
 
-    public static function append($fileName, $content)
+    public static function append($fileName, $content): void
     {
         $fh = fopen($fileName, 'w');
         fwrite($fh, $content);

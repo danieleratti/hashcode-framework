@@ -4,28 +4,28 @@ namespace Utils;
 
 use Utils\DirUtils;
 
-Class Cache
+class Cache
 {
-    protected $filename;
-    protected $dir;
-    public static $prefix;
+    public static string $prefix;
+    protected string $filename;
+    protected string $dir;
 
-    public function __construct($filename)
+    public function __construct(string $filename)
     {
         $this->filename = $filename;
         $this->dir = DirUtils::getScriptDir() . '/caches';
     }
 
-    private function getFilename()
-    {
-        return $this->dir . '/' . (self::$prefix ? (self::$prefix . '_') : '') . $this->filename . '.json';
-    }
-
-    public function save($payload)
+    public function save($payload): void
     {
         $fh = fopen($this->getFilename(), 'w');
         fwrite($fh, json_encode($payload));
         fclose($fh);
+    }
+
+    private function getFilename(): string
+    {
+        return $this->dir . '/' . (self::$prefix ? (self::$prefix . '_') : '') . $this->filename . '.json';
     }
 
     public function get()

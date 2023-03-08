@@ -6,7 +6,7 @@ use ReflectionClass;
 
 Class VisualStandard extends Visual
 {
-    protected $colors;
+    protected array $colors;
 
     public function __construct($rows, $columns)
     {
@@ -15,7 +15,7 @@ Class VisualStandard extends Visual
         $reflectedColors = new ReflectionClass(Colors::class);
 
         $this->colors = [];
-        foreach ($reflectedColors->getConstants() as $name => $color) {
+        foreach ($reflectedColors->getConstants() as $color) {
             $this->colors[$color] = $this->allocateByString($color);
         }
 

@@ -2,35 +2,42 @@
 
 namespace Utils;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+
 class FileManager
 {
-    private static $inputDir = 'input';
-    private static $outputDir = 'output';
-    private static $cacheDir = 'cache';
+    private static string $inputDir = 'input';
+    private static string $outputDir = 'output';
+    private static string $cacheDir = 'cache';
 
-    public $inputName;
-    public $fileContent;
+    public ?string $inputName;
+    public string $fileContent;
 
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->inputName = $this->getFileByStart($name);
         $this->fileContent = trim(file_get_contents(DirUtils::getScriptDir() . '/' . self::$inputDir . '/' . $this->inputName));
     }
 
-    public function get()
+    /**
+     * @throws FileNotFoundException
+     */
+    private function getFileByStart($query): ?string
+    {
+        foreach (DirUtils::listFiles(DirUtils::getScriptDir() . '/' . self::$inputDir) as $fileName) {
+            if (str_starts_with($fileName, $query))
+                return $fileName;
+        }
+
+        throw new FileNotFoundException("File starting with '$query' not found.");
+    }
+
+    public function get(): string
     {
         return $this->fileContent;
     }
 
-    private function getFileByStart($query)
-    {
-        foreach (DirUtils::listFiles(DirUtils::getScriptDir() . '/' . self::$inputDir) as $fileName) {
-            if (substr($fileName, 0, strlen($query)) === $query)
-                return $fileName;
-        }
-    }
-
-    public function output($content, $extra = '')
+    public function output($content, $extra = ''): string
     {
         $baseInputName = $this->getInputName();
         $scriptName = DirUtils::getScriptName();
@@ -39,7 +46,12 @@ class FileManager
         return $filePath;
     }
 
-    public function outputV2($content, $extra = '')
+    public function getInputName(): string
+    {
+        return basename($this->inputName, '.in');
+    }
+
+    public function outputV2($content, $extra = ''): void
     {
         $baseInputName = $this->getInputName();
         $scriptName = DirUtils::getScriptName();
@@ -49,10 +61,5 @@ class FileManager
         File::write($outputPath, $content);
         if (Autoupload::$scriptContent)
             File::write($sourcePath, Autoupload::$scriptContent);
-    }
-
-    public function getInputName()
-    {
-        return basename($this->inputName, '.in');
     }
 }

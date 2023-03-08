@@ -7,12 +7,9 @@ use Utils\Collection;
 
 class Analyzer
 {
-    /** @var string|null $filename */
-    private $filename = null;
-    /** @var array */
-    private $baseData = [];
-    /** @var Dataset[] */
-    private $data = [];
+    private ?string $filename;
+    private array $baseData;
+    private array $data;
 
     public function __construct(string $filename, array $baseData)
     {
@@ -25,14 +22,14 @@ class Analyzer
      * @param array|Collection $data
      * @param array $properties
      */
-    public function addDataset(string $name, $data, array $properties)
+    public function addDataset(string $name, Collection|array $data, array $properties): void
     {
         if ($data instanceof Collection)
             $data = $data->toArray();
         $this->data[] = new Dataset($name, $data, $properties);
     }
 
-    public function analyze()
+    public function analyze(): void
     {
         $chart = new Chart('stats');
         ob_start();
@@ -110,7 +107,7 @@ class Analyzer
     const PRINT_BLUE = 0x00100000;
     const PRINT_TITLE = 0x01000000;
 
-    private function initPage()
+    private function initPage(): void
     {
         echo "<style type='text/css'>body {font-family: sans-serif;}</style>";
         echo "<head>
@@ -119,7 +116,7 @@ class Analyzer
 
     }
 
-    public function print($string, $flags = 0)
+    public function print($string, $flags = 0): void
     {
         if ($flags & self::PRINT_BOLD)
             $string = "<b>$string</b>";
@@ -138,13 +135,13 @@ class Analyzer
         echo $string;
     }
 
-    public function println($string = "", $newLines = 1, $flags = 0)
+    public function println($string = "", $newLines = 1, $flags = 0): void
     {
         $this->print($string, $flags);
         $this->print(str_repeat("<br/>", $newLines));
     }
 
-    public function printDivider()
+    public function printDivider(): void
     {
         $this->print("<hr/>");
     }

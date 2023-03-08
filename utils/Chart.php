@@ -8,11 +8,11 @@
 
 namespace Utils;
 
-Class Chart
+class Chart
 {
-    protected $filename;
-    public static $prefix;
-    public static $outputDir = 'charts';
+    public static string $prefix;
+    public static string $outputDir = 'charts';
+    protected string $filename;
 
     public function __construct($fileName)
     {
@@ -22,7 +22,24 @@ Class Chart
         DirUtils::makeDirOrCreate($dirname);
     }
 
-    private function save($payload)
+    public function plotLineY($line): string
+    {
+        return $this->plotCustom([
+            [
+                'y' => $line,
+                'type' => 'scatter'
+            ]
+        ]);
+    }
+
+    public function plotCustom($data, $layout = []): string
+    {
+        return $this->save($this->generatePayload($data, $layout));
+    }
+
+    /* Plot Charts */
+
+    private function save($payload): string
     {
         $fh = fopen($this->filename, 'w');
         fwrite($fh, $payload);
@@ -30,7 +47,12 @@ Class Chart
         return $this->filename;
     }
 
-    private function generatePayload($data, $layout = [])
+    /*
+     * @param $line
+     * eg. [1,2,3,4,3,2,1]
+     */
+
+    private function generatePayload($data, $layout = []): string
     {
         return "
         <html>
@@ -48,31 +70,12 @@ Class Chart
         </html>";
     }
 
-    /* Plot Charts */
-    public function plotCustom($data, $layout = [])
-    {
-        return $this->save($this->generatePayload($data, $layout));
-    }
-
-    /*
-     * @param $line
-     * eg. [1,2,3,4,3,2,1]
-     */
-    public function plotLineY($line)
-    {
-        return $this->plotCustom([
-            [
-                'y' => $line,
-                'type' => 'scatter'
-            ]
-        ]);
-    }
-
     /*
      * @param $lines
      * eg. [ ['name': 'series1', 'line':[1,2,3,4,3,2,1]], ['name': 'series2', 'line':[2,3,4,3,2,1,2]] ]
      */
-    public function plotMultiLineY($lines)
+
+    public function plotMultiLineY($lines): string
     {
         $customAxis = 2;
         $plot = [];
@@ -105,7 +108,7 @@ Class Chart
      * @param $lines
      * eg. [ ['name': 'series1', 'line':[['a', 1],['b', 2],['c', 3]]], ['name': 'series2', 'line':[['a', 2],['b', 3],['c', 4]]] ]
      */
-    public function plotMultiLineXY($lines)
+    public function plotMultiLineXY($lines): string
     {
         $customAxis = 2;
         $plot = [];
@@ -137,7 +140,7 @@ Class Chart
      * @param $line
      * eg. [[1,1], [2,2], [3,3]]
      */
-    public function plotLineXY($line)
+    public function plotLineXY($line): string
     {
         $lineX = [];
         $lineY = [];
@@ -154,12 +157,12 @@ Class Chart
         ]);
     }
 
-    public function getStatsPlot($stats, $divName){
+    public function getStatsPlot($stats, $divName): string
+    {
         $pointsX = [];
         $pointsY = [];
         $texts = [];
-        foreach ($stats as $stat)
-        {
+        foreach ($stats as $stat) {
             $pointsX[] = 2;
             $pointsY[] = $stat[0];
             $texts[] = $stat[1];
@@ -172,10 +175,10 @@ Class Chart
             'type' => 'pointcloud']
         ];
         $layout = [[
-            'height'=> 800,
-            'width' =>300,
-            'margin'=> [
-                'l'=> 10, 'b' => 20, 't'=> 0, 'r'=> 0]
+            'height' => 800,
+            'width' => 300,
+            'margin' => [
+                'l' => 10, 'b' => 20, 't' => 0, 'r' => 0]
         ]];
 
         return "<script>
@@ -185,13 +188,13 @@ Class Chart
                 </script>";
     }
 
-    public function getBoxPlotHtml($values, $divName){
+    public function getBoxPlotHtml($values, $divName): string
+    {
 
         $data = [];
-        foreach ($values as $v => $value)
-        {
+        foreach ($values as $v => $value) {
             $data[] = [
-                'y'=> $value,
+                'y' => $value,
                 'type' => 'box',
                 'name' => $v,
             ];
@@ -207,7 +210,7 @@ Class Chart
      * @param $points
      * eg. [[1,1,'lab1'], [2,2], [3,3]]
      */
-    public function plotPoints($points)
+    public function plotPoints($points): string
     {
         $pointsX = [];
         $pointsY = [];
@@ -231,7 +234,7 @@ Class Chart
      * @param $points
      * eg. [[1,1,1], [2,2,2], [3,3,3]]
      */
-    public function plotPoints3D($points)
+    public function plotPoints3D($points): string
     {
         $pointsX = [];
         $pointsY = [];
@@ -268,7 +271,7 @@ Class Chart
      * [ [x, y, size, color, text], ... ]
      * eg. [[1, 1, 1, red, '1 small red'], [2, 2, 2, blue, '2 medium blue'], [3, 3, 3, green, '3 big green']]
      */
-    public function plotBubbles($bubbles)
+    public function plotBubbles($bubbles): string
     {
         $xs = [];
         $ys = [];
@@ -308,7 +311,7 @@ Class Chart
      * [ xi, ... ]
      * eg. [1, 2, 3, 3, 3, 2]
      */
-    public function plotHistogram($histogram)
+    public function plotHistogram($histogram): string
     {
         return $this->plotCustom([
             [
@@ -323,7 +326,7 @@ Class Chart
      * [ [xi, yi], ... ]
      * eg. [[1,1], [2,2], [3,3]]
      */
-    public function plotHistogram2D($histogram)
+    public function plotHistogram2D($histogram): string
     {
         $histogramX = [];
         $histogramY = [];

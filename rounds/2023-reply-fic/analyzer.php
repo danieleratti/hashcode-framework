@@ -7,9 +7,9 @@ use Utils\Visual\Colors;
 use Utils\Visual\VisualGradient;
 use Utils\Visual\VisualStandard;
 
-/** @var string */
+/** @var string $fileName */
 global $fileName;
-/** @var FileManager */
+/** @var FileManager $fileManager */
 global $fileManager;
 
 ///** @var Demon[] */
