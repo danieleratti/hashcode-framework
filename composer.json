@@ -6,6 +6,7 @@
     "MIT"
   ],
   "require": {
+    "php": ">=8.2",
     "ext-gd": "*",
     "ext-json": "*",
     "ext-curl": "*",
