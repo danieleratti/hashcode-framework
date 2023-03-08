@@ -7,15 +7,15 @@
   ],
   "require": {
     "ext-gd": "*",
+    "ext-json": "*",
+    "ext-curl": "*",
     "amphp/parallel": "^1.1",
     "amphp/parallel-functions": "^0.1.3",
     "tightenco/collect": "^6.11",
-    "ext-json": "*",
     "graphp/graph": "^0.9.1",
     "graphp/algorithms": "^0.8.1",
     "graphp/graphviz": "^0.2.2",
-    "jan-swiecki/simple-annotations": "^0.3.1",
-    "ext-curl": "*"
+    "jan-swiecki/simple-annotations": "^0.3.1"
   },
   "autoload": {
     "psr-4": {
