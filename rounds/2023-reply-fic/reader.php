@@ -27,6 +27,7 @@ class MapManager
 
     public function putSnake(int $r, int $c): void
     {
+        \Utils\Log::out("Snake in  ($r,$c)");
         if ($this->hasSnake($r, $c)) {
             throw new Error("Snake already here [$r, $c].");
         }
