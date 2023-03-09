@@ -38,6 +38,45 @@ class MapManager
         return $this->map[$r][$c] === '.';
     }
 
+    public function hasSnakeIf(string $direction, array $cell): bool
+    {
+        $cell = $this->getNextCellForDirection($direction, $cell);
+        return $this->hasSnake(...$cell);
+    }
+
+    public function getNextCellForDirection(string $direction, array $cell): array|false
+    {
+        switch ($direction) {
+            case 'U':
+                $cell[0]--;
+                if ($cell[0] < 0) {
+                    $cell[0] = $this->rowsCount - 1;
+                }
+                break;
+            case 'D':
+                $cell[0]++;
+                if ($cell[0] >= $this->rowsCount) {
+                    $cell[0] = 0;
+                }
+                break;
+            case 'L':
+                $cell[1]--;
+                if ($cell[1] < 0) {
+                    $cell[1] = $this->columnsCount - 1;
+                }
+                break;
+            case 'R':
+                $cell[1]++;
+                if ($cell[1] >= $this->columnsCount) {
+                    $cell[1] = 0;
+                }
+                break;
+            default:
+                throw new Error('Unexpected command.');
+        }
+        return $cell;
+    }
+
     /**
      * @param Snake[] $snakes
      * @return void
@@ -74,34 +113,7 @@ class Snake
     public function addDirectionCommand(string $direction, bool $autoTeleport = false): void
     {
         $this->commands[] = $direction;
-        switch ($direction) {
-            case 'U':
-                $this->head[0]--;
-                if ($this->head[0] < 0) {
-                    $this->head[0] = $this->mapManager->rowsCount - 1;
-                }
-                break;
-            case 'D':
-                $this->head[0]++;
-                if ($this->head[0] >= $this->mapManager->rowsCount) {
-                    $this->head[0] = 0;
-                }
-                break;
-            case 'L':
-                $this->head[1]--;
-                if ($this->head[1] < 0) {
-                    $this->head[1] = $this->mapManager->columnsCount - 1;
-                }
-                break;
-            case 'R':
-                $this->head[1]++;
-                if ($this->head[1] >= $this->mapManager->columnsCount) {
-                    $this->head[1] = 0;
-                }
-                break;
-            default:
-                throw new Error('Unexpected command.');
-        }
+        $this->head = $this->mapManager->getNextCellForDirection($direction, $this->head);
         $this->path[] = $this->head;
         $this->currentLength++;
 
