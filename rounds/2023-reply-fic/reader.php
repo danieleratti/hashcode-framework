@@ -14,7 +14,7 @@ class Snake
     public array $path = [];
     public array $commands = [];
     public array $head = [];
-    public $currentLength = 0;
+    public int $currentLength = 0;
 
     public function __construct(
         public int $id,
