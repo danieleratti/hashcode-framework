@@ -15,6 +15,7 @@ class Snake
     public int $id;
     /** @var int $length */
     public int $length;
+    public array $commands;
 
     public function __construct(
         int $id,
@@ -23,6 +24,16 @@ class Snake
     {
         $this->id = $id;
         $this->length = $length;
+    }
+
+    public function addDirectionCommand(string $direction): void
+    {
+        $this->commands[] = $direction;
+    }
+
+    public function addTeleportCommand(int $r, int $c): void
+    {
+        $this->commands[] = [$r, $c];
     }
 }
 
