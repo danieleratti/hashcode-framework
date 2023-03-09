@@ -8,10 +8,13 @@ global $fileName;
 /** @var FileManager $fileManager */
 global $fileManager;
 
-$fileName = 'b';
+$fileName = 'a';
 
 /* Reader */
 include_once 'reader.php';
+
+global $snakes;
+global $map;
 
 /* Functions */
 

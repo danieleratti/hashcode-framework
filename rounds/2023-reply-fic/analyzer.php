@@ -12,32 +12,24 @@ global $fileName;
 /** @var FileManager $fileManager */
 global $fileManager;
 
-///** @var Demon[] */
-//global $demons;
-//
-///** @var int */
-//global $initialStamina;
-///** @var int */
-//global $maxStamina;
-///** @var int */
-//global $turnsNumber;
-///** @var int */
-//global $demonsCount;
-//
-//$fileName = 'b';
-//
-///* Reader */
-//include_once 'mm-reader.php';
-//
-//$analyzer = new Analyzer($fileName, [
-//    'demons_count' => $demonsCount,
-//    'turns' => $turnsNumber,
-//    'max_stamina' => $maxStamina,
-//    'initial_stamina' => $initialStamina,
-//]);
-//
-//$analyzer->addDataset('demons', $demons, ['staminaRequired', 'staminaRecoverTime', 'staminaRecoverAmount', 'fragmentsRewardTime', 'totalFragments']);
-//
-//$analyzer->analyze();
+global $snakes;
+global $map;
+global $rowsCount;
+global $columnsCount;
+global $snakesCount;
+
+$fileName = 'f';
+
+include __DIR__ . '/reader.php';
+
+$analyzer = new Analyzer($fileName, [
+    'rows' => $rowsCount,
+    'columns' => $columnsCount,
+    'snakes' => $snakesCount,
+]);
+
+$analyzer->addDataset('snakes', $snakes, ['length']);
+
+$analyzer->analyze();
 
 die();
