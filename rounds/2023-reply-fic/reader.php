@@ -14,8 +14,8 @@ class Snake
     /** @var int $id */
     public int $id;
     /** @var int $length */
-    public int $length;
-    public array $commands;
+    public int $length = 0;
+    public array $commands = [];
 
     public function __construct(
         int $id,
