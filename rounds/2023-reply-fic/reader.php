@@ -36,6 +36,9 @@ $fileRow = 0;
 /** @var int $columnsCount */
 /** @var int $snakesCount */
 [$columnsCount, $rowsCount, $snakesCount] = explode(' ', $content[$fileRow++]);
+$rowsCount = (int)trim($rowsCount);
+$columnsCount = (int)trim($columnsCount);
+$snakesCount = (int)trim($snakesCount);
 
 /** @var Snake[] $snakes */
 $snakes = [];
@@ -50,9 +53,11 @@ foreach ($lengths as $l) {
 $map = [];
 for ($r = 0; $r < $rowsCount; $r++) {
     $columns = explode(' ', $content[$fileRow++]);
-    $map[$r] = $columns;
+    foreach ($columns as $c => $v) {
+        $map[$r][$c] = $v === '*' ? '*' : (int)trim($v);
+    }
 }
 
-//print_r($snakes);
-//print_r($map);
+print_r($snakes);
+print_r($map);
 unset($content);
