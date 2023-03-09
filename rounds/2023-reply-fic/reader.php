@@ -100,7 +100,7 @@ class Snake
 
     public function getOutputPath(): string
     {
-        $output = $this->path[0][1] . ' ' . $this->head[0][0];
+        $output = $this->path[0][1] . ' ' . $this->path[0][0];
         foreach ($this->commands as $c) {
             if (is_array($c)) {
                 $output .= ' ' . $c[1] . ' ' . $c[0];
