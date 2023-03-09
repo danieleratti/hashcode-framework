@@ -11,35 +11,61 @@ require_once '../../bootstrap.php';
 
 class Snake
 {
-    /** @var int $id */
-    public int $id;
-    /** @var int $length */
-    public int $length = 0;
+    public array $path = [];
     public array $commands = [];
+    public array $head = [];
+    public $currentLength = 0;
 
     public function __construct(
-        int $id,
-        int $length
+        public int $id,
+        public int $length
     )
     {
-        $this->id = $id;
-        $this->length = $length;
     }
 
-    public function setHead(int $r, int $c): void
+    public function setInitialHead(int $r, int $c): void
     {
-        $this->commands = [$c, $r];
+        $this->head = [$r, $c];
+        $this->path = [[$r, $c]];
+        $this->currentLength = 1;
     }
 
     public function addDirectionCommand(string $direction): void
     {
         $this->commands[] = $direction;
+        $translate = match ($direction) {
+            'U' => [-1, 0],
+            'D' => [1, 0],
+            'L' => [0, -1],
+            'R' => [0, 1],
+        };
+        $this->head = [$this->head[0] + $translate[0], $this->head[1] + $translate[1]];
+        $this->path[] = $this->head;
+        $this->currentLength++;
     }
 
     public function addTeleportCommand(int $r, int $c): void
     {
-        $this->commands[] = $c;
-        $this->commands[] = $r;
+        $this->commands[] = [$r, $c];
+        $this->head = [$r, $c];
+    }
+
+    public function getRemainingLength(): int
+    {
+        return $this->length - $this->currentLength;
+    }
+
+    public function getOutputPath(): string
+    {
+        $output = $this->head[1] . ' ' . $this->head[0];
+        foreach ($this->commands as $c) {
+            if (is_array($c)) {
+                $output .= ' ' . $c[1] . ' ' . $c[0];
+            } else {
+                $output .= ' ' . $c;
+            }
+        }
+        return $output;
     }
 }
 
