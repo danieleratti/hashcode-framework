@@ -27,7 +27,9 @@ for ($c = 0; $c < $columnsCount; $c++) {
 for ($c = 0; $c < $columnsCount; $c++) {
     for ($r = 0; $r < $rowsCount; $r++) {
         $v = $map[$r][$c];
-        if ($v === '*') {
+        if ($v === '.') {
+            $color = [0x00, 0x00, 0xff];
+        } elseif ($v === '*') {
             $color = [0xff, 0xff, 0xff];
         } elseif ($v > 0) {
             $color = [0x00, $v / $maxAbsScore * 0xff, 0x00];

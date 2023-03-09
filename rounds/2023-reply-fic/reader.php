@@ -24,6 +24,15 @@ class MapManager
     {
         $this->map = $map;
     }
+
+    /**
+     * @param Snake[] $snakes
+     * @return void
+     */
+    public function visualizeWithSnakes(array $snakes): void
+    {
+
+    }
 }
 
 class Snake
@@ -147,6 +156,7 @@ for ($r = 0; $r < $rowsCount; $r++) {
 }
 
 $mapManager->setMap($map);
+$map = &$mapManager->map;
 
 //print_r($snakes);
 //print_r($map);
