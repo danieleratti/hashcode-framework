@@ -25,6 +25,19 @@ class MapManager
         $this->map = $map;
     }
 
+    public function putSnake(int $r, int $c): void
+    {
+        if ($this->hasSnake($r, $c)) {
+            throw new Error('Snake already here.');
+        }
+        $this->map[$r][$c] = '.';
+    }
+
+    public function hasSnake(int $r, int $c): bool
+    {
+        return $this->map[$r][$c] === '.';
+    }
+
     /**
      * @param Snake[] $snakes
      * @return void
@@ -55,6 +68,7 @@ class Snake
         $this->head = [$r, $c];
         $this->path = [[$r, $c]];
         $this->currentLength = 1;
+        $this->mapManager->putSnake($r, $c);
     }
 
     public function addDirectionCommand(string $direction, bool $autoTeleport = false): void
@@ -90,6 +104,7 @@ class Snake
         }
         $this->path[] = $this->head;
         $this->currentLength++;
+        $this->mapManager->putSnake(...$this->head);
 
         if ($autoTeleport && $this->mapManager->map[$this->head[0]][$this->head[1]] === '*') {
             $this->addTeleportCommand(...$this->head);
