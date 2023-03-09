@@ -9,6 +9,23 @@ global $fileManager;
 
 require_once '../../bootstrap.php';
 
+class MapManager
+{
+    public array $map;
+
+    public function __construct(
+        public int $rowsCount,
+        public int $columnsCount,
+    )
+    {
+    }
+
+    public function setMap(array $map): void
+    {
+        $this->map = $map;
+    }
+}
+
 class Snake
 {
     public array $path = [];
@@ -17,8 +34,9 @@ class Snake
     public int $currentLength = 0;
 
     public function __construct(
-        public int $id,
-        public int $length
+        public int                  $id,
+        public int                  $length,
+        private readonly MapManager $mapManager
     )
     {
     }
@@ -30,18 +48,43 @@ class Snake
         $this->currentLength = 1;
     }
 
-    public function addDirectionCommand(string $direction): void
+    public function addDirectionCommand(string $direction, bool $autoTeleport = false): void
     {
         $this->commands[] = $direction;
-        $translate = match ($direction) {
-            'U' => [-1, 0],
-            'D' => [1, 0],
-            'L' => [0, -1],
-            'R' => [0, 1],
-        };
-        $this->head = [$this->head[0] + $translate[0], $this->head[1] + $translate[1]];
+        switch ($direction) {
+            case 'U':
+                $this->head[0]--;
+                if ($this->head[0] < 0) {
+                    $this->head[0] = $this->mapManager->rowsCount - 1;
+                }
+                break;
+            case 'D':
+                $this->head[0]++;
+                if ($this->head[0] >= $this->mapManager->rowsCount) {
+                    $this->head[0] = 0;
+                }
+                break;
+            case 'L':
+                $this->head[1]--;
+                if ($this->head[1] < 0) {
+                    $this->head[1] = $this->mapManager->columnsCount - 1;
+                }
+                break;
+            case 'R':
+                $this->head[1]++;
+                if ($this->head[1] >= $this->mapManager->columnsCount) {
+                    $this->head[1] = 0;
+                }
+                break;
+            default:
+                throw new Error('Unexpected command.');
+        }
         $this->path[] = $this->head;
         $this->currentLength++;
+
+        if ($autoTeleport && $this->mapManager->map[$this->head[0]][$this->head[1]] === '*') {
+            $this->addTeleportCommand(...$this->head);
+        }
     }
 
     public function addTeleportCommand(int $r, int $c): void
@@ -57,7 +100,7 @@ class Snake
 
     public function getOutputPath(): string
     {
-        $output = $this->head[1] . ' ' . $this->head[0];
+        $output = $this->path[0][1] . ' ' . $this->head[0][0];
         foreach ($this->commands as $c) {
             if (is_array($c)) {
                 $output .= ' ' . $c[1] . ' ' . $c[0];
@@ -83,12 +126,14 @@ $rowsCount = (int)trim($rowsCount);
 $columnsCount = (int)trim($columnsCount);
 $snakesCount = (int)trim($snakesCount);
 
+$mapManager = new MapManager($rowsCount, $columnsCount);
+
 /** @var Snake[] $snakes */
 $snakes = [];
 $lengths = explode(' ', $content[$fileRow++]);
 $i = 0;
 foreach ($lengths as $l) {
-    $snakes[$i] = new Snake($i, $l);
+    $snakes[$i] = new Snake($i, $l, $mapManager);
     $i++;
 }
 
@@ -100,6 +145,8 @@ for ($r = 0; $r < $rowsCount; $r++) {
         $map[$r][$c] = $v === '*' ? '*' : (int)trim($v);
     }
 }
+
+$mapManager->setMap($map);
 
 //print_r($snakes);
 //print_r($map);
