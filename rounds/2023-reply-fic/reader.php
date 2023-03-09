@@ -26,6 +26,11 @@ class Snake
         $this->length = $length;
     }
 
+    public function setHead(int $r, int $c): void
+    {
+        $this->commands = [$c, $r];
+    }
+
     public function addDirectionCommand(string $direction): void
     {
         $this->commands[] = $direction;
@@ -33,7 +38,8 @@ class Snake
 
     public function addTeleportCommand(int $r, int $c): void
     {
-        $this->commands[] = [$r, $c];
+        $this->commands[] = $c;
+        $this->commands[] = $r;
     }
 }
 
@@ -69,6 +75,6 @@ for ($r = 0; $r < $rowsCount; $r++) {
     }
 }
 
-print_r($snakes);
-print_r($map);
+//print_r($snakes);
+//print_r($map);
 unset($content);
