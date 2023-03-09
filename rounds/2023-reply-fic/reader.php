@@ -104,10 +104,11 @@ class Snake
         }
         $this->path[] = $this->head;
         $this->currentLength++;
-        $this->mapManager->putSnake(...$this->head);
 
         if ($autoTeleport && $this->mapManager->map[$this->head[0]][$this->head[1]] === '*') {
             $this->addTeleportCommand(...$this->head);
+        } else {
+            $this->mapManager->putSnake(...$this->head);
         }
     }
 
