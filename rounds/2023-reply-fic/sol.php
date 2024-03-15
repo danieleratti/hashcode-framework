@@ -1,5 +1,6 @@
 <?php
 
+use Utils\ArrayUtils;
 use Utils\FileManager;
 use Utils\Log;
 
@@ -8,7 +9,7 @@ global $fileName;
 /** @var FileManager $fileManager */
 global $fileManager;
 
-$fileName = 'a';
+$fileName = 'c';
 
 /* Reader */
 include_once 'reader.php';
@@ -72,7 +73,19 @@ function getNextDir(string $prevDir): string
 }
 
 
-print_r($cells);
+//print_r($cells);
 
+function getOutput()
+{
+    global $snakes;
+    ArrayUtils::array_keysort_objects($snakes, 'id', SORT_ASC);
+    $output = [];
+    foreach($snakes as $snake) {
+        $output[] = $snake->getOutputPath();
+    }
+    return implode("\n", $output);
+}
+
+$fileManager->outputV2(getOutput(), 0);
 
 Log::out('Finito');
