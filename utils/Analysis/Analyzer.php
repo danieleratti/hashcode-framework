@@ -48,7 +48,7 @@ class Analyzer
         $datasetsResults = $elaborator->elaborate();
         foreach ($datasetsResults['datasets'] as $datasetName => $dataset) {
             $this->println("SET {$datasetName}", 1, self::PRINT_UNDERLINED | self::PRINT_TITLE);
-            $this->println(count($dataset['count']) . " elementi.", 2);
+            $this->println($dataset['count'] . " elementi.", 2);
             if ($dataset['error']) {
                 $this->println($dataset['error'], 2, self::PRINT_RED);
                 continue;

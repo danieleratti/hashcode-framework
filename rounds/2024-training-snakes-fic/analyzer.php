@@ -18,7 +18,7 @@ global $rowsCount;
 global $columnsCount;
 global $snakesCount;
 
-$fileName = 'f';
+$fileName = 'a';
 
 include __DIR__ . '/reader.php';
 

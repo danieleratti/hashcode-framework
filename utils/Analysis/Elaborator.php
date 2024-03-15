@@ -46,21 +46,22 @@ class Elaborator
                     // Riconoscimento tipo
                     $reflection = new ReflectionClass(get_class($dataset->data[key($dataset->data)]));
                     $refProperty = $reflection->getProperty($property);
-                    // Native types handling
                     if ($refProperty->getType() !== null) {
+                        // Native types handling
                         $type = $refProperty->getType()->getName();
                     } else {
+                        // PHPDoc types handling
                         [, , $type] = explode(' ', $refProperty->getDocComment());
-                        if (in_array($type, ['bool', 'int', 'double'])) {
-                            $type = 'number';
-                        } elseif ($type == 'array' || str_contains($type, '[]')) {
-                            $type = 'array';
-                        } elseif (str_contains($type, 'Collection')) {
-                            $type = 'collection';
-                        } else {
-                            $set['error'] = 'Tipo non supportato per proprietà ' . $property . '.';
-                            continue 2;
-                        }
+                    }
+                    if (in_array($type, ['bool', 'int', 'double'])) {
+                        $type = 'number';
+                    } elseif ($type == 'array' || str_contains($type, '[]')) {
+                        $type = 'array';
+                    } elseif (str_contains($type, 'Collection')) {
+                        $type = 'collection';
+                    } else {
+                        $set['error'] = 'Tipo non supportato per proprietà ' . $property . '.';
+                        continue 2;
                     }
                     $item['type'] = $type;
 
