@@ -28,7 +28,7 @@ class Elaborator
 
         foreach ($this->data as $dIdx => $dataset) {
             $set = [
-                'count' => $dataset->data,
+                 'count' => count($dataset->data),
                 'properties' => [],
             ];
 
@@ -45,13 +45,22 @@ class Elaborator
 
                     // Riconoscimento tipo
                     $reflection = new ReflectionClass(get_class($dataset->data[key($dataset->data)]));
-                    [, , $type] = explode(' ', $reflection->getProperty($property)->getDocComment());
-                    if (in_array($type, ['bool', 'int', 'double'])) {
-                        $type = 'number';
-                    } elseif ($type == 'array' || str_contains($type, '[]')) {
-                        $type = 'array';
-                    } elseif (str_contains($type, 'Collection')) {
-                        $type = 'collection';
+                    $refProperty = $reflection->getProperty($property);
+                    // Native types handling
+                    if ($refProperty->getType() !== null) {
+                        $type = $refProperty->getType()->getName();
+                    } else {
+                        [, , $type] = explode(' ', $refProperty->getDocComment());
+                        if (in_array($type, ['bool', 'int', 'double'])) {
+                            $type = 'number';
+                        } elseif ($type == 'array' || str_contains($type, '[]')) {
+                            $type = 'array';
+                        } elseif (str_contains($type, 'Collection')) {
+                            $type = 'collection';
+                        } else {
+                            $set['error'] = 'Tipo non supportato per proprietà ' . $property . '.';
+                            continue 2;
+                        }
                     }
                     $item['type'] = $type;
 
@@ -107,7 +116,7 @@ class Elaborator
                 $set['properties'][$property] = $item;
             }
 
-            $this->boxPlotTraces[$dataset->name]=$boxPlotTraces;
+            $this->boxPlotTraces[$dataset->name] = $boxPlotTraces;
             $results['datasets'][$dataset->name] = $set;
         }
 

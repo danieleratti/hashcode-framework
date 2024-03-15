@@ -93,13 +93,20 @@ class Snake
     public array $commands = [];
     public array $head = [];
     public int $currentLength = 0;
+    public int $id;
+    /** @var int */
+    public $length;
+    private readonly MapManager $mapManager;
 
     public function __construct(
-        public int                  $id,
-        public int                  $length,
-        private readonly MapManager $mapManager
+        int $id,
+        int $length,
+        MapManager $mapManager
     )
     {
+        $this->id = $id;
+        $this->length = $length;
+        $this->mapManager = $mapManager;
     }
 
     public function setInitialHead(int $r, int $c): void
