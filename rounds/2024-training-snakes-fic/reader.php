@@ -1,6 +1,7 @@
 <?php
 
 use Utils\FileManager;
+use Utils\Visual\VisualGradient;
 
 /** @var string $fileName */
 global $fileName;
@@ -11,7 +12,11 @@ require_once '../../bootstrap.php';
 
 class MapManager
 {
+    public const SNAKE_LAYER = 0;
+    public const BIGSNAKE_LAYER = 1;
+
     public array $map;
+    public array $layers = [];
 
     public function __construct(
         public int $rowsCount,
@@ -25,23 +30,23 @@ class MapManager
         $this->map = $map;
     }
 
-    public function putSnake(int $r, int $c): void
+    public function putSnake(int $r, int $c, int $layer = self::SNAKE_LAYER): void
     {
-        if ($this->hasSnake($r, $c)) {
+        if ($this->hasSnake($r, $c, $layer)) {
             throw new Error("Snake already here [$r, $c].");
         }
-        $this->map[$r][$c] = '.';
+        $this->layers[$layer][$r][$c] = '.';
     }
 
-    public function hasSnake(int $r, int $c): bool
+    public function hasSnake(int $r, int $c, int $layer = self::SNAKE_LAYER): bool
     {
-        return $this->map[$r][$c] === '.';
+        return $this->layers[$layer][$r][$c] === '.';
     }
 
-    public function hasSnakeIf(string $direction, array $cell): bool
+    public function hasSnakeIf(string $direction, array $cell, int $layer = self::SNAKE_LAYER): bool
     {
         $cell = $this->getNextCellForDirection($direction, $cell);
-        return $this->hasSnake(...$cell);
+        return $this->hasSnake($cell[0], $cell[1], $layer);
     }
 
     public function getNextCellForDirection(string $direction, array $cell): array|false
@@ -78,12 +83,46 @@ class MapManager
     }
 
     /**
-     * @param Snake[] $snakes
+     * @param int $layer
      * @return void
      */
-    public function visualizeWithSnakes(array $snakes): void
+    public function visualizeWithSnakes(string $filename, int $layer = self::SNAKE_LAYER): void
     {
+        $visualGradient = new VisualGradient($this->rowsCount, $this->columnsCount);
 
+        $maxAbsScore = 0;
+
+        for ($c = 0; $c < $this->columnsCount; $c++) {
+            for ($r = 0; $r < $this->rowsCount; $r++) {
+                $maxAbsScore = max(abs($maxAbsScore), $this->map[$r][$c]);
+            }
+        }
+
+        for ($c = 0; $c < $this->columnsCount; $c++) {
+            for ($r = 0; $r < $this->rowsCount; $r++) {
+                $v = $this->map[$r][$c];
+                $s = $this->layers[$layer][$r][$c];
+                if ($s === '.') {
+                    $color = [0x00, 0x00, 0xff];
+                } elseif ($v === '*') {
+                    $color = [0xff, 0xff, 0xff];
+                } elseif ($v > 0) {
+                    $color = [0x00, $v / $maxAbsScore * 0xff, 0x00];
+                } elseif ($v < 0) {
+                    $color = [-$v / $maxAbsScore * 0xff, 0x00, 0x00];
+                } else {
+                    $color = [0x00, 0x00, 0x00];
+                }
+                $visualGradient->setCustomPixel($r, $c, ...$color);
+            }
+        }
+
+        $visualGradient->save($filename);
+    }
+
+    public function __clone(): void
+    {
+        $this->map = array_map(fn($row) => array_map(fn($cell) => $cell, $row), $this->map);
     }
 }
 
@@ -94,13 +133,12 @@ class Snake
     public array $head = [];
     public int $currentLength = 0;
     public int $id;
-    /** @var int */
-    public $length;
+    public int $length;
     private readonly MapManager $mapManager;
 
     public function __construct(
-        int $id,
-        int $length,
+        int        $id,
+        int        $length,
         MapManager $mapManager
     )
     {
