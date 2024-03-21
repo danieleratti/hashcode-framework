@@ -110,7 +110,7 @@ class MapManager
 
 /* Reading the input */
 $fileManager = new FileManager($fileName);
-$content = explode("\r\n", $fileManager->get());
+$content = explode("\n", $fileManager->get());
 $fileRow = 0;
 
 /** @var int $W */
