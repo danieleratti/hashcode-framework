@@ -2,6 +2,7 @@
 
 global $fileName;
 
+use Utils\Analysis\Analyzer;
 use Utils\FileManager;
 use Utils\Visual\VisualGradient;
 
@@ -124,7 +125,7 @@ $Tl = (int)trim($Tl);
 
 $goldenPoints = [];
 $silverPoints = [];
-$tiles = [];
+$tileTypes = [];
 
 for ($i = 0; $i < $Gn; $i++) {
     [$c, $r] = explode(' ', $content[$fileRow++]);
@@ -135,12 +136,12 @@ for ($i = 0; $i < $Sm; $i++) {
     $silverPoints[$i] = new SilverPoint($r, $c, $score);
 }
 for ($i = 0; $i < $Tl; $i++) {
-    $tiles[$i] = new TileType(...explode(' ', $content[$fileRow++]));
+    $tileTypes[$i] = new TileType(...explode(' ', $content[$fileRow++]));
 }
 
 print_r($goldenPoints);
 print_r($silverPoints);
-print_r($tiles);
+print_r($tileTypes);
 
 $mapManager = new MapManager($fileName, $H, $W);
 foreach ($goldenPoints as $gp) {
@@ -149,4 +150,19 @@ foreach ($goldenPoints as $gp) {
 foreach ($silverPoints as $sp) {
     $mapManager->setSilverPoint($sp);
 }
+
+// Visualize
 $mapManager->visualize();
+
+// Analyze
+$analyzer = new Analyzer($fileName, [
+    'rows' => $H,
+    'columns' => $W,
+    'golden_points' => $Gn,
+    'silver_points' => $Sm,
+    'tiles_types' => $Tl,
+]);
+$analyzer->addDataset('golden_points', $goldenPoints, []);
+$analyzer->addDataset('silver_points', $silverPoints, ['score']);
+$analyzer->addDataset('tile_types', $tileTypes, ['cost', 'count']);
+$analyzer->analyze();
