@@ -14,23 +14,33 @@ class DomainLogic implements DomainLogicInterface
     public function getAdjacentNodes(mixed $node): iterable
     {
         [$r, $c] = $node;
-        $adjacentNodes = [
-            [$r - 1, $c],
-            [$r + 1, $c],
-            [$r, $c - 1],
-            [$r, $c + 1],
-        ];
-        return $node;
+        $adjacentNodes = [];
+        if ($r > 0) {
+            $adjacentNodes[] = [$r - 1, $c];
+        }
+        if ($r < $this->mapManager->rowsCount - 1) {
+            $adjacentNodes[] = [$r + 1, $c];
+        }
+        if ($c > 0) {
+            $adjacentNodes[] = [$r, $c - 1];
+        }
+        if ($c < $this->mapManager->columnsCount - 1) {
+            $adjacentNodes[] = [$r, $c + 1];
+        }
+
+        return $adjacentNodes;
     }
 
     public function calculateRealCost(mixed $node, mixed $adjacent): float|int
     {
-        // Return the actual cost between two adjacent nodes
+        return 1;
     }
 
     public function calculateEstimatedCost(mixed $fromNode, mixed $toNode): float|int
     {
-        // Return the heuristic estimated cost between the two given nodes
+        [$r1, $c1] = $fromNode;
+        [$r2, $c2] = $toNode;
+        return abs($r1 - $r2) + abs($c1 - $c2);
     }
 
     // ...

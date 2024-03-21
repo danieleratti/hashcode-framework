@@ -5,8 +5,10 @@ use Utils\Autoupload;
 use Utils\Cerberus;
 use Utils\FileManager;
 use Utils\Log;
+use JMGQ\AStar\AStar;
 
 require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/DomainLogic.php';
 
 global $fileName;
 /** @var FileManager */
@@ -43,11 +45,11 @@ function getOutput()
 
 /* Algo */
 
-use JMGQ\AStar\AStar;
-
 $domainLogic = new DomainLogic($mapManager);
 $aStar = new AStar($domainLogic);
 $solution = $aStar->run([0,0], [6,6]);
+
+print_r($solution);
 
 
 // RUN
