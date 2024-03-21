@@ -13,8 +13,8 @@ global $fileName;
 global $fileManager;
 
 /* Config & Pre runtime */
-$fileName = 'f';
-$_visualyze = true;
+$fileName = 'a';
+$_visualyze = false;
 $_analyze = false;
 //$param1 = 1;
 //Cerberus::runClient(['fileName' => $fileName, 'param1' => $param1]);
@@ -35,9 +35,19 @@ function getOutput()
 
 
 /* Vars */
-/** @var Snake[] $snakes */
-/** @var int $snakesCount */
+/** @var GoldenPoint $goldenPoints */
+/** @var SilverPoint $silverPoints */
+/** @var TileType $tileTypes */
+/** @var MapManager $mapManager */
 
+
+/* Algo */
+
+use JMGQ\AStar\AStar;
+
+$domainLogic = new DomainLogic($mapManager);
+$aStar = new AStar($domainLogic);
+$solution = $aStar->run([0,0], [6,6]);
 
 
 // RUN

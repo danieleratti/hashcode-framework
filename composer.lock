@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fecfe915a9e7e977b85dfd44ef4f5bb3",
+    "content-hash": "39cdd30ce84b625a2380a08846280a94",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1022,6 +1022,64 @@
                 "source": "https://github.com/jan-swiecki/php-simple-annotations/tree/master"
             },
             "time": "2015-08-17T18:38:50+00:00"
+        },
+        {
+            "name": "jmgq/a-star",
+            "version": "v2.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jmgq/php-a-star.git",
+                "reference": "7a6553e6ceafbcb35afdca5e274f99d021a03e3c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jmgq/php-a-star/zipball/7a6553e6ceafbcb35afdca5e274f99d021a03e3c",
+                "reference": "7a6553e6ceafbcb35afdca5e274f99d021a03e3c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "phan/phan": "^5.0",
+                "php-coveralls/php-coveralls": "^2.0",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^9.0",
+                "psalm/plugin-phpunit": "^0.15.1",
+                "squizlabs/php_codesniffer": "^3.0",
+                "symfony/console": "^5.0",
+                "vimeo/psalm": "^4.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "JMGQ\\AStar\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jose Gonzalez",
+                    "email": "jmgq@jmgq.es",
+                    "homepage": "https://www.jmgq.es"
+                }
+            ],
+            "description": "A* (A Star) algorithm for PHP",
+            "keywords": [
+                "Algorithm",
+                "a",
+                "a star",
+                "pathfinding",
+                "search"
+            ],
+            "support": {
+                "issues": "https://github.com/jmgq/php-a-star/issues",
+                "source": "https://github.com/jmgq/php-a-star/tree/v2.1.1"
+            },
+            "time": "2022-01-02T19:02:36+00:00"
         },
         {
             "name": "opis/closure",
