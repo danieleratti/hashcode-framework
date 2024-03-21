@@ -68,6 +68,7 @@ class Analyzer
                 $propertyArray = [];
                 $this->println("Minimo: {$property['minimum']}");
                 $this->println("Massimo: {$property['maximum']}");
+                $this->println("Somma: {$property['sum']}");
                 $this->println("Media: {$property['average']}");
                 $this->println("Mediana: {$property['median']}");
                 $this->println("Moda e tendenza:");

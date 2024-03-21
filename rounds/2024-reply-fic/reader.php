@@ -1,6 +1,8 @@
 <?php
 
 global $fileName;
+global $_visualyze;
+global $_analyze;
 
 use Utils\Analysis\Analyzer;
 use Utils\FileManager;
@@ -139,9 +141,9 @@ for ($i = 0; $i < $Tl; $i++) {
     $tileTypes[$i] = new TileType(...explode(' ', $content[$fileRow++]));
 }
 
-print_r($goldenPoints);
-print_r($silverPoints);
-print_r($tileTypes);
+//print_r($goldenPoints);
+//print_r($silverPoints);
+//print_r($tileTypes);
 
 $mapManager = new MapManager($fileName, $H, $W);
 foreach ($goldenPoints as $gp) {
@@ -152,17 +154,21 @@ foreach ($silverPoints as $sp) {
 }
 
 // Visualize
-$mapManager->visualize();
+if ($_visualyze) {
+    $mapManager->visualize();
+}
 
 // Analyze
-$analyzer = new Analyzer($fileName, [
-    'rows' => $H,
-    'columns' => $W,
-    'golden_points' => $Gn,
-    'silver_points' => $Sm,
-    'tiles_types' => $Tl,
-]);
-$analyzer->addDataset('golden_points', $goldenPoints, []);
-$analyzer->addDataset('silver_points', $silverPoints, ['score']);
-$analyzer->addDataset('tile_types', $tileTypes, ['cost', 'count']);
-$analyzer->analyze();
+if ($_analyze) {
+    $analyzer = new Analyzer($fileName, [
+        'rows' => $H,
+        'columns' => $W,
+        'golden_points' => $Gn,
+        'silver_points' => $Sm,
+        'tiles_types' => $Tl,
+    ]);
+    $analyzer->addDataset('golden_points', $goldenPoints, []);
+    $analyzer->addDataset('silver_points', $silverPoints, ['score']);
+    $analyzer->addDataset('tile_types', $tileTypes, ['cost', 'count']);
+    $analyzer->analyze();
+}

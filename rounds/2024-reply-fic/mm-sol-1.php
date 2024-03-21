@@ -14,6 +14,8 @@ global $fileManager;
 
 /* Config & Pre runtime */
 $fileName = 'f';
+$_visualyze = false;
+$_analyze = false;
 //$param1 = 1;
 //Cerberus::runClient(['fileName' => $fileName, 'param1' => $param1]);
 

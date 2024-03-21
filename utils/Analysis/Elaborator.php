@@ -103,6 +103,7 @@ class Elaborator
                     sort($orderedValues);
                     arsort($occurrences);
                     $n = count($dataset->data);
+                    $item['sum'] = $sum;
                     $item['average'] = $sum / $n;
                     $middleValueIndex = floor(($n - 1) / 2);
                     $item['median'] = $n % 2 ? $orderedValues[$middleValueIndex] : ($orderedValues[$middleValueIndex] + $orderedValues[$middleValueIndex + 1]) / 2;
