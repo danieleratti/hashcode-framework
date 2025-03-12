@@ -1,0 +1,14 @@
+
+        <html>
+            <head>
+                <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+            </head>
+            <body>
+                <div id='chartDiv'></div>
+                <script>
+                    var data = [{"x":[7,9,6,8,5,12,11,10],"y":[9,8,8,6,6,5,5,3],"text":[null,null,null,null,null,null,null,null],"type":"pointcloud"}];
+                    var layout = [];
+                    Plotly.newPlot('chartDiv', data, layout);
+                </script>
+            </body>
+        </html>

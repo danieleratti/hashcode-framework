@@ -201,8 +201,8 @@ class Chart
         }
 
         return "<script>
-                    var data = " . json_encode($data) . ";
-                    Plotly.newPlot($divName, data);
+                    var {$divName}Data = " . json_encode($data) . ";
+                    Plotly.newPlot($divName, {$divName}Data);
         </script>";
     }
 
