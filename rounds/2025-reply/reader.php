@@ -26,9 +26,9 @@ class Resource
 class Turn
 {
     public int $id;
-    public int $minBuldings;
-    public int $maxBuldings;
-    public int $profitPerBulding;
+    public int $minBuildings;
+    public int $maxBuildings;
+    public int $profitPerBuilding;
 }
 
 enum SpecialEffect: string
@@ -72,16 +72,16 @@ for ($i = 0; $i < $resourcesCount; $i++) {
     $resources[$r->id] = $r;
 }
 
-/** @var Turn[] $resources */
+/** @var Turn[] $turns */
 $turns = [];
 
 for ($i = 0; $i < $turnsCount; $i++) {
     [$minBuildings, $maxBuildings, $profitPerBulding] = explode(' ', $content[$fileRow++]);
     $t = new Turn();
     $t->id = $i;
-    $t->minBuldings = $minBuildings;
-    $t->maxBuldings = $maxBuildings;
-    $t->profitPerBulding = $profitPerBulding;
+    $t->minBuildings = $minBuildings;
+    $t->maxBuildings = $maxBuildings;
+    $t->profitPerBuilding = $profitPerBulding;
     $turns[$t->id] = $t;
 }
 
